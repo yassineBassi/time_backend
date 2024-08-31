@@ -5,6 +5,8 @@ import { Client } from 'src/mongoose/client';
 import { OtpToken } from 'src/mongoose/otp-token';
 import { RegisterClientDTO } from './dtos/register-client.dto';
 import * as bcrypt from 'bcrypt';
+import { StoreSection } from 'src/mongoose/store-section';
+import { StoreCategory } from 'src/mongoose/store-category';
 const SALT_ROUNDS = 10;
 
 @Injectable()
@@ -14,9 +16,8 @@ export class AuthService {
     constructor(
         @InjectModel('Client') 
         private readonly clientModel: Model<Client>,
-
         @InjectModel('OtpToken') 
-        private readonly OtpTokenModel: Model<OtpToken>
+        private readonly OtpTokenModel: Model<OtpToken>,
     ){}
 
     generateRandomDigits(length: number): string {
@@ -28,6 +29,7 @@ export class AuthService {
       }
 
     async registerClient(registerClientDTO: RegisterClientDTO){
+
        let client = new this.clientModel(registerClientDTO);
 
        const salt = await bcrypt.genSalt(SALT_ROUNDS);

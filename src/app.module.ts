@@ -12,6 +12,11 @@ import * as winston from 'winston';
 import { SharedModule } from './common/shared.module';
 import { ClientSchema } from './mongoose/client';
 import { IsUniqueConstraint } from './common/validators/is-unique';
+import { SectionModule } from './modules/section/section.module';
+import { StoreModule } from './modules/store/store.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+import { DataModule } from './modules/data/data.module';
 
 @Module({
   imports: [
@@ -36,8 +41,14 @@ import { IsUniqueConstraint } from './common/validators/is-unique';
         }),
       ],
     }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
+    }),
     AuthModule,
-    SharedModule
+    SharedModule,
+    SectionModule,
+    StoreModule,
+    DataModule
   ],
   controllers: [AppController],
   providers: [

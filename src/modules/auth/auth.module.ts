@@ -6,8 +6,9 @@ import { ClientSchema } from 'src/mongoose/client';
 import { StoreSchema } from 'src/mongoose/store';
 import { UserSchema } from 'src/mongoose/user';
 import { OtpTokenSchema } from 'src/mongoose/otp-token';
-import { IsUniqueConstraint } from 'src/common/validators/is-unique';
 import { SharedModule } from 'src/common/shared.module';
+import { StoreSectionSchema } from 'src/mongoose/store-section';
+import { StoreCategorySchema } from 'src/mongoose/store-category';
 
 @Module({
   imports: [
