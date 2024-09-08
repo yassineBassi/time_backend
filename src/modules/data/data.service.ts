@@ -13,11 +13,11 @@ export class DataService {
 
     private loadData() {
         try {
-        const fileContent = fs.readFileSync(this.dataFilePath, 'utf8');
-        this.areas = JSON.parse(fileContent);
+            const fileContent = fs.readFileSync(this.dataFilePath, 'utf8');
+            this.areas = JSON.parse(fileContent);
         } catch (error) {
-        console.error('Error reading or parsing data file:', error);
-        throw new Error('Could not load data');
+            console.error('Error reading or parsing data file:', error);
+            throw new Error('Could not load data');
         }
     }
 
@@ -30,10 +30,9 @@ export class DataService {
     }
 
     async getCities(area: String){
-        console.log(area)
         const region = this.areas.regions.find(r => r.name === area);
         if (!region) {
-        throw new NotFoundException('Region not found');
+            throw new NotFoundException('Region not found');
         }
         return region.cities;
     }

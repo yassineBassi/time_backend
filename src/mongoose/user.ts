@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { UserStatus } from "src/common/models/enums/user-status";
 
 const Schema = new mongoose.Schema({
-    picture: { type: String, default: "images/avatar.p,g" },
+    picture: { type: String, default: "images/avatar.png" },
     username: { type: String, required: true, unique: true },
     fullName: { type: String },
     country: { type: String, required: true },

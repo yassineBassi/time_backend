@@ -1,7 +1,6 @@
-import { IsString, IsInt, Min, Max, IsEmail, IsPhoneNumber, MinLength, MaxLength, IsNotEmpty } from 'class-validator';
+import { IsString, IsEmail, IsPhoneNumber, MinLength, MaxLength, IsNotEmpty } from 'class-validator';
 import { IsMatch } from 'src/common/validators/is-match.decorator';
 import { IsUnique } from 'src/common/validators/is-unique';
-import { isReadable } from 'stream';
 
 export class RegisterClientDTO{
 

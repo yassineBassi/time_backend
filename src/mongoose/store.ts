@@ -11,10 +11,10 @@ export const StoreSchema = new mongoose.Schema({
     category: { type: mongoose.Schema.Types.ObjectId, ref: 'StoreCategory' },
     reviews: { type: Number },
     reviewsCount: { type: Number },
-    isVerified: { type: Boolean },
+    isVerified: { type: Boolean, default: false },
     //services: { type: String },
     //comments: { type: String },
-    available: { type: Boolean }
+    available: { type: Boolean, default: false }
 });
 
 StoreSchema.add(UserSchema.obj);
