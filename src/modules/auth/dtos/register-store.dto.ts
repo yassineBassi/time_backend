@@ -5,13 +5,13 @@ import { StoreCategory } from 'src/mongoose/store-category';
 
 export class RegisterStoreDTO{
 
-    @IsNotEmpty() @IsNotEmpty() @IsString() @MaxLength(40) @MinLength(3) @IsUnique('Store', 'storeName')
+    @IsNotEmpty() @IsNotEmpty() @IsString() @MaxLength(40) @MinLength(3) @IsUnique(['Store'], 'storeName')
     storeName: String;
 
     @IsNotEmpty() @IsString() @IsEmail()
     email: String;
 
-    @IsNotEmpty() @IsString() @IsPhoneNumber() @IsUnique('Store', 'phoneNumber') @IsUnique('Client', 'phoneNumber')
+    @IsNotEmpty() @IsString() @IsPhoneNumber() @IsUnique(['Store', 'Client'], 'phoneNumber')
     phoneNumber: string;
 
     @IsNotEmpty() @IsString() @MinLength(8)
@@ -41,4 +41,6 @@ export class RegisterStoreDTO{
     @IsNotEmpty() @IsString()
     category: String | StoreCategory;
 
+    firebaseID: String;
+    googleID: String;
 }

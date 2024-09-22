@@ -10,22 +10,33 @@ export class IsUniqueConstraint implements ValidatorConstraintInterface {
   ){}
 
   async validate(value: any, args: ValidationArguments) {
-    const [modelName, fieldName] = args.constraints;
-    const model = this.connection.models[modelName];
-    const count = await model.countDocuments({ [fieldName]: value }).exec();
-    return count === 0;
+    const [modelNames, fieldName] = args.constraints;
+    let exists = false;
+    console.log(modelNames);
+    for(let i = 0; i < modelNames.length; i++){
+      const model = this.connection.models[modelNames[i]];
+      const count = await model.countDocuments({ [fieldName]: value }).exec();
+      console.log("count : ", count)
+      if(count > 0){
+        exists = true;
+        break;
+      }
+    }
 
+    console.log(exists);
+    
+    return !exists;
   }
 }
 
-export function IsUnique(modelName: string, fieldName: string, validationOptions?: ValidationOptions) {
+export function IsUnique(modelNames: string[], fieldName: string, validationOptions?: ValidationOptions) {
   validationOptions = { ...{ message: 'uniqueRow' }, ...validationOptions };
   return function (object: any, propertyName: string) {
     registerDecorator({
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions = { ...{ message: 'uniqueRow' }, ...validationOptions },
-      constraints: [modelName, fieldName],
+      constraints: [modelNames, fieldName],
       validator: IsUniqueConstraint,
     });
   };

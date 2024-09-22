@@ -4,5 +4,6 @@ export enum UserStatus{
     DISABLED = "disabled",
     SUSPENDED = "suspended",
     BLOCKED = "blocked",
-    UNDER_VERIFICATION = "under_verification"
+    UNDER_VERIFICATION = "underVerification",
+    VERIFIED = "verified"
 }

@@ -17,6 +17,8 @@ import { StoreModule } from './modules/store/store.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { DataModule } from './modules/data/data.module';
+import { SubscriptionModule } from './modules/subscription/subscription.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -48,7 +50,11 @@ import { DataModule } from './modules/data/data.module';
     SharedModule,
     SectionModule,
     StoreModule,
-    DataModule
+    DataModule,
+    SubscriptionModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
   ],
   controllers: [AppController],
   providers: [

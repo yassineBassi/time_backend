@@ -7,8 +7,12 @@ import { StoreSchema } from 'src/mongoose/store';
 import { UserSchema } from 'src/mongoose/user';
 import { OtpTokenSchema } from 'src/mongoose/otp-token';
 import { SharedModule } from 'src/common/shared.module';
-import { StoreSectionSchema } from 'src/mongoose/store-section';
-import { StoreCategorySchema } from 'src/mongoose/store-category';
+import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule } from '@nestjs/config';
+import { JwtStrategy } from './strategies/jwt.strategy';
+import { LocalStrategy } from './strategies/local.strategy';
+import { FirebaseAdminModule } from '../firebase-admin/firebase-admin.module';
 
 @Module({
   imports: [
@@ -18,11 +22,22 @@ import { StoreCategorySchema } from 'src/mongoose/store-category';
       { name: 'Store', schema: StoreSchema },
       { name: 'OtpToken', schema: OtpTokenSchema }
     ]),
-    SharedModule
+    PassportModule,
+    JwtModule.register({
+        signOptions: {
+            expiresIn: '24h',
+            mutatePayload: true
+        }
+    }),
+    ConfigModule,
+    SharedModule,
+    FirebaseAdminModule
   ],
   controllers: [AuthController],
   providers: [
-    AuthService,
+    AuthService, 
+    JwtStrategy, 
+    LocalStrategy
   ],
 })
 export class AuthModule {}

@@ -7,10 +7,24 @@ import { RegisterStoreDTO } from './dtos/register-STORE.dto';
 import { diskStorage } from 'multer';
 import { v4 as uuid } from 'uuid';
 import path = require('path');
+import { LoginDTO } from './dtos/login.dto';
+import { LoginWithGoogleDTO } from './dtos/login-with-google.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+
+  @Post("login")
+  async login(@Body() request: LoginDTO) {
+    console.log(request);
+    return Response.success(await this.authService.login(request), "");
+  }
+
+  @Post("login/google")
+  async loginWithGoogle(@Body() request: LoginWithGoogleDTO) {
+    console.log(request);
+    return Response.success(await this.authService.loginWithGoogle(request), "");
+  }
 
   @Post("register/client")
   async registerAccount(@Body() request: RegisterClientDTO) {
@@ -27,12 +41,17 @@ export class AuthController {
             cb(null, `store-${uuid()}${ext ? ext : '.png'}`)
         },
     })
-}))
+  }))
   async registerStore(
     @Body() request: RegisterStoreDTO,
     @UploadedFiles() files: Array<Express.Multer.File>,
   ) {
     return Response.success(await this.authService.registerStore(request, files[0]["path"]), "");
+  }
+
+  @Post("sendOTP")
+  async sendOTP() {
+    return Response.success(await this.authService.sendOTP(), "");
   }
 
 }
