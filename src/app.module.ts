@@ -11,7 +11,6 @@ import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
 import { SharedModule } from './common/shared.module';
 import { ClientSchema } from './mongoose/client';
-import { IsUniqueConstraint } from './common/validators/is-unique';
 import { SectionModule } from './modules/section/section.module';
 import { StoreModule } from './modules/store/store.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
@@ -19,27 +18,27 @@ import { join } from 'path';
 import { DataModule } from './modules/data/data.module';
 import { SubscriptionModule } from './modules/subscription/subscription.module';
 import { ConfigModule } from '@nestjs/config';
+import { ServiceModule } from './modules/service/service.module';
+import { PaymentModule } from './modules/payment/payment.module';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost:27017/time-db'), 
+    MongooseModule.forRoot('mongodb://localhost:27017/time-db'),
     MongooseModule.forFeature([{ name: 'Client', schema: ClientSchema }]),
     I18nModule.forRoot({
       fallbackLanguage: 'ar',
       loaderOptions: {
         path: path.join(__dirname, '..', '/src/i18n/'),
         watch: true,
-      }
+      },
     }),
     WinstonModule.forRoot({
-      format: winston.format.combine(
-        winston.format.simple()
-      ),
+      format: winston.format.combine(winston.format.simple()),
       transports: [
         new winston.transports.Console(),
         new winston.transports.File({
           dirname: path.join(__dirname, './../logs/'),
-          filename: 'wabel.log'
+          filename: 'wabel.log',
         }),
       ],
     }),
@@ -55,6 +54,8 @@ import { ConfigModule } from '@nestjs/config';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ServiceModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [
@@ -62,7 +63,7 @@ import { ConfigModule } from '@nestjs/config';
     {
       provide: APP_FILTER,
       useClass: ResponseExceptionFilter,
-    }
+    },
   ],
 })
 export class AppModule {}

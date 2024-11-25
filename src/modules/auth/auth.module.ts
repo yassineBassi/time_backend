@@ -13,31 +13,29 @@ import { ConfigModule } from '@nestjs/config';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { FirebaseAdminModule } from '../firebase-admin/firebase-admin.module';
+import { SubscriptionModule } from '../subscription/subscription.module';
 
 @Module({
   imports: [
+    SubscriptionModule,
     MongooseModule.forFeature([
       { name: 'User', schema: UserSchema },
       { name: 'Client', schema: ClientSchema },
       { name: 'Store', schema: StoreSchema },
-      { name: 'OtpToken', schema: OtpTokenSchema }
+      { name: 'OtpToken', schema: OtpTokenSchema },
     ]),
     PassportModule,
     JwtModule.register({
-        signOptions: {
-            expiresIn: '24h',
-            mutatePayload: true
-        }
+      signOptions: {
+        expiresIn: '24h',
+        mutatePayload: true,
+      },
     }),
     ConfigModule,
     SharedModule,
-    FirebaseAdminModule
+    FirebaseAdminModule,
   ],
   controllers: [AuthController],
-  providers: [
-    AuthService, 
-    JwtStrategy, 
-    LocalStrategy
-  ],
+  providers: [AuthService, JwtStrategy, LocalStrategy],
 })
 export class AuthModule {}

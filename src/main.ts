@@ -15,17 +15,19 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  app.useGlobalPipes(new ValidationPipe({
-    stopAtFirstError: true,
-    whitelist: true, 
-    transform: true,
-    transformOptions: {
-      enableImplicitConversion: true
-    },
-    exceptionFactory: (errors) => new BadRequestException(errors) 
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      stopAtFirstError: true,
+      whitelist: true,
+      transform: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+      exceptionFactory: (errors) => new BadRequestException(errors),
+    }),
+  );
 
-  useContainer(app.select(AppModule), {fallbackOnErrors: true}); 
+  useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
   await app.listen(3000);
 }

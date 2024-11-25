@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { User, UserSchema } from './user';
 
-export const StoreSchema = new mongoose.Schema({
+export const ServiceSchema = new mongoose.Schema({
   storeName: { type: String },
   //photos: { type: String },
   commerceNumber: { type: String },
@@ -11,18 +11,14 @@ export const StoreSchema = new mongoose.Schema({
   reviews: { type: Number },
   reviewsCount: { type: Number },
   isVerified: { type: Boolean, default: false },
-  subscription: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'StoreSubscription',
-  },
   //services: { type: String },
   //comments: { type: String },
   available: { type: Boolean, default: false },
 });
 
-StoreSchema.add(UserSchema.obj);
+ServiceSchema.add(UserSchema.obj);
 
-export interface Store extends User {
+export interface Service extends User {
   storeName: string;
   //photos: String,
   commerceNumber: string;
@@ -32,7 +28,6 @@ export interface Store extends User {
   reviews: string;
   reviewsCount: string;
   isVerified: string;
-  subscription: mongoose.Schema.Types.ObjectId;
   //services: String,
   //comments: String,
   available: string;
