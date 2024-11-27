@@ -16,6 +16,6 @@ import { StoreSubscriptionSchema } from 'src/mongoose/store-subscription';
   ],
   controllers: [SubscriptionController],
   providers: [SubscriptionService],
-  exports: [SubscriptionService]
+  exports: [SubscriptionService],
 })
 export class SubscriptionModule {}

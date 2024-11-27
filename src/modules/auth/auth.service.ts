@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -117,6 +118,10 @@ export class AuthService {
   }
 
   async loginAccount(account) {
+    if (!account) {
+      throw new NotFoundException('errors.account_not_found');
+    }
+
     // check subscription for stores
     if (account.type == UserType.STORE) {
       let store = await this.storeModel.findById(account.id);
@@ -130,9 +135,6 @@ export class AuthService {
     }
     ///////////////////////////////////////////
 
-    if (!account) {
-      throw new BadRequestException('errors.bad_credentials');
-    }
     const accountObj = this.toAccountObject(account);
 
     const payload = {
@@ -202,18 +204,29 @@ export class AuthService {
   async registerStore(registerStoreDTO: RegisterStoreDTO, picture: string) {
     let store = new this.storeModel(registerStoreDTO);
 
-    if (registerStoreDTO.firebaseID) {
+    console.log('stooore');
+    console.log(store);
+    console.log(store.password);
+
+    if (registerStoreDTO.firebaseID && registerStoreDTO.googleID) {
+      const user = await this.firebaseService.getUserByUid(
+        registerStoreDTO.firebaseID as string,
+      );
+      if (!user || user.uid != registerStoreDTO.googleID) {
+        throw new BadRequestException(this.generateUniqueUsername());
+      }
+      store.status = UserStatus.VERIFIED;
+    } else if (registerStoreDTO.password) {
+      const salt = await bcrypt.genSalt(SALT_ROUNDS);
+      const hashedPassword = await bcrypt.hash(store.password, salt);
+      store.password = hashedPassword;
+      store.salt = salt;
+    } else {
       return 'failed';
     }
 
     store.picture = picture;
     store.type = UserType.STORE;
-
-    const salt = await bcrypt.genSalt(SALT_ROUNDS);
-    const hashedPassword = await bcrypt.hash(store.password, salt);
-    store.password = hashedPassword;
-    store.salt = salt;
-
     store.username = store.storeName;
 
     store = await store.save();

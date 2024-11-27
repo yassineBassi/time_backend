@@ -10,7 +10,8 @@ export class ServiceService {
     return 'This action adds a new service';
   }
 
-  findAll() {
+  async findAll() {
+    console.log("done")
     return ['test', 'test'];
   }
 

@@ -20,6 +20,7 @@ import { SubscriptionModule } from './modules/subscription/subscription.module';
 import { ConfigModule } from '@nestjs/config';
 import { ServiceModule } from './modules/service/service.module';
 import { PaymentModule } from './modules/payment/payment.module';
+import { ServiceCategoryModule } from './modules/service-category/service-category.module';
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { PaymentModule } from './modules/payment/payment.module';
     }),
     ServiceModule,
     PaymentModule,
+    ServiceCategoryModule,
   ],
   controllers: [AppController],
   providers: [

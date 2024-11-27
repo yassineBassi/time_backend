@@ -1,9 +1,9 @@
 import { IsNotEmpty } from 'class-validator';
 
-export class LoginWithGoogleDTO{
-    @IsNotEmpty()
-    googleId: string;
+export class LoginWithGoogleDTO {
+  @IsNotEmpty()
+  googleId: string;
 
-    @IsNotEmpty()
-    firebaseId: string;
+  @IsNotEmpty()
+  firebaseId: string;
 }

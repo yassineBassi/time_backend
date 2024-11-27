@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { ServiceService } from './service.service';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
+import { Response } from 'src/common/response';
 
 @Controller('services')
 export class ServiceController {
@@ -14,8 +15,8 @@ export class ServiceController {
   }
 
   @Get()
-  findAll() {
-    return this.serviceService.findAll();
+  async findAll() {
+    return Response.success(await this.serviceService.findAll());
   }
 
   @Get(':id')

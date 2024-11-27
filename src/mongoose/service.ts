@@ -1,34 +1,28 @@
 import mongoose from 'mongoose';
 import { User, UserSchema } from './user';
+import { DiscountType } from 'src/common/models/enums/discount-type';
 
 export const ServiceSchema = new mongoose.Schema({
-  storeName: { type: String },
-  //photos: { type: String },
-  commerceNumber: { type: String },
-  commerceNumberExpirationDate: { type: Date },
-  accountNumber: { type: String },
-  category: { type: mongoose.Schema.Types.ObjectId, ref: 'StoreCategory' },
-  reviews: { type: Number },
-  reviewsCount: { type: Number },
-  isVerified: { type: Boolean, default: false },
-  //services: { type: String },
-  //comments: { type: String },
-  available: { type: Boolean, default: false },
+  title: { type: String },
+  picture: { type: String },
+  price: { type: Number, default: 0.0 },
+  discount: { type: Number },
+  category: { type: mongoose.Schema.Types.ObjectId, ref: 'ServiceCategory' },
+  discountType: { type: String, enum: Object.values(DiscountType) },
+  enabled: { type: Boolean },
+  duration: { type: Number },
 });
 
 ServiceSchema.add(UserSchema.obj);
 
 export interface Service extends User {
-  storeName: string;
-  //photos: String,
-  commerceNumber: string;
-  commerceNumberExpirationDate: string;
-  accountNumber: string;
+  title: string;
+  picture: string;
+  price: number;
+  discount: number;
   category: mongoose.Schema.Types.ObjectId;
-  reviews: string;
-  reviewsCount: string;
-  isVerified: string;
-  //services: String,
-  //comments: String,
-  available: string;
+  discountType: DiscountType;
+  enabled: boolean;
+  duration: number;
+  //  facilities: List<Facility>;
 }

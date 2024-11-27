@@ -78,5 +78,6 @@
     "coupon_store_required":"متجر الكوبون مطلوب",
     "coupon_product_required":"منتج الكوبون مطلوب",
     "forbidden_action":"لا يسمح لك بهذا الإجراء",
-    "section":"القسم"
+    "section":"القسم",
+    "category_already_exist": "لديك بالفعل تصنيف بهذا الاسم"
 }

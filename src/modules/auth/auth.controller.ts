@@ -1,4 +1,11 @@
-import { Body, Controller, Post, UploadedFile, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  UploadedFile,
+  UploadedFiles,
+  UseInterceptors,
+} from '@nestjs/common';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { Response } from 'src/common/response';
 import { AuthService } from './auth.service';
@@ -14,44 +21,50 @@ import { LoginWithGoogleDTO } from './dtos/login-with-google.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post("login")
+  @Post('login')
   async login(@Body() request: LoginDTO) {
     console.log(request);
-    return Response.success(await this.authService.login(request), "");
+    return Response.success(await this.authService.login(request), '');
   }
 
-  @Post("login/google")
+  @Post('login/google')
   async loginWithGoogle(@Body() request: LoginWithGoogleDTO) {
-    console.log(request);
-    return Response.success(await this.authService.loginWithGoogle(request), "");
+    return Response.success(
+      await this.authService.loginWithGoogle(request),
+      '',
+    );
   }
 
-  @Post("register/client")
+  @Post('register/client')
   async registerAccount(@Body() request: RegisterClientDTO) {
     console.log(request);
-    return Response.success(await this.authService.registerClient(request), "");
+    return Response.success(await this.authService.registerClient(request), '');
   }
 
-  @Post("register/store")
-  @UseInterceptors(AnyFilesInterceptor({
-    storage: diskStorage({
+  @Post('register/store')
+  @UseInterceptors(
+    AnyFilesInterceptor({
+      storage: diskStorage({
         destination: './public/images/stores',
         filename: (req, file, cb) => {
-            const ext = path.parse(file.originalname).ext;
-            cb(null, `store-${uuid()}${ext ? ext : '.png'}`)
+          const ext = path.parse(file.originalname).ext;
+          cb(null, `store-${uuid()}${ext ? ext : '.png'}`);
         },
-    })
-  }))
+      }),
+    }),
+  )
   async registerStore(
     @Body() request: RegisterStoreDTO,
     @UploadedFiles() files: Array<Express.Multer.File>,
   ) {
-    return Response.success(await this.authService.registerStore(request, files[0]["path"]), "");
+    return Response.success(
+      await this.authService.registerStore(request, files[0]['path']),
+      '',
+    );
   }
 
-  @Post("sendOTP")
+  @Post('sendOTP')
   async sendOTP() {
-    return Response.success(await this.authService.sendOTP(), "");
+    return Response.success(await this.authService.sendOTP(), '');
   }
-
 }
