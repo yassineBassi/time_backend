@@ -1,36 +1,95 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseInterceptors,
+  UploadedFiles,
+  UseGuards,
+} from '@nestjs/common';
 import { ServiceService } from './service.service';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
 import { Response } from 'src/common/response';
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import path = require('path');
+import { v4 as uuid } from 'uuid';
+import { CurrentUser } from 'src/common/decorators/current-user';
+import { Store } from 'src/mongoose/store';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/common/guards/roles.guard';
+import { UserType } from 'src/common/models/enums/user-type';
+import { SubscribedStoreGuard } from 'src/common/guards/subscribed-store.guard';
 
 @Controller('services')
 export class ServiceController {
-
   constructor(private readonly serviceService: ServiceService) {}
 
   @Post()
-  create(@Body() createServiceDto: CreateServiceDto) {
-    return this.serviceService.create(createServiceDto);
+  @UseInterceptors(
+    AnyFilesInterceptor({
+      storage: diskStorage({
+        destination: './public/images/services',
+        filename: (req, file, cb) => {
+          const ext = path.parse(file.originalname).ext;
+          cb(null, `service-${uuid()}${ext ? ext : '.png'}`);
+        },
+      }),
+    }),
+  )
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE), SubscribedStoreGuard)
+  async create(
+    @Body() createServiceDto: CreateServiceDto,
+    @UploadedFiles() files: Array<Express.Multer.File>,
+    @CurrentUser() store: Store,
+  ) {
+    return Response.success(
+      await this.serviceService.create(
+        createServiceDto,
+        files[0]['path'],
+        store,
+      ),
+    );
   }
 
-  @Get()
-  async findAll() {
-    return Response.success(await this.serviceService.findAll());
+  @Post('update')
+  @UseInterceptors(
+    AnyFilesInterceptor({
+      storage: diskStorage({
+        destination: './public/images/services',
+        filename: (req, file, cb) => {
+          const ext = path.parse(file.originalname).ext;
+          cb(null, `service-${uuid()}${ext ? ext : '.png'}`);
+        },
+      }),
+    }),
+  )
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE), SubscribedStoreGuard)
+  async update(
+    @Body() updateServiceDto: UpdateServiceDto,
+    @UploadedFiles() files: Array<Express.Multer.File>,
+    @CurrentUser() store: Store,
+  ) {
+    return Response.success(
+      await this.serviceService.update(
+        updateServiceDto,
+        files && files.length ? files[0]['path'] : null,
+        store,
+      ),
+    );
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.serviceService.findOne(+id);
+  @Post('toggle/:id')
+  async toggleService(@Param('id') id: string) {
+    return Response.success(await this.serviceService.toggleService(id));
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateServiceDto: UpdateServiceDto) {
-    return this.serviceService.update(+id, updateServiceDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.serviceService.remove(+id);
+  @Post('delete/:id')
+  async remove(@Param('id') id: string) {
+    return Response.success(await this.serviceService.remove(id));
   }
 }

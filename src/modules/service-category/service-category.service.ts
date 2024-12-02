@@ -1,16 +1,14 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateServiceCategoryDto } from './dto/create-service-category.dto';
-import { UpdateServiceCategoryDto } from './dto/update-service-category.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { ServiceCategory } from 'src/mongoose/service-category';
 import { Store } from 'src/mongoose/store';
+import { ServiceCategoryModel } from 'src/mongoose/service-category';
 
 @Injectable()
 export class ServiceCategoryService {
   constructor(
     @InjectModel('ServiceCategory')
-    private serviceCategoryModel: Model<ServiceCategory>,
+    private serviceCategoryModel: ServiceCategoryModel,
   ) {}
 
   async create(
@@ -35,29 +33,21 @@ export class ServiceCategoryService {
   }
 
   async findAll(store: Store) {
-    const categories = await this.serviceCategoryModel.find({
-      storeId: store.id,
-      deletedAt: null,
-    });
+    const categories = await this.serviceCategoryModel
+      .find({
+        storeId: store.id,
+        deletedAt: null,
+      })
+      .populate('services')
+      .populate('services.category');
 
     return categories;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} serviceCategory`;
-  }
-
-  update(id: number, updateServiceCategoryDto: UpdateServiceCategoryDto) {
-    return `This action updates a #${id} serviceCategory`;
-  }
-
   async remove(id: string) {
     console.log('delete category', id);
-    const result = await this.serviceCategoryModel.findByIdAndUpdate(id, {
-      isDeleted: true,
-      deletedAt: new Date(),
-    });
-    console.log("res", result);
+    const result = await this.serviceCategoryModel.delete({ _id: id });
+    console.log('res', result);
     return result;
   }
 }

@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import * as mongooseDelete from 'mongoose-delete';
 
 export const ServiceCategorySchema = new mongoose.Schema(
   {
@@ -10,9 +11,20 @@ export const ServiceCategorySchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-export interface ServiceCategory {
+ServiceCategorySchema.plugin(mongooseDelete, {
+  deletedAt: true,
+  overrideMethods: true,
+  restore: true,
+});
+
+export interface ServiceCategory
+  extends Document,
+    mongooseDelete.SoftDeleteDocument {
   name: string;
   storeId: mongoose.Schema.Types.ObjectId;
   services: mongoose.Schema.Types.ObjectId[];
   deletedAt: Date;
 }
+
+export type ServiceCategoryModel =
+  mongooseDelete.SoftDeleteModel<ServiceCategory>;

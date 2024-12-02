@@ -1,0 +1,4 @@
+1001 --> resource is only for subscribed stores
+1002 --> resource is only for unsubscribed stores
+1003 --> resource is only for stores
+1004 --> resource is only for clients

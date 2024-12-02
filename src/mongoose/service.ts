@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
-import { User, UserSchema } from './user';
 import { DiscountType } from 'src/common/models/enums/discount-type';
+import * as mongooseDelete from 'mongoose-delete';
 
 export const ServiceSchema = new mongoose.Schema({
   title: { type: String },
@@ -8,21 +8,29 @@ export const ServiceSchema = new mongoose.Schema({
   price: { type: Number, default: 0.0 },
   discount: { type: Number },
   category: { type: mongoose.Schema.Types.ObjectId, ref: 'ServiceCategory' },
+  store: { type: mongoose.Schema.Types.ObjectId, ref: 'Store' },
   discountType: { type: String, enum: Object.values(DiscountType) },
-  enabled: { type: Boolean },
+  enabled: { type: Boolean, default: false },
   duration: { type: Number },
 });
 
-ServiceSchema.add(UserSchema.obj);
+ServiceSchema.plugin(mongooseDelete, {
+  deletedAt: true,
+  overrideMethods: true,
+  restore: true,
+});
 
-export interface Service extends User {
+export interface Service extends mongooseDelete.SoftDeleteDocument {
   title: string;
   picture: string;
   price: number;
   discount: number;
   category: mongoose.Schema.Types.ObjectId;
+  store: mongoose.Schema.Types.ObjectId;
   discountType: DiscountType;
   enabled: boolean;
   duration: number;
-  //  facilities: List<Facility>;
 }
+
+export type ServiceModel =
+  mongooseDelete.SoftDeleteModel<Service>;

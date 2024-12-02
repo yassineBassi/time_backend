@@ -42,19 +42,6 @@ export class ServiceCategoryController {
     return Response.success(await this.serviceCategoryService.findAll(store));
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.serviceCategoryService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateServiceCategoryDto: UpdateServiceCategoryDto,
-  ) {
-    return this.serviceCategoryService.update(+id, updateServiceCategoryDto);
-  }
-
   @Post('delete/:id')
   async remove(@Param('id') id: string) {
     return Response.success(await this.serviceCategoryService.remove(id));

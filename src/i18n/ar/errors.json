@@ -79,5 +79,8 @@
     "coupon_product_required":"منتج الكوبون مطلوب",
     "forbidden_action":"لا يسمح لك بهذا الإجراء",
     "section":"القسم",
-    "category_already_exist": "لديك بالفعل تصنيف بهذا الاسم"
+    "category_already_exist": "لديك بالفعل تصنيف بهذا الاسم",
+    "title": "العنوان",
+    "duration": "المدة",
+    "isPositive": "يجب أن يكون {property} موجبًا"
 }
