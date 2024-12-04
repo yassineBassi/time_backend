@@ -15,6 +15,10 @@ export const StoreSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'StoreSubscription',
   },
+  workingTimes: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'WorkingTime',
+  },
   //services: { type: String },
   //comments: { type: String },
   available: { type: Boolean, default: false },
@@ -33,6 +37,7 @@ export interface Store extends User {
   reviewsCount: string;
   isVerified: string;
   subscription: mongoose.Schema.Types.ObjectId;
+  workingTimes: mongoose.Schema.Types.ObjectId;
   //services: String,
   //comments: String,
   available: string;

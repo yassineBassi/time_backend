@@ -21,6 +21,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ServiceModule } from './modules/service/service.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { ServiceCategoryModule } from './modules/service-category/service-category.module';
+import { WorkingTimesModule } from './modules/working-times/working-times.module';
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { ServiceCategoryModule } from './modules/service-category/service-catego
     ServiceModule,
     PaymentModule,
     ServiceCategoryModule,
+    WorkingTimesModule,
   ],
   controllers: [AppController],
   providers: [
