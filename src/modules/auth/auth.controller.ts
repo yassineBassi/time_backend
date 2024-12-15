@@ -1,9 +1,11 @@
 import {
   Body,
   Controller,
+  Get,
   Post,
   UploadedFile,
   UploadedFiles,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
@@ -16,6 +18,9 @@ import { v4 as uuid } from 'uuid';
 import path = require('path');
 import { LoginDTO } from './dtos/login.dto';
 import { LoginWithGoogleDTO } from './dtos/login-with-google.dto';
+import { CurrentUser } from 'src/common/decorators/current-user';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { LoginWithTwitterDTO } from './dtos/login-with-twitter.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -31,6 +36,15 @@ export class AuthController {
   async loginWithGoogle(@Body() request: LoginWithGoogleDTO) {
     return Response.success(
       await this.authService.loginWithGoogle(request),
+      '',
+    );
+  }
+
+  @Post('login/twitter')
+  async loginWithTwitter(@Body() request: LoginWithTwitterDTO) {
+    console.log(request);
+    return Response.success(
+      await this.authService.loginWithTwitter(request),
       '',
     );
   }
@@ -58,7 +72,10 @@ export class AuthController {
     @UploadedFiles() files: Array<Express.Multer.File>,
   ) {
     return Response.success(
-      await this.authService.registerStore(request, files[0]['path']),
+      await this.authService.registerStore(
+        request,
+        files && files.length ? files[0]['path'] : null,
+      ),
       '',
     );
   }
@@ -66,5 +83,17 @@ export class AuthController {
   @Post('sendOTP')
   async sendOTP() {
     return Response.success(await this.authService.sendOTP(), '');
+  }
+
+  @Get('profile')
+  @UseGuards(JwtAuthGuard)
+  async getProfile(@CurrentUser() user: any) {
+    return Response.success(await this.authService.getProfile(user));
+  }
+
+  @Post('profile')
+  @UseGuards(JwtAuthGuard)
+  async saveProfile(@CurrentUser() user: any) {
+    return Response.success(await this.authService.saveProfile(user));
   }
 }

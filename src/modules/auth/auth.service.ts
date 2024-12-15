@@ -21,6 +21,7 @@ import { UserStatus } from 'src/common/models/enums/user-status';
 import { FirebaseAdminService } from '../firebase-admin/firebase-admin.service';
 import { UserType } from 'src/common/models/enums/user-type';
 import { SubscriptionService } from '../subscription/subscription.service';
+import { LoginWithTwitterDTO } from './dtos/login-with-twitter.dto';
 
 const SALT_ROUNDS = 10;
 
@@ -97,6 +98,20 @@ export class AuthService {
     return client;
   }
 
+  async findUserByTwitter(twitterID: string, firebaseID: string): Promise<any> {
+    const store = await this.storeModel
+      .findOne({ twitterID, firebaseID })
+      .exec();
+    if (store) {
+      return store;
+    }
+
+    const client = await this.clientModel
+      .findOne({ twitterID, firebaseID })
+      .exec();
+    return client;
+  }
+
   async validate(phoneNumber: string, password: string) {
     const account = await this.findUserByPhoneNumber(phoneNumber);
 
@@ -154,8 +169,18 @@ export class AuthService {
 
   async loginWithGoogle(request: LoginWithGoogleDTO) {
     const account: User = await this.findUserByGoogle(
-      request.googleId,
-      request.firebaseId,
+      request.googleID,
+      request.firebaseID,
+    );
+
+    return this.loginAccount(account);
+  }
+
+  async loginWithTwitter(request: LoginWithTwitterDTO) {
+    console.log(request);
+    const account: User = await this.findUserByTwitter(
+      request.twitterID,
+      request.firebaseID,
     );
 
     return this.loginAccount(account);
@@ -169,7 +194,10 @@ export class AuthService {
   async registerClient(registerClientDTO: RegisterClientDTO) {
     let client = new this.clientModel(registerClientDTO);
 
-    if (registerClientDTO.firebaseID && registerClientDTO.googleID) {
+    if (
+      registerClientDTO.firebaseID &&
+      (registerClientDTO.googleID || registerClientDTO.twitterID)
+    ) {
       const user = await this.firebaseService.getUserByUid(
         registerClientDTO.firebaseID as string,
       );
@@ -204,15 +232,22 @@ export class AuthService {
   async registerStore(registerStoreDTO: RegisterStoreDTO, picture: string) {
     let store = new this.storeModel(registerStoreDTO);
 
-    console.log('stooore');
-    console.log(store);
-    console.log(store.password);
-
-    if (registerStoreDTO.firebaseID && registerStoreDTO.googleID) {
+    if (
+      registerStoreDTO.firebaseID &&
+      (registerStoreDTO.googleID || registerStoreDTO.twitterID)
+    ) {
       const user = await this.firebaseService.getUserByUid(
         registerStoreDTO.firebaseID as string,
       );
-      if (!user || user.uid != registerStoreDTO.googleID) {
+
+      console.log('user : ', user);
+      console.log('user : ', registerStoreDTO.twitterID);
+      if (
+        !user ||
+        ![registerStoreDTO.googleID, registerStoreDTO.twitterID].includes(
+          user.uid,
+        )
+      ) {
         throw new BadRequestException(this.generateUniqueUsername());
       }
       store.status = UserStatus.VERIFIED;
@@ -225,11 +260,13 @@ export class AuthService {
       return 'failed';
     }
 
-    store.picture = picture;
+    if (picture && picture.length) store.picture = picture;
     store.type = UserType.STORE;
     store.username = store.storeName;
 
     store = await store.save();
+
+    console.log(store);
 
     await new this.OtpTokenModel({
       code: this.generateRandomDigits(5),
@@ -259,4 +296,10 @@ export class AuthService {
       throw new UnauthorizedException('Invalid or expired token');
     }
   }
+
+  async getProfile(user: any) {
+    return user;
+  }
+
+  async saveProfile(user: any) {}
 }

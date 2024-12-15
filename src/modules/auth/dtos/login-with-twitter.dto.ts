@@ -1,8 +1,8 @@
 import { IsNotEmpty } from 'class-validator';
 
-export class LoginWithGoogleDTO {
+export class LoginWithTwitterDTO {
   @IsNotEmpty()
-  googleID: string;
+  twitterID: string;
 
   @IsNotEmpty()
   firebaseID: string;

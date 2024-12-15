@@ -65,7 +65,12 @@ export class RegisterStoreDTO {
   category: string | StoreCategory;
 
   @IsOptional()
+  picture: string;
+
+  @IsOptional()
   firebaseID: string;
   @IsOptional()
   googleID: string;
+  @IsOptional()
+  twitterID: string;
 }

@@ -59,4 +59,6 @@ export class RegisterClientDTO {
   firebaseID: string;
   @IsOptional()
   googleID: string;
+  @IsOptional()
+  twitterID: string;
 }

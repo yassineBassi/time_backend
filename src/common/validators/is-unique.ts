@@ -15,11 +15,9 @@ export class IsUniqueConstraint implements ValidatorConstraintInterface {
   async validate(value: any, args: ValidationArguments) {
     const [modelNames, fieldName] = args.constraints;
     let exists = false;
-    console.log(modelNames);
     for (let i = 0; i < modelNames.length; i++) {
       const model = this.connection.models[modelNames[i]];
       const count = await model.countDocuments({ [fieldName]: value }).exec();
-      console.log('model: ', model, ' ,count : ', count);
       if (count > 0) {
         exists = true;
         break;
