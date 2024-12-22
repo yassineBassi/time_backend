@@ -18,6 +18,7 @@ export class FirebaseAdminService {
   async getUserByUid(uid: string): Promise<admin.auth.UserInfo | null> {
     try {
       const user = await this.firebaseApp.auth().getUser(uid);
+      console.log("---------", user);
       return user.providerData[0];
     } catch (error) {
       console.error('Error fetching user data:', error);

@@ -61,4 +61,6 @@ export class RegisterClientDTO {
   googleID: string;
   @IsOptional()
   twitterID: string;
+  @IsOptional()
+  appleID: string;
 }

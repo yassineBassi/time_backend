@@ -14,6 +14,7 @@ const Schema = new mongoose.Schema(
     googleID: { type: String, required: false, default: '' },
     firebaseID: { type: String, required: false, default: '' },
     twitterID: { type: String, required: false, default: '' },
+    appleID: { type: String, required: false, default: '' },
     phoneNumber: { type: String, required: true, unique: true },
     phoneNumberVerified: { type: Boolean, default: false },
     type: { type: String, enum: Object.values(UserType) },
@@ -43,6 +44,7 @@ export interface User extends Document {
   googleID: string;
   firebaseID: string;
   twitterID: string;
+  appleID: string;
   phoneNumber: string;
   phoneNumberVerified: boolean;
   status: UserStatus;

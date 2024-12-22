@@ -21,6 +21,7 @@ import { LoginWithGoogleDTO } from './dtos/login-with-google.dto';
 import { CurrentUser } from 'src/common/decorators/current-user';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { LoginWithTwitterDTO } from './dtos/login-with-twitter.dto';
+import { LoginWithAppleDTO } from './dtos/login-with-apple.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -42,15 +43,19 @@ export class AuthController {
 
   @Post('login/twitter')
   async loginWithTwitter(@Body() request: LoginWithTwitterDTO) {
-    console.log(request);
     return Response.success(
       await this.authService.loginWithTwitter(request),
       '',
     );
   }
 
+  @Post('login/apple')
+  async loginWithApple(@Body() request: LoginWithAppleDTO) {
+    return Response.success(await this.authService.loginWithApple(request), '');
+  }
+
   @Post('register/client')
-  async registerAccount(@Body() request: RegisterClientDTO) {
+  async registerClient(@Body() request: RegisterClientDTO) {
     console.log(request);
     return Response.success(await this.authService.registerClient(request), '');
   }

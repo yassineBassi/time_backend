@@ -68,9 +68,18 @@ export class RegisterStoreDTO {
   picture: string;
 
   @IsOptional()
+  address: string;
+  @IsOptional()
+  lng: string;
+  @IsOptional()
+  lat: string;
+
+  @IsOptional()
   firebaseID: string;
   @IsOptional()
   googleID: string;
   @IsOptional()
   twitterID: string;
+  @IsOptional()
+  appleID: string;
 }

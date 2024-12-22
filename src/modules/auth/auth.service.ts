@@ -22,6 +22,7 @@ import { FirebaseAdminService } from '../firebase-admin/firebase-admin.service';
 import { UserType } from 'src/common/models/enums/user-type';
 import { SubscriptionService } from '../subscription/subscription.service';
 import { LoginWithTwitterDTO } from './dtos/login-with-twitter.dto';
+import { LoginWithAppleDTO } from './dtos/login-with-apple.dto';
 
 const SALT_ROUNDS = 10;
 
@@ -112,6 +113,18 @@ export class AuthService {
     return client;
   }
 
+  async findUserByApple(appleID: string, firebaseID: string): Promise<any> {
+    const store = await this.storeModel.findOne({ appleID, firebaseID }).exec();
+    if (store) {
+      return store;
+    }
+
+    const client = await this.clientModel
+      .findOne({ appleID, firebaseID })
+      .exec();
+    return client;
+  }
+
   async validate(phoneNumber: string, password: string) {
     const account = await this.findUserByPhoneNumber(phoneNumber);
 
@@ -186,6 +199,17 @@ export class AuthService {
     return this.loginAccount(account);
   }
 
+  async loginWithApple(request: LoginWithAppleDTO) {
+    console.log('login with apple');
+    console.log(request);
+    const account: User = await this.findUserByApple(
+      request.appleID,
+      request.firebaseID,
+    );
+
+    return this.loginAccount(account);
+  }
+
   async login(request: LoginDTO) {
     const account = await this.validate(request.phoneNumber, request.password);
     return this.loginAccount(account);
@@ -193,15 +217,26 @@ export class AuthService {
 
   async registerClient(registerClientDTO: RegisterClientDTO) {
     let client = new this.clientModel(registerClientDTO);
-
     if (
       registerClientDTO.firebaseID &&
-      (registerClientDTO.googleID || registerClientDTO.twitterID)
+      (registerClientDTO.googleID ||
+        registerClientDTO.twitterID ||
+        registerClientDTO.appleID)
     ) {
       const user = await this.firebaseService.getUserByUid(
         registerClientDTO.firebaseID as string,
       );
-      if (!user || user.uid != registerClientDTO.googleID) {
+      console.log('returened user : ', user);
+      console.log('returened user id : ', user.uid);
+      console.log('apple id : ', registerClientDTO.appleID);
+      if (
+        !user ||
+        ![
+          registerClientDTO.googleID,
+          registerClientDTO.twitterID,
+          registerClientDTO.appleID,
+        ].includes(user.uid)
+      ) {
         throw new BadRequestException(this.generateUniqueUsername());
       }
       client.status = UserStatus.VERIFIED;
@@ -214,6 +249,9 @@ export class AuthService {
 
     client.username = await this.generateUniqueUsername();
     client.type = UserType.CLIENT;
+
+    if (client.picture == '' || client.picture == null)
+      client.picture = 'public/images/clients/default-client.jpeg';
 
     client = await client.save();
 
@@ -234,7 +272,9 @@ export class AuthService {
 
     if (
       registerStoreDTO.firebaseID &&
-      (registerStoreDTO.googleID || registerStoreDTO.twitterID)
+      (registerStoreDTO.googleID ||
+        registerStoreDTO.twitterID ||
+        registerStoreDTO.appleID)
     ) {
       const user = await this.firebaseService.getUserByUid(
         registerStoreDTO.firebaseID as string,
@@ -244,9 +284,11 @@ export class AuthService {
       console.log('user : ', registerStoreDTO.twitterID);
       if (
         !user ||
-        ![registerStoreDTO.googleID, registerStoreDTO.twitterID].includes(
-          user.uid,
-        )
+        ![
+          registerStoreDTO.googleID,
+          registerStoreDTO.twitterID,
+          registerStoreDTO.appleID,
+        ].includes(user.uid)
       ) {
         throw new BadRequestException(this.generateUniqueUsername());
       }

@@ -25,7 +25,6 @@ export class CreateServiceDto {
   @IsNotEmpty()
   price: number;
 
-  @IsPositive()
   @IsNumber()
   @IsNotEmpty()
   discount: number;
