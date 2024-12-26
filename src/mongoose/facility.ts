@@ -1,6 +1,13 @@
 import mongoose from 'mongoose';
 
-export const FacilitySchema = new mongoose.Schema(
-);
+export const FacilitySchema = new mongoose.Schema({
+  title: { type: String },
+  icon: { type: String },
+  items: [{ type: mongoose.Schema.Types.ObjectId, ref: 'FacilityItem' }],
+});
 
-export type Facility = object;
+export interface Facility {
+  title: string;
+  icon: string;
+  items: mongoose.Schema.Types.ObjectId[];
+}

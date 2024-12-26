@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
+import { InjectModel, MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
@@ -22,11 +22,18 @@ import { ServiceModule } from './modules/service/service.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { ServiceCategoryModule } from './modules/service-category/service-category.module';
 import { WorkingTimesModule } from './modules/working-times/working-times.module';
+import { Facility, FacilitySchema } from './mongoose/facility';
+import { FacilityItem, FacilityItemSchema } from './mongoose/facility-item';
+import { Model, Types } from 'mongoose';
 
 @Module({
   imports: [
     MongooseModule.forRoot('mongodb://localhost:27017/time-db'),
-    MongooseModule.forFeature([{ name: 'Client', schema: ClientSchema }]),
+    MongooseModule.forFeature([
+      { name: 'Client', schema: ClientSchema },
+      { name: 'Facility', schema: FacilitySchema },
+      { name: 'FacilityItem', schema: FacilityItemSchema },
+    ]),
     I18nModule.forRoot({
       fallbackLanguage: 'ar',
       loaderOptions: {

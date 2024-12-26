@@ -1,4 +1,5 @@
 import {
+  IsArray,
   IsEnum,
   IsNotEmpty,
   IsNumber,
@@ -39,4 +40,7 @@ export class CreateServiceDto {
   @IsNumber()
   @IsNotEmpty()
   duration: number;
+
+  @IsNotEmpty()
+  facilitiesIds: string | string[];
 }

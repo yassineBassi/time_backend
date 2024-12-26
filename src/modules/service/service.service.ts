@@ -5,11 +5,12 @@ import {
 } from '@nestjs/common';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Service, ServiceModel } from 'src/mongoose/service';
 import { Store } from 'src/mongoose/store';
 import { ServiceCategory } from 'src/mongoose/service-category';
+import { Facility } from 'src/mongoose/facility';
 
 @Injectable()
 export class ServiceService {
@@ -20,6 +21,8 @@ export class ServiceService {
     private readonly serviceCategory: Model<ServiceCategory>,
     @InjectModel('Store')
     private readonly storeModel: Model<Store>,
+    @InjectModel('Facility')
+    private readonly facilityModel: Model<Facility>,
   ) {}
 
   async create(
@@ -40,7 +43,18 @@ export class ServiceService {
     service.category = category.id;
     service.store = (await this.storeModel.findById(store.id)).id;
 
+    const facilities = (createServiceDto.facilitiesIds as string)
+      .slice(1, -1)
+      .split(', ')
+      .map((id) => new mongoose.Types.ObjectId(id));
+
+    service.facilities = facilities;
+
     service = await service.save();
+
+    service = await this.serviceModel
+      .findById(service.id)
+      .populate('facilities');
 
     category.services.push(service.id);
     await category.save();
@@ -59,12 +73,16 @@ export class ServiceService {
 
     const service = await this.serviceModel.findByIdAndUpdate(
       updateServiceDto.id,
-      picture
-        ? {
-            ...updateServiceDto,
-            picture,
-          }
-        : updateServiceDto,
+      {
+        ...(picture
+          ? {
+              ...updateServiceDto,
+              picture,
+            }
+          : updateServiceDto),
+        facilities: updateServiceDto.facilitiesIds
+          .map((id) => new mongoose.Types.ObjectId(id)),
+      },
       {
         new: true,
       },
@@ -93,5 +111,10 @@ export class ServiceService {
     const result = await this.serviceModel.delete({ _id: id });
     console.log('res', result);
     return result;
+  }
+
+  async getFacilities() {
+    const facilities = await this.facilityModel.find().populate('items');
+    return facilities;
   }
 }

@@ -84,12 +84,20 @@ export class ServiceController {
   }
 
   @Post('toggle/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE), SubscribedStoreGuard)
   async toggleService(@Param('id') id: string) {
     return Response.success(await this.serviceService.toggleService(id));
   }
 
   @Post('delete/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE), SubscribedStoreGuard)
   async remove(@Param('id') id: string) {
     return Response.success(await this.serviceService.remove(id));
+  }
+
+  @Get('facilities')
+  //@UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE), SubscribedStoreGuard)
+  async getFacilities() {
+    return Response.success(await this.serviceService.getFacilities());
   }
 }
