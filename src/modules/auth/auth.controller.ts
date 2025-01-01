@@ -22,6 +22,11 @@ import { CurrentUser } from 'src/common/decorators/current-user';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { LoginWithTwitterDTO } from './dtos/login-with-twitter.dto';
 import { LoginWithAppleDTO } from './dtos/login-with-apple.dto';
+import { UserType } from 'src/common/models/enums/user-type';
+import { SubscribedStoreGuard } from 'src/common/guards/subscribed-store.guard';
+import { RolesGuard } from 'src/common/guards/roles.guard';
+import { EditStoreProfileDTO } from './dtos/edit-store-profile.dto';
+import { Store } from 'src/mongoose/store';
 
 @Controller('auth')
 export class AuthController {
@@ -96,9 +101,30 @@ export class AuthController {
     return Response.success(await this.authService.getProfile(user));
   }
 
-  @Post('profile')
-  @UseGuards(JwtAuthGuard)
-  async saveProfile(@CurrentUser() user: any) {
-    return Response.success(await this.authService.saveProfile(user));
+  @Post('profile/store')
+  @UseInterceptors(
+    AnyFilesInterceptor({
+      storage: diskStorage({
+        destination: './public/images/stores',
+        filename: (req, file, cb) => {
+          const ext = path.parse(file.originalname).ext;
+          cb(null, `store-${uuid()}${ext ? ext : '.png'}`);
+        },
+      }),
+    }),
+  )
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE), SubscribedStoreGuard)
+  async editStoreProfile(
+    @CurrentUser() currentUser: Store,
+    @Body() request: EditStoreProfileDTO,
+    @UploadedFiles() files: Array<Express.Multer.File>,
+  ) {
+    return await Response.success(
+      await this.authService.editStoreProfile(
+        request,
+        files && files.length ? files[0]['path'] : null,
+        currentUser,
+      ),
+    );
   }
 }

@@ -67,10 +67,6 @@ export class ServiceService {
     picture: string,
     store: Store,
   ) {
-    console.log('dto : ', updateServiceDto);
-    console.log('file : ', picture);
-    console.log('store : ', store);
-
     const service = await this.serviceModel.findByIdAndUpdate(
       updateServiceDto.id,
       {
@@ -80,8 +76,9 @@ export class ServiceService {
               picture,
             }
           : updateServiceDto),
-        facilities: updateServiceDto.facilitiesIds
-          .map((id) => new mongoose.Types.ObjectId(id)),
+        facilities: updateServiceDto.facilitiesIds.map(
+          (id) => new mongoose.Types.ObjectId(id),
+        ),
       },
       {
         new: true,

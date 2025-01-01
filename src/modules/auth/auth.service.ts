@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -23,6 +24,7 @@ import { UserType } from 'src/common/models/enums/user-type';
 import { SubscriptionService } from '../subscription/subscription.service';
 import { LoginWithTwitterDTO } from './dtos/login-with-twitter.dto';
 import { LoginWithAppleDTO } from './dtos/login-with-apple.dto';
+import { EditStoreProfileDTO } from './dtos/edit-store-profile.dto';
 
 const SALT_ROUNDS = 10;
 
@@ -343,5 +345,23 @@ export class AuthService {
     return user;
   }
 
-  async saveProfile(user: any) {}
+  async editStoreProfile(request: any, picture: string, currentUser: Store) {
+    console.log('edit store profile');
+    console.log(request);
+    console.log(picture);
+
+    if (currentUser.id != request.id) {
+      throw new ForbiddenException();
+    }
+
+    if (picture && picture.length) request.picture = picture;
+
+    const store = await this.storeModel
+      .findByIdAndUpdate(currentUser.id, request)
+      .exec();
+
+    console.log(store);
+
+    return store;
+  }
 }
