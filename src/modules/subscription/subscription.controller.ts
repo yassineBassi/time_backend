@@ -17,19 +17,20 @@ import { CurrentUser } from 'src/common/decorators/current-user';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { UserType } from 'src/common/models/enums/user-type';
 import { UnSubscribedStoreGuard } from 'src/common/guards/unsubscribe-store.guard';
+import { Store } from 'src/mongoose/store';
+import { SubscribedStoreGuard } from 'src/common/guards/subscribed-store.guard';
 
 @Controller('subscriptions')
 export class SubscriptionController {
   constructor(private readonly subscriptionService: SubscriptionService) {}
 
-  @Post()
-  create(@Body() createSubscriptionDto: CreateSubscriptionDto) {
-    return this.subscriptionService.create(createSubscriptionDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.subscriptionService.findAll();
+  @Get('my-subscription')
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE), SubscribedStoreGuard)
+  async getMySubscription(@CurrentUser() CurrentUser: Store) {
+    return Response.success(
+      await this.subscriptionService.getMySubscription(CurrentUser),
+      '',
+    );
   }
 
   @Get('types')
@@ -45,21 +46,12 @@ export class SubscriptionController {
     return Response.success(await this.subscriptionService.getLevels(), '');
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.subscriptionService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateSubscriptionDto: UpdateSubscriptionDto,
-  ) {
-    return this.subscriptionService.update(+id, updateSubscriptionDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.subscriptionService.remove(+id);
+  @Post('cancel')
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE), SubscribedStoreGuard)
+  async cancelSubscription(@CurrentUser() store: Store) {
+    return Response.success(
+      await this.subscriptionService.cancelSubscription(store),
+      '',
+    );
   }
 }

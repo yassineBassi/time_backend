@@ -8,6 +8,7 @@ import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
 import { StoreSubscription } from 'src/mongoose/store-subscription';
 import { Store } from 'src/mongoose/store';
+import { SubscriptionStatus } from 'src/common/models/enums/subscription-status';
 
 @Injectable()
 export class SubscriptionService {
@@ -40,22 +41,6 @@ export class SubscriptionService {
     return subscriptionLevels;
   }
 
-  findAll() {
-    return `This action returns all subscription`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} subscription`;
-  }
-
-  update(id: number, updateSubscriptionDto: UpdateSubscriptionDto) {
-    return `This action updates a #${id} subscription`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} subscription`;
-  }
-
   async checkStoreSubscription(store: Store) {
     console.log(store.id);
 
@@ -79,5 +64,35 @@ export class SubscriptionService {
     }
 
     return true;
+  }
+
+  async getMySubscription(store: Store) {
+    const storeSubscription = await this.storeSubscriptionModel.findById(
+      store.subscription,
+    );
+    const subscription = await this.subscriptionLevelModel.findById(
+      storeSubscription.subscriptionId,
+    );
+
+    const date = new Date(
+      new Date(storeSubscription.createdAt).getTime() +
+        subscription.expirationDays * 24 * 60 * 60 * 1000,
+    );
+
+    return {
+      expireDate: date,
+      status: storeSubscription.status,
+      subscription,
+    };
+  }
+
+  async cancelSubscription(store: Store) {
+    await this.storeSubscriptionModel.findByIdAndUpdate(store.subscription, {
+      status: SubscriptionStatus.CANCELED,
+    });
+
+    return {
+      status: SubscriptionStatus.CANCELED,
+    };
   }
 }
