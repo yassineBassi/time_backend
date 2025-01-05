@@ -22,9 +22,9 @@ import { ServiceModule } from './modules/service/service.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { ServiceCategoryModule } from './modules/service-category/service-category.module';
 import { WorkingTimesModule } from './modules/working-times/working-times.module';
-import { Facility, FacilitySchema } from './mongoose/facility';
-import { FacilityItem, FacilityItemSchema } from './mongoose/facility-item';
-import { Model, Types } from 'mongoose';
+import { FacilitySchema } from './mongoose/facility';
+import { FacilityItemSchema } from './mongoose/facility-item';
+import { ParamsModule } from './modules/params/params.module';
 
 @Module({
   imports: [
@@ -67,6 +67,7 @@ import { Model, Types } from 'mongoose';
     PaymentModule,
     ServiceCategoryModule,
     WorkingTimesModule,
+    ParamsModule,
   ],
   controllers: [AppController],
   providers: [
