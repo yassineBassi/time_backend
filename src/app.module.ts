@@ -25,6 +25,7 @@ import { WorkingTimesModule } from './modules/working-times/working-times.module
 import { FacilitySchema } from './mongoose/facility';
 import { FacilityItemSchema } from './mongoose/facility-item';
 import { ParamsModule } from './modules/params/params.module';
+import { ReportsModule } from './modules/reports/reports.module';
 
 @Module({
   imports: [
@@ -68,6 +69,7 @@ import { ParamsModule } from './modules/params/params.module';
     ServiceCategoryModule,
     WorkingTimesModule,
     ParamsModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [

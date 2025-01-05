@@ -82,5 +82,6 @@
     "category_already_exist": "لديك بالفعل تصنيف بهذا الاسم",
     "title": "العنوان",
     "duration": "المدة",
-    "isPositive": "يجب أن يكون {property} موجبًا"
+    "isPositive": "يجب أن يكون {property} موجبًا",
+    "message": "الرسالة"
 }
