@@ -26,13 +26,15 @@ import { FacilitySchema } from './mongoose/facility';
 import { FacilityItemSchema } from './mongoose/facility-item';
 import { ParamsModule } from './modules/params/params.module';
 import { ReportsModule } from './modules/reports/reports.module';
+import { StoreSection, StoreSectionSchema } from './mongoose/store-section';
+import { Model } from 'mongoose';
 
 @Module({
   imports: [
     MongooseModule.forRoot('mongodb://localhost:27017/time-db'),
     MongooseModule.forFeature([
       { name: 'Client', schema: ClientSchema },
-      { name: 'Facility', schema: FacilitySchema },
+      { name: 'StoreSection', schema: StoreSectionSchema },
       { name: 'FacilityItem', schema: FacilityItemSchema },
     ]),
     I18nModule.forRoot({
@@ -80,4 +82,13 @@ import { ReportsModule } from './modules/reports/reports.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule {
+  constructor(
+    @InjectModel('StoreSection')
+    private storeSectionModel: Model<StoreSection>,
+  ) {
+    setTimeout(async () => {
+      
+    }, 1000);
+  }
+}
