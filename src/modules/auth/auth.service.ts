@@ -87,43 +87,20 @@ export class AuthService {
     return client;
   }
 
-  async findUserByGoogle(googleID: string, firebaseID: string): Promise<any> {
-    const store = await this.storeModel
-      .findOne({ googleID, firebaseID })
-      .exec();
+  async findUserByFirebase(filter: {
+    firebaseID: string;
+    googleID?: string;
+    twitterID?: string;
+    appleID?: string;
+  }) {
+    const select = '_id username fullname picture isVerified subscription type';
+
+    const store = await this.storeModel.findOne(filter).select(select).exec();
     if (store) {
       return store;
     }
 
-    const client = await this.clientModel
-      .findOne({ googleID, firebaseID })
-      .exec();
-    return client;
-  }
-
-  async findUserByTwitter(twitterID: string, firebaseID: string): Promise<any> {
-    const store = await this.storeModel
-      .findOne({ twitterID, firebaseID })
-      .exec();
-    if (store) {
-      return store;
-    }
-
-    const client = await this.clientModel
-      .findOne({ twitterID, firebaseID })
-      .exec();
-    return client;
-  }
-
-  async findUserByApple(appleID: string, firebaseID: string): Promise<any> {
-    const store = await this.storeModel.findOne({ appleID, firebaseID }).exec();
-    if (store) {
-      return store;
-    }
-
-    const client = await this.clientModel
-      .findOne({ appleID, firebaseID })
-      .exec();
+    const client = await this.clientModel.findOne(filter).select(select).exec();
     return client;
   }
 
@@ -138,12 +115,6 @@ export class AuthService {
     ) {
       throw new BadRequestException('errors.bad_credentials');
     }
-    return account;
-  }
-
-  toAccountObject(accountTemp) {
-    const accountTempObj = accountTemp.toObject();
-    const { password, salt, googleID, firebaseID, ...account } = accountTempObj;
     return account;
   }
 
@@ -165,38 +136,36 @@ export class AuthService {
     }
     ///////////////////////////////////////////
 
-    const accountObj = this.toAccountObject(account);
-
     const payload = {
-      sub: accountObj._id,
-      username: accountObj.username,
-      type: accountObj.type,
+      sub: account._id,
+      username: account.username,
+      type: account.type,
     };
 
     const res = {
       accessToken: this.jwtService.sign(payload, {
         secret: this.configService.get('JWT_SECRET'),
       }),
-      account: accountObj,
+      account: account,
     };
     return res;
   }
 
   async loginWithGoogle(request: LoginWithGoogleDTO) {
-    const account: User = await this.findUserByGoogle(
-      request.googleID,
-      request.firebaseID,
-    );
+    const account: User = await this.findUserByFirebase({
+      googleID: request.googleID,
+      firebaseID: request.firebaseID,
+    });
 
     return this.loginAccount(account);
   }
 
   async loginWithTwitter(request: LoginWithTwitterDTO) {
     console.log(request);
-    const account: User = await this.findUserByTwitter(
-      request.twitterID,
-      request.firebaseID,
-    );
+    const account: User = await this.findUserByFirebase({
+      twitterID: request.twitterID,
+      firebaseID: request.firebaseID,
+    });
 
     return this.loginAccount(account);
   }
@@ -204,10 +173,10 @@ export class AuthService {
   async loginWithApple(request: LoginWithAppleDTO) {
     console.log('login with apple');
     console.log(request);
-    const account: User = await this.findUserByApple(
-      request.appleID,
-      request.firebaseID,
-    );
+    const account: User = await this.findUserByFirebase({
+      appleID: request.appleID,
+      firebaseID: request.firebaseID,
+    });
 
     return this.loginAccount(account);
   }

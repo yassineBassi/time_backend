@@ -41,11 +41,17 @@ export class StoreService {
     let workingTime: any = await this.WorkingTimeModel.findOne({
       storeId: store.id,
     });
+
     if (!workingTime) {
-      workingTime = await new this.WorkingTimeModel({
-        storeId: store.id,
-      }).save();
+      workingTime = await (
+        await this.WorkingTimeModel.create({
+          storeId: store.id,
+        })
+      ).save();
     }
+
+    console.log(store.firebaseID);
+    console.log('--', workingTime);
 
     workingTime.monday = request['monday'];
     workingTime.tuesday = request['tuesday'];
@@ -54,6 +60,8 @@ export class StoreService {
     workingTime.friday = request['friday'];
     workingTime.sunday = request['sunday'];
     workingTime.saturday = request['saturday'];
+
+    console.log('--', workingTime);
 
     workingTime = await workingTime.save();
 
@@ -81,7 +89,7 @@ export class StoreService {
     const filter = {
       //     status: UserStatus.ENABLED
     };
-    const limit = 100;
+    const limit = 3;
     const populate: PopulateOptions[] = [
       {
         path: 'category',
