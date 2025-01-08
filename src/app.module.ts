@@ -10,7 +10,7 @@ import { ResponseExceptionFilter } from './common/filters/response-exception.fil
 import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
 import { SharedModule } from './common/shared.module';
-import { ClientSchema } from './mongoose/client';
+import { Client, ClientSchema } from './mongoose/client';
 import { SectionModule } from './modules/section/section.module';
 import { StoreModule } from './modules/store/store.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
@@ -28,14 +28,20 @@ import { ParamsModule } from './modules/params/params.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { StoreSection, StoreSectionSchema } from './mongoose/store-section';
 import { Model } from 'mongoose';
+import { Store, StoreSchema } from './mongoose/store';
+import { StoreCategory, StoreCategorySchema } from './mongoose/store-category';
+import { StoreReview, StoreReviewSchema } from './mongoose/store-review';
 
 @Module({
   imports: [
     MongooseModule.forRoot('mongodb://localhost:27017/time-db'),
     MongooseModule.forFeature([
-      { name: 'Client', schema: ClientSchema },
+      { name: 'Store', schema: StoreSchema },
       { name: 'StoreSection', schema: StoreSectionSchema },
+      { name: 'StoreCategory', schema: StoreCategorySchema },
       { name: 'FacilityItem', schema: FacilityItemSchema },
+      { name: 'StoreReview', schema: StoreReviewSchema },
+      { name: 'Client', schema: ClientSchema },
     ]),
     I18nModule.forRoot({
       fallbackLanguage: 'ar',
@@ -84,11 +90,45 @@ import { Model } from 'mongoose';
 })
 export class AppModule {
   constructor(
+    @InjectModel('StoreCategory')
+    private storeCategoryModel: Model<StoreCategory>,
     @InjectModel('StoreSection')
     private storeSectionModel: Model<StoreSection>,
+    @InjectModel('Store')
+    private storeModel: Model<Store>,
+    @InjectModel('StoreReview')
+    private storeReviewModel: Model<StoreReview>,
+    @InjectModel('Client')
+    private clientModel: Model<Client>,
   ) {
     setTimeout(async () => {
-      
+      /*const stores = await this.storeModel.find();
+      stores.forEach(async (s) => {
+        const review = await (
+          await this.storeReviewModel.create({
+            rate: (Math.random() * (5 - 1) + 1).toFixed(2),
+            comment: 'test',
+            client: await this.clientModel.findOne(),
+            store: s.id,
+          })
+        ).save();
+
+        s.reviews.push(review.id);
+
+        await s.save();
+      });*/
     }, 1000);
   }
 }
+
+/*
+/public/images/sections/camps.png
+/public/images/sections/coffe.png
+
+
+
+
+
+/public/images/sections/tailor.png
+
+*/

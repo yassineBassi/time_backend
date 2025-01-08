@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, PopulateOptions } from 'mongoose';
+import { StoresListSegment } from 'src/common/models/enums/stores-list-segement';
+import { UserStatus } from 'src/common/models/enums/user-status';
+import { Client } from 'src/mongoose/client';
 import { Store } from 'src/mongoose/store';
 import { StoreCategory } from 'src/mongoose/store-category';
 import { StoreSection } from 'src/mongoose/store-section';
@@ -9,6 +12,8 @@ import { WorkingTime } from 'src/mongoose/working-time';
 @Injectable()
 export class StoreService {
   constructor(
+    @InjectModel('Store')
+    private readonly storeModel: Model<Store>,
     @InjectModel('StoreSection')
     private readonly storeSectionModel: Model<StoreSection>,
     @InjectModel('StoreCategory')
@@ -66,6 +71,62 @@ export class StoreService {
     }
 
     return workingTime;
+  }
 
+  async getStoresBySegment(segment: StoresListSegment, client: Client) {
+    let stores: any = [];
+
+    const select =
+      'picture storeName category workingTimes available reviews isVerified lat lng ';
+    const filter = {
+      //     status: UserStatus.ENABLED
+    };
+    const limit = 100;
+    const populate: PopulateOptions[] = [
+      {
+        path: 'category',
+        select: '_id name section',
+        populate: {
+          path: 'section',
+          select: '_id name',
+        },
+      },
+      {
+        path: 'reviews',
+      },
+    ];
+
+    if (segment == StoresListSegment.NEAR_BY) {
+      stores = await this.storeModel
+        .find(filter)
+        .select(select)
+        .populate(populate)
+        .limit(limit);
+    } else if (segment == StoresListSegment.SUGGESTED) {
+      stores = await this.storeModel
+        .find(filter)
+        .select(select)
+        .populate(populate)
+        .limit(limit);
+    }
+
+    console.log(stores[0].reviews);
+    console.log();
+
+    stores = stores.map((s) => ({
+      ...s.toObject(),
+      isFavorite: false,
+      photos: [s.picture],
+      reviews: (
+        s.reviews
+          .map((v) => v.rate)
+          .reduce((acc: number, curr: number) => acc + curr) / s.reviews.length
+      ).toFixed(1),
+      reviewsCount: s.reviews.length,
+    }));
+
+    //console.log(stores);
+
+    return stores;
   }
 }

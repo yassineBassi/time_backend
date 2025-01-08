@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { Response } from 'src/common/response';
 import { StoreService } from './store.service';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
@@ -7,6 +15,8 @@ import { UserType } from 'src/common/models/enums/user-type';
 import { SubscribedStoreGuard } from 'src/common/guards/subscribed-store.guard';
 import { CurrentUser } from 'src/common/decorators/current-user';
 import { Store } from 'src/mongoose/store';
+import { StoresListSegment } from 'src/common/models/enums/stores-list-segement';
+import { Client } from 'src/mongoose/client';
 
 @Controller('store')
 export class StoreController {
@@ -28,12 +38,25 @@ export class StoreController {
   @Post('working-days')
   @UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE), SubscribedStoreGuard)
   async saveWorkingDays(@Body() request: any, @CurrentUser() store: Store) {
-    return Response.success(await this.storeService.saveWorkingDays(request, store));
+    return Response.success(
+      await this.storeService.saveWorkingDays(request, store),
+    );
   }
 
   @Get('working-days')
   @UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE), SubscribedStoreGuard)
   async getWorkingDays(@CurrentUser() store: Store) {
     return Response.success(await this.storeService.getWorkingDays(store));
+  }
+
+  @Get('bySegment')
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.CLIENT))
+  async getStoresBySegment(
+    @Query('segment') segment: StoresListSegment,
+    @CurrentUser() client: Client,
+  ) {
+    return Response.success(
+      await this.storeService.getStoresBySegment(segment, client),
+    );
   }
 }

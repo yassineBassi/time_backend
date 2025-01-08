@@ -8,8 +8,6 @@ export const StoreSchema = new mongoose.Schema({
   commerceNumberExpirationDate: { type: Date },
   accountNumber: { type: String },
   category: { type: mongoose.Schema.Types.ObjectId, ref: 'StoreCategory' },
-  reviews: { type: Number },
-  reviewsCount: { type: Number },
   isVerified: { type: Boolean, default: false },
   subscription: {
     type: mongoose.Schema.Types.ObjectId,
@@ -20,7 +18,7 @@ export const StoreSchema = new mongoose.Schema({
     ref: 'WorkingTime',
   },
   //services: { type: String },
-  //comments: { type: String },
+  reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'StoreReview' }],
   available: { type: Boolean, default: false },
 });
 
@@ -33,7 +31,7 @@ export interface Store extends User {
   commerceNumberExpirationDate: string;
   accountNumber: string;
   category: mongoose.Schema.Types.ObjectId;
-  reviews: string;
+  reviews: mongoose.Schema.Types.ObjectId[];
   reviewsCount: string;
   isVerified: string;
   subscription: mongoose.Schema.Types.ObjectId;

@@ -1,15 +1,18 @@
 import mongoose from 'mongoose';
 
-export const WorkingTimeSchema = new mongoose.Schema({
-  storeId: { type: mongoose.Schema.Types.ObjectId, ref: 'Store' },
-  monday: { type: [String] },
-  tuesday: { type: [String] },
-  wednesday: { type: [String] },
-  thursday: { type: [String] },
-  friday: { type: [String] },
-  sunday: { type: [String] },
-  saturday: { type: [String] },
-});
+export const WorkingTimeSchema = new mongoose.Schema(
+  {
+    storeId: { type: mongoose.Schema.Types.ObjectId, ref: 'Store' },
+    monday: { type: [String] },
+    tuesday: { type: [String] },
+    wednesday: { type: [String] },
+    thursday: { type: [String] },
+    friday: { type: [String] },
+    sunday: { type: [String] },
+    saturday: { type: [String] },
+  },
+  { timestamps: true },
+);
 
 export interface WorkingTime {
   storeId: mongoose.Schema.Types.ObjectId;
