@@ -50,9 +50,6 @@ export class StoreService {
       ).save();
     }
 
-    console.log(store.firebaseID);
-    console.log('--', workingTime);
-
     workingTime.monday = request['monday'];
     workingTime.tuesday = request['tuesday'];
     workingTime.wednesday = request['wednesday'];
@@ -60,8 +57,6 @@ export class StoreService {
     workingTime.friday = request['friday'];
     workingTime.sunday = request['sunday'];
     workingTime.saturday = request['saturday'];
-
-    console.log('--', workingTime);
 
     workingTime = await workingTime.save();
 
@@ -82,6 +77,7 @@ export class StoreService {
   }
 
   async getStoresBySegment(segment: StoresListSegment, client: Client) {
+
     let stores: any = [];
 
     const select =
@@ -118,9 +114,6 @@ export class StoreService {
         .limit(limit);
     }
 
-    console.log(stores[0].reviews);
-    console.log();
-
     stores = stores.map((s) => ({
       ...s.toObject(),
       isFavorite: false,
@@ -132,8 +125,6 @@ export class StoreService {
       ).toFixed(1),
       reviewsCount: s.reviews.length,
     }));
-
-    //console.log(stores);
 
     return stores;
   }

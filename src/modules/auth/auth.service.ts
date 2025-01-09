@@ -93,7 +93,7 @@ export class AuthService {
     twitterID?: string;
     appleID?: string;
   }) {
-    const select = '_id username fullname picture isVerified subscription type';
+    const select = '_id username fullname picture isVerified type subscription';
 
     const store = await this.storeModel.findOne(filter).select(select).exec();
     if (store) {
