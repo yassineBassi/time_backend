@@ -59,4 +59,10 @@ export class StoreController {
       await this.storeService.getStoresBySegment(segment, client),
     );
   }
+
+  @Get('')
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.CLIENT))
+  async getStores(@Query() params: any) {
+    return Response.success(await this.storeService.getStores(params));
+  }
 }

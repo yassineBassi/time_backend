@@ -31,9 +31,6 @@ export class StoreService {
       section: sectionId,
     });
 
-    console.log(sectionId);
-    console.log(categories);
-
     return categories;
   }
 
@@ -77,7 +74,6 @@ export class StoreService {
   }
 
   async getStoresBySegment(segment: StoresListSegment, client: Client) {
-
     let stores: any = [];
 
     const select =
@@ -113,6 +109,51 @@ export class StoreService {
         .populate(populate)
         .limit(limit);
     }
+
+    stores = stores.map((s) => ({
+      ...s.toObject(),
+      isFavorite: false,
+      photos: [s.picture],
+      reviews: (
+        s.reviews
+          .map((v) => v.rate)
+          .reduce((acc: number, curr: number) => acc + curr) / s.reviews.length
+      ).toFixed(1),
+      reviewsCount: s.reviews.length,
+    }));
+
+    return stores;
+  }
+
+  async getStores(params: any) {
+    const select =
+      'picture storeName category workingTimes available reviews isVerified lat lng ';
+
+    const populate: PopulateOptions[] = [
+      {
+        path: 'category',
+        select: '_id name section',
+        populate: {
+          path: 'section',
+          select: '_id name',
+        },
+      },
+      {
+        path: 'reviews',
+      },
+    ];
+
+    const filter = {
+      category: params['category'],
+      country: params['country'],
+      area: params['area'],
+      city: params['city'],
+    };
+
+    let stores: any[] = await this.storeModel
+      .find(filter)
+      .select(select)
+      .populate(populate);
 
     stores = stores.map((s) => ({
       ...s.toObject(),

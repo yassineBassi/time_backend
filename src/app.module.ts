@@ -103,17 +103,15 @@ export class AppModule {
   ) {
     setTimeout(async () => {
       /*const stores = await this.storeModel.find();
-      stores.forEach(async (s) => {
-        const review = await (
-          await this.storeReviewModel.create({
-            rate: (Math.random() * (5 - 1) + 1).toFixed(2),
-            comment: 'test',
-            client: await this.clientModel.findOne(),
-            store: s.id,
-          })
-        ).save();
+      const categories = await this.storeCategoryModel.find();
 
-        s.reviews.push(review.id);
+      stores.forEach(async (s) => {
+
+        const ind = (Math.random() * (categories.length - 1) + 1).toFixed(0);
+        console.log("------------")
+        console.log(ind)
+        console.log(categories[ind])
+        s.category = categories[ind].id;
 
         await s.save();
       });*/
