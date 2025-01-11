@@ -65,4 +65,15 @@ export class StoreController {
   async getStores(@Query() params: any) {
     return Response.success(await this.storeService.getStores(params));
   }
+
+  @Get('map')
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.CLIENT))
+  async getMapStores(
+    @Query('latitude') latitude: string,
+    @Query('longitude') longitude: string,
+  ) {
+    return Response.success(
+      await this.storeService.getMapStores(latitude, longitude),
+    );
+  }
 }

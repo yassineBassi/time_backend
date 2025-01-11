@@ -125,6 +125,59 @@ export class StoreService {
     return stores;
   }
 
+  async getMapStores(latitude: string, longitude: string) {
+    const select =
+      'picture storeName category workingTimes available reviews geoLocation isVerified lat lng ';
+
+    const populate: PopulateOptions[] = [
+      {
+        path: 'category',
+        select: '_id name section',
+        populate: {
+          path: 'section',
+          select: '_id name',
+        },
+      },
+      {
+        path: 'reviews',
+      },
+    ];
+
+
+    const filter = {
+      geoLocation: {
+        $near: {
+          $maxDistance: 5000,
+          $geometry: {
+            type: 'Point',
+            coordinates: [latitude, longitude],
+          },
+        },
+      },
+    };
+
+    let stores: any[] = await this.storeModel
+      .find(filter)
+      .select(select)
+      .populate(populate);
+
+    console.log(stores);
+
+    stores = stores.map((s) => ({
+      ...s.toObject(),
+      isFavorite: false,
+      photos: [s.picture],
+      reviews: (
+        s.reviews
+          .map((v) => v.rate)
+          .reduce((acc: number, curr: number) => acc + curr) / s.reviews.length
+      ).toFixed(1),
+      reviewsCount: s.reviews.length,
+    }));
+
+    return stores;
+  }
+
   async getStores(params: any) {
     const select =
       'picture storeName category workingTimes available reviews isVerified lat lng ';

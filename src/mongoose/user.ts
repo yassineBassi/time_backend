@@ -26,11 +26,32 @@ const Schema = new mongoose.Schema(
     password: { type: String },
     salt: { type: String },
     address: { type: String, default: '' },
-    lat: { type: Number, default: 0.0 },
-    lng: { type: Number, default: 0.0 },
+    geoLocation: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        required: true,
+        default: 'Point',
+      },
+      coordinates: {
+        type: [Number],
+        required: true,
+      },
+    },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  },
 );
+
+Schema.index({ geoLocation: '2dsphere' });
+
+interface GeoJSONPoint {
+  type: 'Point';
+  coordinates: [number, number];
+}
 
 export interface User extends Document {
   id: string;
@@ -52,6 +73,7 @@ export interface User extends Document {
   password: string;
   salt: string;
   address: string;
+  geoLocation: GeoJSONPoint;
   lat: number;
   lng: number;
 }

@@ -103,16 +103,11 @@ export class AppModule {
   ) {
     setTimeout(async () => {
       /*const stores = await this.storeModel.find();
-      const categories = await this.storeCategoryModel.find();
 
       stores.forEach(async (s) => {
-
-        const ind = (Math.random() * (categories.length - 1) + 1).toFixed(0);
-        console.log("------------")
-        console.log(ind)
-        console.log(categories[ind])
-        s.category = categories[ind].id;
-
+        console.log(s);
+        console.log(s.lng)
+        s.geoLocation.coordinates = [s.geoLocation.coordinates[1], s.geoLocation.coordinates[0]];
         await s.save();
       });*/
     }, 1000);

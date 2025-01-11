@@ -277,6 +277,11 @@ export class AuthService {
     store.type = UserType.STORE;
     store.username = store.storeName;
 
+    store.geoLocation.coordinates = [
+      parseFloat(registerStoreDTO.lng),
+      parseFloat(registerStoreDTO.lat),
+    ];
+
     store = await store.save();
 
     console.log(store);

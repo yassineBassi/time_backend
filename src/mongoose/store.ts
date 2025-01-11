@@ -1,26 +1,33 @@
 import mongoose from 'mongoose';
 import { User, UserSchema } from './user';
 
-export const StoreSchema = new mongoose.Schema({
-  storeName: { type: String },
-  //photos: { type: String },
-  commerceNumber: { type: String },
-  commerceNumberExpirationDate: { type: Date },
-  accountNumber: { type: String },
-  category: { type: mongoose.Schema.Types.ObjectId, ref: 'StoreCategory' },
-  isVerified: { type: Boolean, default: false },
-  subscription: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'StoreSubscription',
+export const StoreSchema = new mongoose.Schema(
+  {
+    storeName: { type: String },
+    //photos: { type: String },
+    commerceNumber: { type: String },
+    commerceNumberExpirationDate: { type: Date },
+    accountNumber: { type: String },
+    category: { type: mongoose.Schema.Types.ObjectId, ref: 'StoreCategory' },
+    isVerified: { type: Boolean, default: false },
+    subscription: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'StoreSubscription',
+    },
+    workingTimes: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'WorkingTime',
+    },
+    //services: { type: String },
+    reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'StoreReview' }],
+    available: { type: Boolean, default: false },
   },
-  workingTimes: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'WorkingTime',
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   },
-  //services: { type: String },
-  reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'StoreReview' }],
-  available: { type: Boolean, default: false },
-});
+);
 
 StoreSchema.add(UserSchema.obj);
 
@@ -40,3 +47,11 @@ export interface Store extends User {
   //comments: String,
   available: string;
 }
+
+StoreSchema.virtual('lat').get(function (this: Store) {
+  return this.geoLocation.coordinates[0];
+});
+
+StoreSchema.virtual('lng').get(function (this: Store) {
+  return this.geoLocation.coordinates[1];
+});
