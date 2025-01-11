@@ -161,8 +161,6 @@ export class StoreService {
       .select(select)
       .populate(populate);
 
-    console.log(stores);
-
     stores = stores.map((s) => ({
       ...s.toObject(),
       isFavorite: false,
