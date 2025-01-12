@@ -2,9 +2,11 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { populate } from 'dotenv';
 import { Model, PopulateOptions } from 'mongoose';
+import { ReservationStatus } from 'src/common/models/enums/reservation-status';
 import { StoresListSegment } from 'src/common/models/enums/stores-list-segement';
 import { UserStatus } from 'src/common/models/enums/user-status';
 import { Client } from 'src/mongoose/client';
+import { Reservation } from 'src/mongoose/reservation';
 import { Store } from 'src/mongoose/store';
 import { StoreCategory } from 'src/mongoose/store-category';
 import { StoreSection } from 'src/mongoose/store-section';
@@ -21,6 +23,8 @@ export class StoreService {
     private readonly storeCategoryModel: Model<StoreCategory>,
     @InjectModel('WorkingTime')
     private readonly WorkingTimeModel: Model<WorkingTime>,
+    @InjectModel('Reservation')
+    private readonly reservationModel: Model<Reservation>,
   ) {}
 
   defaultSelect =
@@ -183,7 +187,6 @@ export class StoreService {
   }
 
   async getStoreAvailableTimes(date: string, storeId: string) {
-    storeId = '674fea3538258161503d56f8';
     const days = [
       'sunday',
       'monday',
@@ -193,6 +196,7 @@ export class StoreService {
       'friday',
       'saturday',
     ];
+
     const day = days[new Date(date).getDay()];
 
     const store = await this.storeModel
@@ -200,11 +204,43 @@ export class StoreService {
       .select('_id geoLocation lat lng workingTimes')
       .populate('workingTimes');
 
+    const reservedTimes = (
+      await this.reservationModel
+        .find({
+          store: store.id,
+          status: ReservationStatus.PAYED,
+          $expr: {
+            $eq: [
+              {
+                $dateToString: { format: '%Y-%m-%d', date: '$reservationDate' },
+              },
+              new Date(date).toISOString().split('T')[0],
+            ],
+          },
+        })
+        .select('reservationDate')
+    )
+      .map((r) => r.reservationDate)
+      .map((d) => {
+        const date = new Date(d);
+        const hours = date.getHours();
+        const minutes = date.getMinutes();
+
+        const formattedDate =
+          (hours % 12 || 12).toString().padStart(2, '0') +
+          ':' +
+          minutes.toString().padStart(2, '0') +
+          ' ' +
+          (hours >= 12 ? 'pm' : 'am');
+
+        return formattedDate;
+      });
+      
     const workingTimes = store.workingTimes[day];
 
     return {
       workingTimes,
-      reservedTimes: workingTimes.slice(0, 3)
+      reservedTimes,
     };
   }
 }

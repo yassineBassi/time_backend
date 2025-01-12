@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { createReservationDTO } from './dto/create-reservation.dto';
 import { Client } from 'src/mongoose/client';
 import { InjectModel } from '@nestjs/mongoose';
@@ -7,6 +7,7 @@ import { Store } from 'src/mongoose/store';
 import { ReservationItem } from 'src/mongoose/reservation-item';
 import { Reservation } from 'src/mongoose/reservation';
 import { Service } from 'src/mongoose/service';
+import { ReservationStatus } from 'src/common/models/enums/reservation-status';
 
 @Injectable()
 export class ReservationService {
@@ -23,6 +24,19 @@ export class ReservationService {
 
   async createReservation(request: createReservationDTO, client: Client) {
     const store = await this.storeModel.findById(request.storeId);
+
+    // check if there are reservations in the wanted time
+    const count = await this.reservationModel.countDocuments({
+      store: store.id,
+      status: ReservationStatus.PAYED,
+      reservationDate: request.reservationDate,
+    });
+
+    if (count) {
+      throw new BadRequestException(
+        'messages.reservation_date_booked',
+      );
+    }
 
     let reservation = await this.reservationModel.create({
       store: store.id,

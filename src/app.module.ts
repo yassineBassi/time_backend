@@ -119,6 +119,7 @@ export class AppModule {
     private workingTimeModel: Model<WorkingTime>,
   ) {
     setTimeout(async () => {
+
       /*const stores = await this.storeModel.find();
       stores.forEach(async (s) => {
         if (!s.workingTimes) {
