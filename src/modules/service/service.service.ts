@@ -111,7 +111,8 @@ export class ServiceService {
   }
 
   async fetchByCategoryId(categoryId: string) {
-    console.log(categoryId);
+    //const parsedDate = new Date(date.split(' ').join('T') + 'Z');
+
     const services = await this.serviceModel
       .find({
         category: categoryId,

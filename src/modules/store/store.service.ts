@@ -167,7 +167,6 @@ export class StoreService {
   }
 
   async getStoreById(id: string) {
-
     const store = await this.storeModel
       .findOne({
         ...this.defaultFilter,
@@ -181,5 +180,31 @@ export class StoreService {
     }
 
     return this.addFieldsToStores([store])[0];
+  }
+
+  async getStoreAvailableTimes(date: string, storeId: string) {
+    storeId = '674fea3538258161503d56f8';
+    const days = [
+      'sunday',
+      'monday',
+      'tuesday',
+      'wednesday',
+      'thursday',
+      'friday',
+      'saturday',
+    ];
+    const day = days[new Date(date).getDay()];
+
+    const store = await this.storeModel
+      .findById(storeId)
+      .select('_id geoLocation lat lng workingTimes')
+      .populate('workingTimes');
+
+    const workingTimes = store.workingTimes[day];
+
+    return {
+      workingTimes,
+      reservedTimes: workingTimes.slice(0, 3)
+    };
   }
 }

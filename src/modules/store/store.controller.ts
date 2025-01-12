@@ -77,10 +77,19 @@ export class StoreController {
     );
   }
 
+  @Get('available-times')
+  async getStoreAvailableTimes(
+    @Query('date') date: string,
+    @Query('storeId') storeId: string,
+  ) {
+    return Response.success(
+      await this.storeService.getStoreAvailableTimes(date, storeId),
+    );
+  }
+
   @Get(':id')
   @UseGuards(JwtAuthGuard, RolesGuard(UserType.CLIENT))
   async getStoreById(@Param('id') id: string) {
-    console.log(id);
     return Response.success(await this.storeService.getStoreById(id));
   }
 }

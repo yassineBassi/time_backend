@@ -32,7 +32,11 @@ import { Store, StoreSchema } from './mongoose/store';
 import { StoreCategory, StoreCategorySchema } from './mongoose/store-category';
 import { StoreReview, StoreReviewSchema } from './mongoose/store-review';
 import { Service, ServiceSchema } from './mongoose/service';
-import { ServiceCategory, ServiceCategorySchema } from './mongoose/service-category';
+import {
+  ServiceCategory,
+  ServiceCategorySchema,
+} from './mongoose/service-category';
+import { WorkingTime, WorkingTimeSchema } from './mongoose/working-time';
 
 @Module({
   imports: [
@@ -46,6 +50,7 @@ import { ServiceCategory, ServiceCategorySchema } from './mongoose/service-categ
       { name: 'Client', schema: ClientSchema },
       { name: 'Service', schema: ServiceSchema },
       { name: 'ServiceCategory', schema: ServiceCategorySchema },
+      { name: 'WorkingTime', schema: WorkingTimeSchema },
     ]),
     I18nModule.forRoot({
       fallbackLanguage: 'ar',
@@ -108,16 +113,20 @@ export class AppModule {
     private serviceModel: Model<Service>,
     @InjectModel('ServiceCategory')
     private serviceCategoryModel: Model<ServiceCategory>,
+    @InjectModel('WorkingTime')
+    private workingTimeModel: Model<WorkingTime>,
   ) {
     setTimeout(async () => {
-      /*const services = await this.serviceCategoryModel.find();
-      console.log(services);
-      services.forEach(async (s) => {
-        s.store = (s as any).storeId;
-        console.log(s);
-        await s.save();
-      });
-      */
+      /*const stores = await this.storeModel.find();
+      stores.forEach(async (s) => {
+        if (!s.workingTimes) {
+          s.workingTimes = (
+            await (await workingTimeModel.create({})).save()
+          ).id;
+          console.log('+--------------');
+          await s.save();
+        }
+      });*/
     }, 1000);
   }
 }

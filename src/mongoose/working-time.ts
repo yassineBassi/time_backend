@@ -3,13 +3,13 @@ import mongoose from 'mongoose';
 export const WorkingTimeSchema = new mongoose.Schema(
   {
     storeId: { type: mongoose.Schema.Types.ObjectId, ref: 'Store' },
-    monday: { type: [String] },
-    tuesday: { type: [String] },
-    wednesday: { type: [String] },
-    thursday: { type: [String] },
-    friday: { type: [String] },
-    sunday: { type: [String] },
-    saturday: { type: [String] },
+    monday: { type: [String], default: [] },
+    tuesday: { type: [String], default: [] },
+    wednesday: { type: [String], default: [] },
+    thursday: { type: [String], default: [] },
+    friday: { type: [String], default: [] },
+    sunday: { type: [String], default: [] },
+    saturday: { type: [String], default: [] },
   },
   { timestamps: true },
 );
