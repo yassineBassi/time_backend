@@ -7,6 +7,7 @@ import { StoreSubscriptionSchema } from 'src/mongoose/store-subscription';
 import { SubscriptionLevelSchema } from 'src/mongoose/subscription-level';
 import { StoreSchema } from 'src/mongoose/store';
 import { ClientSchema } from 'src/mongoose/client';
+import { ReservationSchema } from 'src/mongoose/reservation';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { ClientSchema } from 'src/mongoose/client';
       { name: 'Store', schema: StoreSchema },
       { name: 'SubscriptionLevel', schema: SubscriptionLevelSchema },
       { name: 'StoreSubscription', schema: StoreSubscriptionSchema },
+      { name: 'Reservation', schema: ReservationSchema },
     ]),
   ],
   controllers: [PaymentController],

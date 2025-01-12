@@ -37,6 +37,7 @@ import {
   ServiceCategorySchema,
 } from './mongoose/service-category';
 import { WorkingTime, WorkingTimeSchema } from './mongoose/working-time';
+import { ReservationModule } from './modules/reservation/reservation.module';
 
 @Module({
   imports: [
@@ -87,6 +88,7 @@ import { WorkingTime, WorkingTimeSchema } from './mongoose/working-time';
     WorkingTimesModule,
     ParamsModule,
     ReportsModule,
+    ReservationModule,
   ],
   controllers: [AppController],
   providers: [

@@ -93,7 +93,8 @@ export class AuthService {
     twitterID?: string;
     appleID?: string;
   }) {
-    const select = '_id username fullname picture isVerified type subscription';
+    const select =
+      '_id username fullName email phoneNumber picture isVerified type subscription';
 
     const store = await this.storeModel.findOne(filter).select(select).exec();
     if (store) {
@@ -248,8 +249,6 @@ export class AuthService {
         registerStoreDTO.firebaseID as string,
       );
 
-      console.log('user : ', user);
-      console.log('user : ', registerStoreDTO.twitterID);
       if (
         !user ||
         ![

@@ -10,4 +10,19 @@ export class ParamsController {
   async getAppLinks() {
     return Response.success(await this.paramsService.getAppLinks());
   }
+
+  @Get('tva')
+  async fetchTva() {
+    return Response.success(await this.paramsService.fetchTva());
+  }
+
+  @Get('working-days')
+  async getDays() {
+    return Response.success(await this.paramsService.getWorkingDays());
+  }
+
+  @Get('working-times')
+  async getTimes() {
+    return Response.success(await this.paramsService.getWorkingTimes());
+  }
 }

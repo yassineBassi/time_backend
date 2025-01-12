@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
+import { ReservationStatus } from 'src/common/models/enums/reservation-status';
 import { Client } from 'src/mongoose/client';
+import { Reservation } from 'src/mongoose/reservation';
 import { Store } from 'src/mongoose/store';
 import { StoreSubscription } from 'src/mongoose/store-subscription';
 import { SubscriptionLevel } from 'src/mongoose/subscription-level';
@@ -20,6 +22,8 @@ export class PaymentService {
     private readonly subscriptionLevelModel: Model<SubscriptionLevel>,
     @InjectModel('StoreSubscription')
     private readonly storeSubscriptionModel: Model<StoreSubscription>,
+    @InjectModel('Reservation')
+    private readonly reservationModel: Model<Reservation>,
   ) {}
 
   async callback(request: any) {
@@ -64,29 +68,49 @@ export class PaymentService {
     console.log(request.metadata);
 
     if (tapPayment.statut == 'CAPTURED') {
-      let store = await this.storeModel.findById(metadata.userId);
-      const subscriptionLevel = await this.subscriptionLevelModel.findById(
-        metadata.id,
-      );
-
-      let subscription = new this.storeSubscriptionModel({
-        storeId: store.id,
-        subscriptionId: subscriptionLevel.id,
-        paymentId: tapPayment.id,
-      });
-
-      subscription = await subscription.save();
-
-      console.log('subscription: ', subscription);
-
-      store.subscription = subscription.id;
-      store = await store.save();
-
-      console.log('captured');
-
-      return true;
+      if (metadata.type == 'reservation') {
+        return this.handleReservationCallback(metadata, tapPayment.id);
+      } else {
+        return this.handleSubscrptionCallback(metadata, tapPayment.id);
+      }
     }
 
     return false;
+  }
+
+  async handleReservationCallback(metadata: any, tapPaymentId: any) {
+    const reservation = await this.reservationModel.findById(metadata.id);
+    reservation.status = ReservationStatus.PAYED;
+    reservation.payment = tapPaymentId;
+
+    await reservation.save();
+
+    console.log('reservation captured');
+
+    return true;
+  }
+
+  async handleSubscrptionCallback(metadata: any, tapPaymentId: any) {
+    let store = await this.storeModel.findById(metadata.userId);
+    const subscriptionLevel = await this.subscriptionLevelModel.findById(
+      metadata.id,
+    );
+
+    let subscription = new this.storeSubscriptionModel({
+      storeId: store.id,
+      subscriptionId: subscriptionLevel.id,
+      paymentId: tapPaymentId,
+    });
+
+    subscription = await subscription.save();
+
+    console.log('subscription: ', subscription);
+
+    store.subscription = subscription.id;
+    store = await store.save();
+
+    console.log('subscription captured');
+
+    return true;
   }
 }
