@@ -161,7 +161,6 @@ export class AuthService {
   }
 
   async loginWithTwitter(request: LoginWithTwitterDTO) {
-    console.log(request);
     const account: User = await this.findUserByFirebase({
       twitterID: request.twitterID,
       firebaseID: request.firebaseID,
@@ -171,8 +170,6 @@ export class AuthService {
   }
 
   async loginWithApple(request: LoginWithAppleDTO) {
-    console.log('login with apple');
-    console.log(request);
     const account: User = await this.findUserByFirebase({
       appleID: request.appleID,
       firebaseID: request.firebaseID,

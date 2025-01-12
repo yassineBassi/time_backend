@@ -76,4 +76,11 @@ export class StoreController {
       await this.storeService.getMapStores(latitude, longitude),
     );
   }
+
+  @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.CLIENT))
+  async getStoreById(@Param('id') id: string) {
+    console.log(id);
+    return Response.success(await this.storeService.getStoreById(id));
+  }
 }

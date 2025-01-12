@@ -78,4 +78,12 @@ export interface User extends Document {
   lng: number;
 }
 
+Schema.virtual('lat').get(function (this: User) {
+  return this.geoLocation.coordinates[1];
+});
+
+Schema.virtual('lng').get(function (this: User) {
+  return this.geoLocation.coordinates[0];
+});
+
 export const UserSchema = Schema;

@@ -4,7 +4,7 @@ import * as mongooseDelete from 'mongoose-delete';
 export const ServiceCategorySchema = new mongoose.Schema(
   {
     name: { type: String },
-    storeId: { type: mongoose.Schema.Types.ObjectId, ref: 'Store' },
+    store: { type: mongoose.Schema.Types.ObjectId, ref: 'Store' },
     services: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Service' }],
     deletedAt: { type: Date, default: null },
   },
@@ -21,7 +21,7 @@ export interface ServiceCategory
   extends Document,
     mongooseDelete.SoftDeleteDocument {
   name: string;
-  storeId: mongoose.Schema.Types.ObjectId;
+  store: mongoose.Schema.Types.ObjectId;
   services: mongoose.Schema.Types.ObjectId[];
   deletedAt: Date;
 }

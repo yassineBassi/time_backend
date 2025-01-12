@@ -9,6 +9,7 @@ import {
   UseInterceptors,
   UploadedFiles,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { ServiceService } from './service.service';
 import { CreateServiceDto } from './dto/create-service.dto';
@@ -93,6 +94,15 @@ export class ServiceController {
   @UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE), SubscribedStoreGuard)
   async remove(@Param('id') id: string) {
     return Response.success(await this.serviceService.remove(id));
+  }
+
+  @Get('byCategoryId')
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.CLIENT))
+  async fetchByCategoryId(@Query('categoryId') categoryId: string) {
+    console.log(categoryId);
+    return Response.success(
+      await this.serviceService.fetchByCategoryId(categoryId),
+    );
   }
 
   @Get('facilities')

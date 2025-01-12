@@ -110,6 +110,17 @@ export class ServiceService {
     return result;
   }
 
+  async fetchByCategoryId(categoryId: string) {
+    console.log(categoryId);
+    const services = await this.serviceModel
+      .find({
+        category: categoryId,
+      })
+      .select('_id title picture price duration discount discountType enabled');
+
+    return services;
+  }
+
   async getFacilities() {
     const facilities = await this.facilityModel.find().populate('items');
     return facilities;

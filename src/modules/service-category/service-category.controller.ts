@@ -3,14 +3,12 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
-  Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { ServiceCategoryService } from './service-category.service';
 import { CreateServiceCategoryDto } from './dto/create-service-category.dto';
-import { UpdateServiceCategoryDto } from './dto/update-service-category.dto';
 import { Response } from 'src/common/response';
 import { CurrentUser } from 'src/common/decorators/current-user';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
@@ -40,6 +38,14 @@ export class ServiceCategoryController {
   @UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE), SubscribedStoreGuard)
   async findAll(@CurrentUser() store: Store) {
     return Response.success(await this.serviceCategoryService.findAll(store));
+  }
+
+  @Get('byStoreId')
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.CLIENT))
+  async fetchByStoreId(@Query('storeId') storeId: string) {
+    return Response.success(
+      await this.serviceCategoryService.fetchByStoreId(storeId),
+    );
   }
 
   @Post('delete/:id')

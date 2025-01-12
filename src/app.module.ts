@@ -31,6 +31,8 @@ import { Model } from 'mongoose';
 import { Store, StoreSchema } from './mongoose/store';
 import { StoreCategory, StoreCategorySchema } from './mongoose/store-category';
 import { StoreReview, StoreReviewSchema } from './mongoose/store-review';
+import { Service, ServiceSchema } from './mongoose/service';
+import { ServiceCategory, ServiceCategorySchema } from './mongoose/service-category';
 
 @Module({
   imports: [
@@ -42,6 +44,8 @@ import { StoreReview, StoreReviewSchema } from './mongoose/store-review';
       { name: 'FacilityItem', schema: FacilityItemSchema },
       { name: 'StoreReview', schema: StoreReviewSchema },
       { name: 'Client', schema: ClientSchema },
+      { name: 'Service', schema: ServiceSchema },
+      { name: 'ServiceCategory', schema: ServiceCategorySchema },
     ]),
     I18nModule.forRoot({
       fallbackLanguage: 'ar',
@@ -100,16 +104,20 @@ export class AppModule {
     private storeReviewModel: Model<StoreReview>,
     @InjectModel('Client')
     private clientModel: Model<Client>,
+    @InjectModel('Service')
+    private serviceModel: Model<Service>,
+    @InjectModel('ServiceCategory')
+    private serviceCategoryModel: Model<ServiceCategory>,
   ) {
     setTimeout(async () => {
-      /*const stores = await this.storeModel.find();
-
-      stores.forEach(async (s) => {
+      /*const services = await this.serviceCategoryModel.find();
+      console.log(services);
+      services.forEach(async (s) => {
+        s.store = (s as any).storeId;
         console.log(s);
-        console.log(s.lng)
-        s.geoLocation.coordinates = [s.geoLocation.coordinates[1], s.geoLocation.coordinates[0]];
         await s.save();
-      });*/
+      });
+      */
     }, 1000);
   }
 }

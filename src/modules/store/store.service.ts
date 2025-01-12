@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { populate } from 'dotenv';
 import { Model, PopulateOptions } from 'mongoose';
 import { StoresListSegment } from 'src/common/models/enums/stores-list-segement';
 import { UserStatus } from 'src/common/models/enums/user-status';
@@ -21,6 +22,23 @@ export class StoreService {
     @InjectModel('WorkingTime')
     private readonly WorkingTimeModel: Model<WorkingTime>,
   ) {}
+
+  defaultSelect =
+    'picture storeName category workingTimes available reviews geoLocation isVerified lat lng ';
+  defaultPopulate = [
+    {
+      path: 'category',
+      select: '_id name section',
+      populate: {
+        path: 'section',
+        select: '_id name',
+      },
+    },
+    {
+      path: 'reviews',
+    },
+  ];
+  defaultFilter = {};
 
   async getSections() {
     return this.storeSectionModel.find();
@@ -73,44 +91,8 @@ export class StoreService {
     return workingTime;
   }
 
-  async getStoresBySegment(segment: StoresListSegment, client: Client) {
-    let stores: any = [];
-
-    const select =
-      'picture storeName category workingTimes available reviews isVerified lat lng ';
-    const filter = {
-      //     status: UserStatus.ENABLED
-    };
-    const limit = 3;
-    const populate: PopulateOptions[] = [
-      {
-        path: 'category',
-        select: '_id name section',
-        populate: {
-          path: 'section',
-          select: '_id name',
-        },
-      },
-      {
-        path: 'reviews',
-      },
-    ];
-
-    if (segment == StoresListSegment.NEAR_BY) {
-      stores = await this.storeModel
-        .find(filter)
-        .select(select)
-        .populate(populate)
-        .limit(limit);
-    } else if (segment == StoresListSegment.SUGGESTED) {
-      stores = await this.storeModel
-        .find(filter)
-        .select(select)
-        .populate(populate)
-        .limit(limit);
-    }
-
-    stores = stores.map((s) => ({
+  addFieldsToStores(stores: Store[]) {
+    return stores.map((s: any) => ({
       ...s.toObject(),
       isFavorite: false,
       photos: [s.picture],
@@ -121,30 +103,33 @@ export class StoreService {
       ).toFixed(1),
       reviewsCount: s.reviews.length,
     }));
+  }
 
-    return stores;
+  async getStoresBySegment(segment: StoresListSegment, client: Client) {
+    let stores: any = [];
+
+    const limit = 3;
+
+    if (segment == StoresListSegment.NEAR_BY) {
+      stores = await this.storeModel
+        .find(this.defaultFilter)
+        .select(this.defaultSelect)
+        .populate(this.defaultPopulate)
+        .limit(limit);
+    } else if (segment == StoresListSegment.SUGGESTED) {
+      stores = await this.storeModel
+        .find(this.defaultFilter)
+        .select(this.defaultSelect)
+        .populate(this.defaultPopulate)
+        .limit(limit);
+    }
+
+    return this.addFieldsToStores(stores);
   }
 
   async getMapStores(latitude: string, longitude: string) {
-    const select =
-      'picture storeName category workingTimes available reviews geoLocation isVerified lat lng ';
-
-    const populate: PopulateOptions[] = [
-      {
-        path: 'category',
-        select: '_id name section',
-        populate: {
-          path: 'section',
-          select: '_id name',
-        },
-      },
-      {
-        path: 'reviews',
-      },
-    ];
-
-
     const filter = {
+      ...this.defaultFilter,
       geoLocation: {
         $near: {
           $maxDistance: 5000,
@@ -156,68 +141,45 @@ export class StoreService {
       },
     };
 
-    let stores: any[] = await this.storeModel
+    const stores = await this.storeModel
       .find(filter)
-      .select(select)
-      .populate(populate);
+      .select(this.defaultSelect)
+      .populate(this.defaultPopulate);
 
-    stores = stores.map((s) => ({
-      ...s.toObject(),
-      isFavorite: false,
-      photos: [s.picture],
-      reviews: (
-        s.reviews
-          .map((v) => v.rate)
-          .reduce((acc: number, curr: number) => acc + curr) / s.reviews.length
-      ).toFixed(1),
-      reviewsCount: s.reviews.length,
-    }));
-
-    return stores;
+    return this.addFieldsToStores(stores);
   }
 
   async getStores(params: any) {
-    const select =
-      'picture storeName category workingTimes available reviews isVerified lat lng ';
-
-    const populate: PopulateOptions[] = [
-      {
-        path: 'category',
-        select: '_id name section',
-        populate: {
-          path: 'section',
-          select: '_id name',
-        },
-      },
-      {
-        path: 'reviews',
-      },
-    ];
-
     const filter = {
+      ...this.defaultFilter,
       category: params['category'],
       country: params['country'],
       area: params['area'],
       city: params['city'],
     };
 
-    let stores: any[] = await this.storeModel
+    const stores = await this.storeModel
       .find(filter)
-      .select(select)
-      .populate(populate);
+      .select(this.defaultSelect)
+      .populate(this.defaultPopulate);
 
-    stores = stores.map((s) => ({
-      ...s.toObject(),
-      isFavorite: false,
-      photos: [s.picture],
-      reviews: (
-        s.reviews
-          .map((v) => v.rate)
-          .reduce((acc: number, curr: number) => acc + curr) / s.reviews.length
-      ).toFixed(1),
-      reviewsCount: s.reviews.length,
-    }));
+    return this.addFieldsToStores(stores);
+  }
 
-    return stores;
+  async getStoreById(id: string) {
+
+    const store = await this.storeModel
+      .findOne({
+        ...this.defaultFilter,
+        _id: id,
+      })
+      .select(this.defaultSelect)
+      .populate(this.defaultPopulate);
+
+    if (!store) {
+      throw new NotFoundException();
+    }
+
+    return this.addFieldsToStores([store])[0];
   }
 }

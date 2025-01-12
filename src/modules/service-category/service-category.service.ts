@@ -17,7 +17,7 @@ export class ServiceCategoryService {
   ) {
     const count = await this.serviceCategoryModel.countDocuments({
       name: createServiceCategoryDto.name,
-      storeId: store.id,
+      store: store.id,
     });
 
     if (count > 0) {
@@ -26,7 +26,7 @@ export class ServiceCategoryService {
 
     let category = new this.serviceCategoryModel({
       name: createServiceCategoryDto.name,
-      storeId: store.id,
+      store: store.id,
     });
     category = await category.save();
     return category;
@@ -35,7 +35,7 @@ export class ServiceCategoryService {
   async findAll(store: Store) {
     const categories = await this.serviceCategoryModel
       .find({
-        storeId: store.id,
+        store: store.id,
         deletedAt: null,
       })
       .populate('services')
@@ -44,10 +44,17 @@ export class ServiceCategoryService {
     return categories;
   }
 
+  async fetchByStoreId(storeId: string) {
+    const categories = await this.serviceCategoryModel
+      .find({
+        store: storeId,
+      })
+      .select('_id name');
+    return categories;
+  }
+
   async remove(id: string) {
-    console.log('delete category', id);
     const result = await this.serviceCategoryModel.delete({ _id: id });
-    console.log('res', result);
     return result;
   }
 }
