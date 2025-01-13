@@ -87,6 +87,12 @@ export class StoreController {
     );
   }
 
+  @Get('comments')
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.CLIENT))
+  async getStoreComments(@Query('storeId') storeId: string) {
+    return Response.success(await this.storeService.getStoreComments(storeId));
+  }
+
   @Get(':id')
   @UseGuards(JwtAuthGuard, RolesGuard(UserType.CLIENT))
   async getStoreById(@Param('id') id: string) {

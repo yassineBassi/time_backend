@@ -38,6 +38,7 @@ import {
 } from './mongoose/service-category';
 import { WorkingTime, WorkingTimeSchema } from './mongoose/working-time';
 import { ReservationModule } from './modules/reservation/reservation.module';
+import { Reservation, ReservationSchema } from './mongoose/reservation';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { ReservationModule } from './modules/reservation/reservation.module';
       { name: 'Service', schema: ServiceSchema },
       { name: 'ServiceCategory', schema: ServiceCategorySchema },
       { name: 'WorkingTime', schema: WorkingTimeSchema },
+      { name: 'Reservation', schema: ReservationSchema },
     ]),
     I18nModule.forRoot({
       fallbackLanguage: 'ar',
@@ -117,6 +119,8 @@ export class AppModule {
     private serviceCategoryModel: Model<ServiceCategory>,
     @InjectModel('WorkingTime')
     private workingTimeModel: Model<WorkingTime>,
+    @InjectModel('Reservation')
+    private reservationModel: Model<Reservation>,
   ) {
     setTimeout(async () => {
 

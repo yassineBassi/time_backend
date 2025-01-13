@@ -8,6 +8,7 @@ import { SubscriptionModule } from '../subscription/subscription.module';
 import { WorkingTimeSchema } from 'src/mongoose/working-time';
 import { StoreSchema } from 'src/mongoose/store';
 import { ReservationSchema } from 'src/mongoose/reservation';
+import { StoreReviewSchema } from 'src/mongoose/store-review';
 
 @Module({
   imports: [
@@ -17,8 +18,9 @@ import { ReservationSchema } from 'src/mongoose/reservation';
       { name: 'StoreCategory', schema: StoreCategorySchema },
       { name: 'WorkingTime', schema: WorkingTimeSchema },
       { name: 'Reservation', schema: ReservationSchema },
+      { name: 'StoreReview', schema: StoreReviewSchema },
     ]),
-    SubscriptionModule
+    SubscriptionModule,
   ],
   controllers: [StoreController],
   providers: [StoreService],

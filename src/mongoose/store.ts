@@ -43,7 +43,7 @@ export interface Store extends User {
   isVerified: string;
   subscription: mongoose.Schema.Types.ObjectId;
   workingTimes: mongoose.Schema.Types.ObjectId;
-  services: mongoose.Schema.Types.ObjectId[],
+  services: mongoose.Schema.Types.ObjectId[];
   available: string;
 }
 

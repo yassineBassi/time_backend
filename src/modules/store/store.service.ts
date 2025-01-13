@@ -9,6 +9,7 @@ import { Client } from 'src/mongoose/client';
 import { Reservation } from 'src/mongoose/reservation';
 import { Store } from 'src/mongoose/store';
 import { StoreCategory } from 'src/mongoose/store-category';
+import { StoreReview } from 'src/mongoose/store-review';
 import { StoreSection } from 'src/mongoose/store-section';
 import { WorkingTime } from 'src/mongoose/working-time';
 
@@ -25,6 +26,8 @@ export class StoreService {
     private readonly WorkingTimeModel: Model<WorkingTime>,
     @InjectModel('Reservation')
     private readonly reservationModel: Model<Reservation>,
+    @InjectModel('StoreReview')
+    private readonly storeReviewModel: Model<StoreReview>,
   ) {}
 
   defaultSelect =
@@ -235,12 +238,28 @@ export class StoreService {
 
         return formattedDate;
       });
-      
+
     const workingTimes = store.workingTimes[day];
 
     return {
       workingTimes,
       reservedTimes,
     };
+  }
+
+  async getStoreComments(storeId: string) {
+    const reviews = await this.storeReviewModel
+      .find({
+        store: storeId,
+      })
+      .populate({
+        path: 'client',
+        select: 'fullName picture',
+      })
+      .sort({
+        createdAt: -1,
+      });
+
+    return reviews;
   }
 }
