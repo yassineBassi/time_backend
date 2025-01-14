@@ -25,6 +25,7 @@ import { SubscriptionService } from '../subscription/subscription.service';
 import { LoginWithTwitterDTO } from './dtos/login-with-twitter.dto';
 import { LoginWithAppleDTO } from './dtos/login-with-apple.dto';
 import { EditStoreProfileDTO } from './dtos/edit-store-profile.dto';
+import { EditClientProfileDTO } from './dtos/edi-client-profile.dto';
 
 const SALT_ROUNDS = 10;
 
@@ -333,5 +334,23 @@ export class AuthService {
     console.log(store);
 
     return store;
+  }
+
+
+  async editClientProfile(request: EditClientProfileDTO, currentUser: Client) {
+    console.log('edit client profile');
+    console.log(request);
+
+    if (currentUser.id != request.id) {
+      throw new ForbiddenException();
+    }
+
+    const client = await this.clientModel
+      .findByIdAndUpdate(currentUser.id, request)
+      .exec();
+
+    console.log(client);
+
+    return client;
   }
 }

@@ -27,6 +27,8 @@ import { SubscribedStoreGuard } from 'src/common/guards/subscribed-store.guard';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { EditStoreProfileDTO } from './dtos/edit-store-profile.dto';
 import { Store } from 'src/mongoose/store';
+import { EditClientProfileDTO } from './dtos/edi-client-profile.dto';
+import { Client } from 'src/mongoose/client';
 
 @Controller('auth')
 export class AuthController {
@@ -125,6 +127,17 @@ export class AuthController {
         files && files.length ? files[0]['path'] : null,
         currentUser,
       ),
+    );
+  }
+
+  @Post('profile/client')
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.CLIENT))
+  async editClientProfile(
+    @CurrentUser() currentUser: Client,
+    @Body() request: EditClientProfileDTO,
+  ) {
+    return await Response.success(
+      await this.authService.editClientProfile(request, currentUser),
     );
   }
 }
