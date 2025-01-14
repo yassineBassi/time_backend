@@ -39,6 +39,8 @@ import {
 import { WorkingTime, WorkingTimeSchema } from './mongoose/working-time';
 import { ReservationModule } from './modules/reservation/reservation.module';
 import { Reservation, ReservationSchema } from './mongoose/reservation';
+import { WalletModule } from './modules/wallet/wallet.module';
+import { CouponModule } from './modules/coupon/coupon.module';
 
 @Module({
   imports: [
@@ -91,6 +93,8 @@ import { Reservation, ReservationSchema } from './mongoose/reservation';
     ParamsModule,
     ReportsModule,
     ReservationModule,
+    WalletModule,
+    CouponModule,
   ],
   controllers: [AppController],
   providers: [
