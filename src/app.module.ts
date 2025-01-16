@@ -21,8 +21,6 @@ import { ConfigModule } from '@nestjs/config';
 import { ServiceModule } from './modules/service/service.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { ServiceCategoryModule } from './modules/service-category/service-category.module';
-import { WorkingTimesModule } from './modules/working-times/working-times.module';
-import { FacilitySchema } from './mongoose/facility';
 import { FacilityItemSchema } from './mongoose/facility-item';
 import { ParamsModule } from './modules/params/params.module';
 import { ReportsModule } from './modules/reports/reports.module';
@@ -41,6 +39,8 @@ import { ReservationModule } from './modules/reservation/reservation.module';
 import { Reservation, ReservationSchema } from './mongoose/reservation';
 import { WalletModule } from './modules/wallet/wallet.module';
 import { CouponModule } from './modules/coupon/coupon.module';
+import { GiftCard, GiftCardSchema } from './mongoose/gift-card';
+import { GiftModule } from './modules/gift/gift.module';
 
 @Module({
   imports: [
@@ -56,6 +56,7 @@ import { CouponModule } from './modules/coupon/coupon.module';
       { name: 'ServiceCategory', schema: ServiceCategorySchema },
       { name: 'WorkingTime', schema: WorkingTimeSchema },
       { name: 'Reservation', schema: ReservationSchema },
+      { name: 'GiftCard', schema: GiftCardSchema },
     ]),
     I18nModule.forRoot({
       fallbackLanguage: 'ar',
@@ -89,12 +90,12 @@ import { CouponModule } from './modules/coupon/coupon.module';
     ServiceModule,
     PaymentModule,
     ServiceCategoryModule,
-    WorkingTimesModule,
     ParamsModule,
     ReportsModule,
     ReservationModule,
     WalletModule,
     CouponModule,
+    GiftModule,
   ],
   controllers: [AppController],
   providers: [
@@ -125,9 +126,10 @@ export class AppModule {
     private workingTimeModel: Model<WorkingTime>,
     @InjectModel('Reservation')
     private reservationModel: Model<Reservation>,
+    @InjectModel('GiftCard')
+    private giftCardModel: Model<GiftCard>,
   ) {
     setTimeout(async () => {
-
       /*const stores = await this.storeModel.find();
       stores.forEach(async (s) => {
         if (!s.workingTimes) {

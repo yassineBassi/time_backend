@@ -8,9 +8,13 @@ import { SubscriptionLevelSchema } from 'src/mongoose/subscription-level';
 import { StoreSchema } from 'src/mongoose/store';
 import { ClientSchema } from 'src/mongoose/client';
 import { ReservationSchema } from 'src/mongoose/reservation';
+import { GiftModule } from '../gift/gift.module';
+import { GiftService } from '../gift/gift.service';
+import { GiftSchema } from 'src/mongoose/gift';
 
 @Module({
   imports: [
+    GiftModule,
     MongooseModule.forFeature([
       { name: 'TapPayment', schema: TapPaymentSchema },
       { name: 'Client', schema: ClientSchema },
@@ -18,6 +22,7 @@ import { ReservationSchema } from 'src/mongoose/reservation';
       { name: 'SubscriptionLevel', schema: SubscriptionLevelSchema },
       { name: 'StoreSubscription', schema: StoreSubscriptionSchema },
       { name: 'Reservation', schema: ReservationSchema },
+      { name: 'Gift', schema: GiftSchema },
     ]),
   ],
   controllers: [PaymentController],

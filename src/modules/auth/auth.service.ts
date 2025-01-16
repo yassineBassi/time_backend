@@ -317,10 +317,6 @@ export class AuthService {
   }
 
   async editStoreProfile(request: any, picture: string, currentUser: Store) {
-    console.log('edit store profile');
-    console.log(request);
-    console.log(picture);
-
     if (currentUser.id != request.id) {
       throw new ForbiddenException();
     }
@@ -331,16 +327,10 @@ export class AuthService {
       .findByIdAndUpdate(currentUser.id, request)
       .exec();
 
-    console.log(store);
-
-    return store;
+      return store;
   }
 
-
   async editClientProfile(request: EditClientProfileDTO, currentUser: Client) {
-    console.log('edit client profile');
-    console.log(request);
-
     if (currentUser.id != request.id) {
       throw new ForbiddenException();
     }
@@ -348,8 +338,6 @@ export class AuthService {
     const client = await this.clientModel
       .findByIdAndUpdate(currentUser.id, request)
       .exec();
-
-    console.log(client);
 
     return client;
   }

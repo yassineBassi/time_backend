@@ -13,6 +13,7 @@ export const CouponSchema = new mongoose.Schema(
     consumed: { type: Boolean, default: false },
     userType: { type: String, enum: Object.values(UserType) },
     user: { type: mongoose.Schema.Types.ObjectId, refPath: 'userType' },
+    expiredAt: { type: Date },
   },
   { timestamps: true },
 );
@@ -31,6 +32,7 @@ export interface Coupon extends mongooseDelete.SoftDeleteDocument {
   consumed: boolean;
   userType: UserType;
   user: mongoose.Schema.Types.ObjectId;
+  expiredAt: Date;
 }
 
 export type CouponModel = mongooseDelete.SoftDeleteModel<Coupon>;

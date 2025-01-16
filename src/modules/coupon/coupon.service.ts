@@ -42,6 +42,7 @@ export class CouponService {
     discount: number,
     discountType: DiscountType,
     type: CouponType,
+    expiredAt?: Date,
   ) {
     const coupon = await (
       await this.couponModel.create({
@@ -52,6 +53,7 @@ export class CouponService {
         consumed: false,
         userType: user.type,
         user: user.id,
+        expiredAt,
       })
     ).save();
 

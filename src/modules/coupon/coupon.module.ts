@@ -10,5 +10,6 @@ import { MongooseModule } from '@nestjs/mongoose';
   ],
   controllers: [CouponController],
   providers: [CouponService],
+  exports: [CouponService]
 })
 export class CouponModule {}

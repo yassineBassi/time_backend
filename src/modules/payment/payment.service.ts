@@ -8,6 +8,7 @@ import { Store } from 'src/mongoose/store';
 import { StoreSubscription } from 'src/mongoose/store-subscription';
 import { SubscriptionLevel } from 'src/mongoose/subscription-level';
 import { TapPayment } from 'src/mongoose/tap-payment';
+import { GiftService } from '../gift/gift.service';
 
 @Injectable()
 export class PaymentService {
@@ -24,6 +25,7 @@ export class PaymentService {
     private readonly storeSubscriptionModel: Model<StoreSubscription>,
     @InjectModel('Reservation')
     private readonly reservationModel: Model<Reservation>,
+    private readonly giftService: GiftService,
   ) {}
 
   async callback(request: any) {
@@ -63,11 +65,13 @@ export class PaymentService {
 
     tapPayment = await tapPayment.save();
 
-    console.log(tapPayment);
-
-    console.log(request.metadata);
-
-    if (tapPayment.statut == 'CAPTURED') {
+    if (metadata.type == 'gift') {
+      await this.giftService.handleGiftCallback(
+        metadata,
+        tapPayment.id,
+        tapPayment.statut,
+      );
+    } else if (tapPayment.statut == 'CAPTURED') {
       if (metadata.type == 'reservation') {
         return this.handleReservationCallback(metadata, tapPayment.id);
       } else {
