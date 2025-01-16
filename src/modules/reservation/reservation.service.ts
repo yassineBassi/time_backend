@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { createReservationDTO } from './dto/create-reservation.dto';
 import { Client } from 'src/mongoose/client';
 import { InjectModel } from '@nestjs/mongoose';
@@ -93,8 +98,6 @@ export class ReservationService {
   }
 
   async fetchReservation(user: User, tab: string) {
-    console.log('fetch reservations', tab);
-
     const filter = {};
 
     if (tab.split('ReservationTab.')[1] == 'completed') {
@@ -144,5 +147,27 @@ export class ReservationService {
       });
 
     return reservations;
+  }
+
+  async cancelReservation(user: Client, reservationId: string) {
+    const reservation = await this.reservationModel.findById(reservationId);
+
+    if (!reservation) {
+      throw new NotFoundException();
+    }
+    if (reservation.client.toString() != user.id) {
+      throw new ForbiddenException();
+    }
+
+    if (
+      (reservation as any).createdAt.getTime() + 1000 * 3600 * 24 <
+      new Date().getTime() 
+    ) {
+      throw new BadRequestException('messages.cancel_reservation_date_passed');
+    }
+
+    reservation.status = ReservationStatus.CANCELED;
+
+    return await reservation.save();
   }
 }

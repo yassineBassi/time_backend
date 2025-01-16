@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ReservationService } from './reservation.service';
 import { Response } from 'src/common/response';
 import { createReservationDTO } from './dto/create-reservation.dto';
@@ -29,6 +37,17 @@ export class ReservationController {
   async fetchReservation(@CurrentUser() user: User, @Query('tab') tab: string) {
     return Response.success(
       await this.reservationService.fetchReservation(user, tab),
+    );
+  }
+
+  @Get('cancel/:id')
+  @UseGuards(JwtAuthGuard)
+  async cancelReservation(
+    @CurrentUser() user: Client,
+    @Param('id') reservationId: string,
+  ) {
+    return Response.success(
+      await this.reservationService.cancelReservation(user, reservationId),
     );
   }
 }

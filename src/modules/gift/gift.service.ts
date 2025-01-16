@@ -105,6 +105,7 @@ export class GiftService {
 
 
     if (gift.status == GiftStatus.PAYED) {
+        console.log('captured');
       const coupon = await this.couponService.createCoupon(
         user,
         giftCard.price,
@@ -112,6 +113,7 @@ export class GiftService {
         CouponType.GIFT,
         new Date(new Date().getTime() + giftCard.validityMills),
       );
+      console.log(coupon);
       gift.coupon = coupon.id;
       await gift.save();
     }
