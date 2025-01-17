@@ -16,6 +16,7 @@ import { ReservationStatus } from 'src/common/models/enums/reservation-status';
 import { User } from 'src/mongoose/user';
 import { UserType } from 'src/common/models/enums/user-type';
 import { populate } from 'dotenv';
+import { StoreReview } from 'src/mongoose/store-review';
 
 @Injectable()
 export class ReservationService {
@@ -28,6 +29,8 @@ export class ReservationService {
     private readonly reservationModel: Model<Reservation>,
     @InjectModel('Service')
     private readonly serviceModel: Model<Service>,
+    @InjectModel('StoreReview')
+    private readonly storeReviewModel: Model<StoreReview>,
   ) {}
 
   private async generateRandomReservation(length: number) {
@@ -118,7 +121,7 @@ export class ReservationService {
       filter['client'] = user.id;
     }
 
-    const reservations = await this.reservationModel
+    let reservations: any = await this.reservationModel
       .find(filter)
       .populate([
         {
@@ -146,6 +149,20 @@ export class ReservationService {
         updatedAt: -1,
       });
 
+    if (user.type == UserType.CLIENT) {
+      for (let i = 0; i < reservations.length; i++) {
+        reservations[i] = await {
+          ...reservations[i].toObject(),
+          isReviewSubmitted:
+            (await this.storeReviewModel.countDocuments({
+              store: reservations[i].store,
+              client: user.id,
+            })) != 0,
+        };
+      }
+
+    }
+
     return reservations;
   }
 
@@ -159,10 +176,10 @@ export class ReservationService {
       throw new ForbiddenException();
     }
 
-    if (
-      (reservation as any).createdAt.getTime() + 1000 * 3600 * 24 <
-      new Date().getTime() 
-    ) {
+    const currentDate = new Date().getTime();
+    const oneDayTime = 1000 * 3600 * 24;
+
+    if (currentDate > reservation.reservationDate.getTime() - oneDayTime) {
       throw new BadRequestException('messages.cancel_reservation_date_passed');
     }
 

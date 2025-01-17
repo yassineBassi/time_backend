@@ -1,10 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { populate } from 'dotenv';
-import { Model, PopulateOptions } from 'mongoose';
+import { Model } from 'mongoose';
 import { ReservationStatus } from 'src/common/models/enums/reservation-status';
 import { StoresListSegment } from 'src/common/models/enums/stores-list-segement';
-import { UserStatus } from 'src/common/models/enums/user-status';
 import { Client } from 'src/mongoose/client';
 import { Reservation } from 'src/mongoose/reservation';
 import { Store } from 'src/mongoose/store';
@@ -12,6 +14,7 @@ import { StoreCategory } from 'src/mongoose/store-category';
 import { StoreReview } from 'src/mongoose/store-review';
 import { StoreSection } from 'src/mongoose/store-section';
 import { WorkingTime } from 'src/mongoose/working-time';
+import { RateStoreDTO } from './dto/rate-store.sto';
 
 @Injectable()
 export class StoreService {
@@ -103,11 +106,14 @@ export class StoreService {
       ...s.toObject(),
       isFavorite: false,
       photos: [s.picture],
-      reviews: (
-        s.reviews
-          .map((v) => v.rate)
-          .reduce((acc: number, curr: number) => acc + curr) / s.reviews.length
-      ).toFixed(1),
+      reviews: s.reviews.length
+        ? (
+            s.reviews
+              .map((v) => v.rate)
+              .reduce((acc: number, curr: number) => acc + curr) /
+            s.reviews.length
+          ).toFixed(1)
+        : 0,
       reviewsCount: s.reviews.length,
     }));
   }
@@ -261,5 +267,45 @@ export class StoreService {
       });
 
     return reviews;
+  }
+
+  async rateStore(request: RateStoreDTO, storeId: string, client: Client) {
+    console.log('request', request);
+    const store = await this.storeModel.findById(storeId);
+
+    const reservationsCounts = await this.reservationModel.countDocuments({
+      store: store.id,
+      client: client.id,
+      status: ReservationStatus.COMPLETED,
+    });
+
+    if (!reservationsCounts) {
+      throw new ForbiddenException('messages.forbidden');
+    }
+
+    const reviewsCount = await this.storeReviewModel.countDocuments({
+      client: client.id,
+      store: store.id,
+    });
+
+    if (reviewsCount) {
+      throw new ForbiddenException('messages.forbidden');
+    }
+
+    const review = await (
+      await this.storeReviewModel.create({
+        rate: request.rate,
+        comment: request.message,
+        client: client.id,
+        store: store.id,
+      })
+    ).save();
+
+    store.reviews.push(review.id);
+    await store.save();
+
+    return {
+      success: true,
+    };
   }
 }

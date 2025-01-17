@@ -17,6 +17,7 @@ import { CurrentUser } from 'src/common/decorators/current-user';
 import { Store } from 'src/mongoose/store';
 import { StoresListSegment } from 'src/common/models/enums/stores-list-segement';
 import { Client } from 'src/mongoose/client';
+import { RateStoreDTO } from './dto/rate-store.sto';
 
 @Controller('store')
 export class StoreController {
@@ -97,5 +98,17 @@ export class StoreController {
   @UseGuards(JwtAuthGuard, RolesGuard(UserType.CLIENT))
   async getStoreById(@Param('id') id: string) {
     return Response.success(await this.storeService.getStoreById(id));
+  }
+
+  @Post(':id/rate')
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.CLIENT))
+  async rateStore(
+    @Body() request: RateStoreDTO,
+    @Param('id') storeId: string,
+    @CurrentUser() client: Client,
+  ) {
+    return Response.success(
+      await this.storeService.rateStore(request, storeId, client),
+    );
   }
 }
