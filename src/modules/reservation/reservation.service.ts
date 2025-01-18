@@ -15,8 +15,8 @@ import { Service } from 'src/mongoose/service';
 import { ReservationStatus } from 'src/common/models/enums/reservation-status';
 import { User } from 'src/mongoose/user';
 import { UserType } from 'src/common/models/enums/user-type';
-import { populate } from 'dotenv';
 import { StoreReview } from 'src/mongoose/store-review';
+import { StoreReport } from 'src/mongoose/store-report';
 
 @Injectable()
 export class ReservationService {
@@ -31,6 +31,8 @@ export class ReservationService {
     private readonly serviceModel: Model<Service>,
     @InjectModel('StoreReview')
     private readonly storeReviewModel: Model<StoreReview>,
+    @InjectModel('StoreReport')
+    private readonly storeReportModel: Model<StoreReport>,
   ) {}
 
   private async generateRandomReservation(length: number) {
@@ -121,7 +123,7 @@ export class ReservationService {
       filter['client'] = user.id;
     }
 
-    let reservations: any = await this.reservationModel
+    const reservations: any = await this.reservationModel
       .find(filter)
       .populate([
         {
@@ -158,9 +160,13 @@ export class ReservationService {
               store: reservations[i].store,
               client: user.id,
             })) != 0,
+          isReported:
+            (await this.storeReportModel.countDocuments({
+              reservation: reservations[i].id,
+              client: user.id,
+            })) != 0,
         };
       }
-
     }
 
     return reservations;

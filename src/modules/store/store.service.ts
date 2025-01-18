@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -15,6 +16,7 @@ import { StoreReview } from 'src/mongoose/store-review';
 import { StoreSection } from 'src/mongoose/store-section';
 import { WorkingTime } from 'src/mongoose/working-time';
 import { RateStoreDTO } from './dto/rate-store.sto';
+import { StoreReport } from 'src/mongoose/store-report';
 
 @Injectable()
 export class StoreService {
@@ -31,6 +33,8 @@ export class StoreService {
     private readonly reservationModel: Model<Reservation>,
     @InjectModel('StoreReview')
     private readonly storeReviewModel: Model<StoreReview>,
+    @InjectModel('StoreReport')
+    private readonly storeReportModel: Model<StoreReport>,
   ) {}
 
   defaultSelect =
@@ -270,7 +274,6 @@ export class StoreService {
   }
 
   async rateStore(request: RateStoreDTO, storeId: string, client: Client) {
-    console.log('request', request);
     const store = await this.storeModel.findById(storeId);
 
     const reservationsCounts = await this.reservationModel.countDocuments({
@@ -302,6 +305,49 @@ export class StoreService {
     ).save();
 
     store.reviews.push(review.id);
+    await store.save();
+
+    return {
+      success: true,
+    };
+  }
+
+  async reportStore(message: string, reservationId: string, client: Client) {
+    if (!message.length) {
+      throw new BadRequestException('');
+    }
+
+    const reservation = await this.reservationModel.findById(reservationId);
+
+    if (reservation.status == ReservationStatus.PAYED) {
+      throw new ForbiddenException();
+    }
+
+    if (reservation.client.toString() != client.id) {
+      throw new ForbiddenException('');
+    }
+
+    const reportsCounts = await this.storeReportModel.countDocuments({
+      reservation: reservation.id,
+      client: client.id,
+    });
+
+    if (reportsCounts) {
+      throw new ForbiddenException('messages.forbidden');
+    }
+
+    const store = await this.storeModel.findById(reservation.store);
+
+    const report = await (
+      await this.storeReportModel.create({
+        message,
+        client: client.id,
+        reservation: reservation.id,
+        store: store.id,
+      })
+    ).save();
+
+    store.reports.push(report.id);
     await store.save();
 
     return {

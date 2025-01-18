@@ -111,4 +111,17 @@ export class StoreController {
       await this.storeService.rateStore(request, storeId, client),
     );
   }
+
+
+  @Post(':id/report')
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.CLIENT))
+  async reportStore(
+    @Body('message') message: string,
+    @Param('id') reservationId: string,
+    @CurrentUser() client: Client,
+  ) {
+    return Response.success(
+      await this.storeService.reportStore(message, reservationId, client),
+    );
+  }
 }

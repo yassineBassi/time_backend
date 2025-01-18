@@ -17,6 +17,7 @@ export const ReservationSchema = new mongoose.Schema(
     reservationDate: { type: Date },
     tva: { type: String },
     totalPrice: { type: Number },
+    reports: []
   },
   { timestamps: true },
 );

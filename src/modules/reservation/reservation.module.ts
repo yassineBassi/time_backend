@@ -7,6 +7,7 @@ import { ServiceSchema } from 'src/mongoose/service';
 import { ReservationSchema } from 'src/mongoose/reservation';
 import { ReservationItemSchema } from 'src/mongoose/reservation-item';
 import { StoreReviewSchema } from 'src/mongoose/store-review';
+import { StoreReportSchema } from 'src/mongoose/store-report';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { StoreReviewSchema } from 'src/mongoose/store-review';
       { name: 'Reservation', schema: ReservationSchema },
       { name: 'ReservationItem', schema: ReservationItemSchema },
       { name: 'StoreReview', schema: StoreReviewSchema },
+      { name: 'StoreReport', schema: StoreReportSchema },
     ]),
   ],
   controllers: [ReservationController],

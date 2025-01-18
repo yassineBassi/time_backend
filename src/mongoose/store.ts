@@ -20,6 +20,7 @@ export const StoreSchema = new mongoose.Schema(
     },
     services: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Service' }],
     reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'StoreReview' }],
+    reports: [{ type: mongoose.Schema.Types.ObjectId, ref: 'StoreReport' }],
     available: { type: Boolean, default: false },
   },
   {
@@ -44,6 +45,7 @@ export interface Store extends User {
   subscription: mongoose.Schema.Types.ObjectId;
   workingTimes: mongoose.Schema.Types.ObjectId;
   services: mongoose.Schema.Types.ObjectId[];
+  reports: mongoose.Schema.Types.ObjectId[];
   available: string;
 }
 
