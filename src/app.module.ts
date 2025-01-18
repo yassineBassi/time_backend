@@ -1,13 +1,13 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { InjectModel, MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { I18nModule } from 'nestjs-i18n';
 import * as path from 'path';
-import { APP_FILTER } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { ResponseExceptionFilter } from './common/filters/response-exception.filter';
-import { WinstonModule } from 'nest-winston';
+import { WinstonLogger, WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
 import { SharedModule } from './common/shared.module';
 import { Client, ClientSchema } from './mongoose/client';
@@ -41,6 +41,8 @@ import { WalletModule } from './modules/wallet/wallet.module';
 import { CouponModule } from './modules/coupon/coupon.module';
 import { GiftCard, GiftCardSchema } from './mongoose/gift-card';
 import { GiftModule } from './modules/gift/gift.module';
+import { UserStatus } from './common/models/enums/user-status';
+import { LoggerMiddleware } from './common/middlewares/logger.middleware';
 
 @Module({
   imports: [
@@ -104,9 +106,18 @@ import { GiftModule } from './modules/gift/gift.module';
       provide: APP_FILTER,
       useClass: ResponseExceptionFilter,
     },
+    WinstonLogger,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: WinstonLogger
+    }
   ],
 })
-export class AppModule {
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');  
+  }
+
   constructor(
     @InjectModel('StoreCategory')
     private storeCategoryModel: Model<StoreCategory>,
@@ -130,6 +141,9 @@ export class AppModule {
     private giftCardModel: Model<GiftCard>,
   ) {
     setTimeout(async () => {
+      await this.storeModel.updateMany({}, {
+        status: UserStatus.ENABLED
+      })
       /*const stores = await this.storeModel.find();
       stores.forEach(async (s) => {
         if (!s.workingTimes) {

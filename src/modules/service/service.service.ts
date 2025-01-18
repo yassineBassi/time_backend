@@ -111,11 +111,11 @@ export class ServiceService {
   }
 
   async fetchByCategoryId(categoryId: string) {
-    //const parsedDate = new Date(date.split(' ').join('T') + 'Z');
 
     const services = await this.serviceModel
       .find({
         category: categoryId,
+        enabled: true
       })
       .select('_id title picture price duration discount discountType enabled');
 

@@ -63,7 +63,6 @@ export class ReservationService {
       store: store.id,
       status: ReservationStatus.PAYED,
       reservationDate: request.reservationDate,
-      number: this.generateRandomReservation(10),
     });
 
     if (count) {
@@ -76,6 +75,7 @@ export class ReservationService {
       reservationDate: request.reservationDate,
       tva: request.tva,
       totalPrice: request.totalPrice,
+      number: await this.generateRandomReservation(10),
     });
 
     reservation = await reservation.save();

@@ -17,6 +17,7 @@ import { StoreSection } from 'src/mongoose/store-section';
 import { WorkingTime } from 'src/mongoose/working-time';
 import { RateStoreDTO } from './dto/rate-store.sto';
 import { StoreReport } from 'src/mongoose/store-report';
+import { UserStatus } from 'src/common/models/enums/user-status';
 
 @Injectable()
 export class StoreService {
@@ -52,7 +53,9 @@ export class StoreService {
       path: 'reviews',
     },
   ];
-  defaultFilter = {};
+  defaultFilter = {
+    status: UserStatus.ENABLED
+  };
 
   async getSections() {
     return this.storeSectionModel.find();
@@ -216,6 +219,7 @@ export class StoreService {
       .findById(storeId)
       .select('_id geoLocation lat lng workingTimes')
       .populate('workingTimes');
+
 
     const reservedTimes = (
       await this.reservationModel
