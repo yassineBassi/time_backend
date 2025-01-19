@@ -63,8 +63,8 @@ export class StoreController {
 
   @Get('')
   @UseGuards(JwtAuthGuard, RolesGuard(UserType.CLIENT))
-  async getStores(@Query() params: any) {
-    return Response.success(await this.storeService.getStores(params));
+  async getStores(@Query() params: any, @CurrentUser() client: Client) {
+    return Response.success(await this.storeService.getStores(params, client));
   }
 
   @Get('map')
@@ -72,9 +72,10 @@ export class StoreController {
   async getMapStores(
     @Query('latitude') latitude: string,
     @Query('longitude') longitude: string,
+    @CurrentUser() client: Client
   ) {
     return Response.success(
-      await this.storeService.getMapStores(latitude, longitude),
+      await this.storeService.getMapStores(latitude, longitude, client),
     );
   }
 
@@ -96,8 +97,8 @@ export class StoreController {
 
   @Get(':id')
   @UseGuards(JwtAuthGuard, RolesGuard(UserType.CLIENT))
-  async getStoreById(@Param('id') id: string) {
-    return Response.success(await this.storeService.getStoreById(id));
+  async getStoreById(@Param('id') id: string, @CurrentUser() client: Client) {
+    return Response.success(await this.storeService.getStoreById(id, client));
   }
 
   @Post(':id/rate')
@@ -112,7 +113,6 @@ export class StoreController {
     );
   }
 
-
   @Post(':id/report')
   @UseGuards(JwtAuthGuard, RolesGuard(UserType.CLIENT))
   async reportStore(
@@ -124,4 +124,5 @@ export class StoreController {
       await this.storeService.reportStore(message, reservationId, client),
     );
   }
+
 }

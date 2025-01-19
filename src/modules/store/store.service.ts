@@ -108,10 +108,10 @@ export class StoreService {
     return workingTime;
   }
 
-  addFieldsToStores(stores: Store[]) {
+  addFieldsToStores(stores: Store[], client: Client){
     return stores.map((s: any) => ({
       ...s.toObject(),
-      isFavorite: false,
+      isFavorite: client.favotiteStores.includes(s.id),
       photos: [s.picture],
       reviews: s.reviews.length
         ? (
@@ -144,10 +144,10 @@ export class StoreService {
         .limit(limit);
     }
 
-    return this.addFieldsToStores(stores);
+    return this.addFieldsToStores(stores, client);
   }
 
-  async getMapStores(latitude: string, longitude: string) {
+  async getMapStores(latitude: string, longitude: string, client: Client) {
     const filter = {
       ...this.defaultFilter,
       geoLocation: {
@@ -166,10 +166,10 @@ export class StoreService {
       .select(this.defaultSelect)
       .populate(this.defaultPopulate);
 
-    return this.addFieldsToStores(stores);
+    return this.addFieldsToStores(stores, client);
   }
 
-  async getStores(params: any) {
+  async getStores(params: any, client: Client) {
     const filter = {
       ...this.defaultFilter,
       category: params['category'],
@@ -183,10 +183,10 @@ export class StoreService {
       .select(this.defaultSelect)
       .populate(this.defaultPopulate);
 
-    return this.addFieldsToStores(stores);
+    return this.addFieldsToStores(stores, client);
   }
 
-  async getStoreById(id: string) {
+  async getStoreById(id: string, client: Client) {
     const store = await this.storeModel
       .findOne({
         ...this.defaultFilter,
@@ -199,7 +199,7 @@ export class StoreService {
       throw new NotFoundException();
     }
 
-    return this.addFieldsToStores([store])[0];
+    return this.addFieldsToStores([store], client)[0];
   }
 
   async getStoreAvailableTimes(date: string, storeId: string) {

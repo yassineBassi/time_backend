@@ -43,6 +43,7 @@ import { GiftCard, GiftCardSchema } from './mongoose/gift-card';
 import { GiftModule } from './modules/gift/gift.module';
 import { UserStatus } from './common/models/enums/user-status';
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
+import { ClientModule } from './modules/client/client.module';
 
 @Module({
   imports: [
@@ -98,6 +99,7 @@ import { LoggerMiddleware } from './common/middlewares/logger.middleware';
     WalletModule,
     CouponModule,
     GiftModule,
+    ClientModule,
   ],
   controllers: [AppController],
   providers: [

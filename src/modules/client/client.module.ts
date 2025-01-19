@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
-import { StoreService } from './store.service';
-import { StoreController } from './store.controller';
+import { ClientService } from './client.service';
+import { ClientController } from './client.controller';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ClientSchema } from 'src/mongoose/client';
+import { StoreSchema } from 'src/mongoose/store';
+import { StoreService } from '../store/store.service';
 import { StoreSectionSchema } from 'src/mongoose/store-section';
 import { StoreCategorySchema } from 'src/mongoose/store-category';
-import { SubscriptionModule } from '../subscription/subscription.module';
 import { WorkingTimeSchema } from 'src/mongoose/working-time';
-import { StoreSchema } from 'src/mongoose/store';
 import { ReservationSchema } from 'src/mongoose/reservation';
 import { StoreReviewSchema } from 'src/mongoose/store-review';
 import { StoreReportSchema } from 'src/mongoose/store-report';
@@ -14,6 +15,7 @@ import { StoreReportSchema } from 'src/mongoose/store-report';
 @Module({
   imports: [
     MongooseModule.forFeature([
+      { name: 'Client', schema: ClientSchema },
       { name: 'Store', schema: StoreSchema },
       { name: 'StoreSection', schema: StoreSectionSchema },
       { name: 'StoreCategory', schema: StoreCategorySchema },
@@ -22,10 +24,8 @@ import { StoreReportSchema } from 'src/mongoose/store-report';
       { name: 'StoreReview', schema: StoreReviewSchema },
       { name: 'StoreReport', schema: StoreReportSchema },
     ]),
-    SubscriptionModule,
   ],
-  controllers: [StoreController],
-  providers: [StoreService],
-  exports: [StoreService]
+  controllers: [ClientController],
+  providers: [ClientService, StoreService],
 })
-export class StoreModule {}
+export class ClientModule {}
