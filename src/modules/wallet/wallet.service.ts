@@ -116,6 +116,7 @@ export class WalletService {
       await this.pointsTransfernModel.create({
         coupon: coupon.id,
         points,
+        price: coupon.discount,
         userType: user.type,
         user: user,
       })

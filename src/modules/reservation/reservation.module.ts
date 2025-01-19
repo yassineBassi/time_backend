@@ -8,6 +8,9 @@ import { ReservationSchema } from 'src/mongoose/reservation';
 import { ReservationItemSchema } from 'src/mongoose/reservation-item';
 import { StoreReviewSchema } from 'src/mongoose/store-review';
 import { StoreReportSchema } from 'src/mongoose/store-report';
+import { CouponSchema } from 'src/mongoose/coupon';
+import { CouponService } from '../coupon/coupon.service';
+import { CouponModule } from '../coupon/coupon.module';
 
 @Module({
   imports: [
@@ -18,9 +21,11 @@ import { StoreReportSchema } from 'src/mongoose/store-report';
       { name: 'ReservationItem', schema: ReservationItemSchema },
       { name: 'StoreReview', schema: StoreReviewSchema },
       { name: 'StoreReport', schema: StoreReportSchema },
+      { name: 'Coupon', schema: CouponSchema },
     ]),
+    CouponModule
   ],
   controllers: [ReservationController],
-  providers: [ReservationService],
+  providers: [ReservationService, CouponService],
 })
 export class ReservationModule {}

@@ -11,6 +11,7 @@ import { ReservationSchema } from 'src/mongoose/reservation';
 import { GiftModule } from '../gift/gift.module';
 import { GiftService } from '../gift/gift.service';
 import { GiftSchema } from 'src/mongoose/gift';
+import { CouponSchema } from 'src/mongoose/coupon';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { GiftSchema } from 'src/mongoose/gift';
       { name: 'StoreSubscription', schema: StoreSubscriptionSchema },
       { name: 'Reservation', schema: ReservationSchema },
       { name: 'Gift', schema: GiftSchema },
+      { name: 'Coupon', schema: CouponSchema },
     ]),
   ],
   controllers: [PaymentController],

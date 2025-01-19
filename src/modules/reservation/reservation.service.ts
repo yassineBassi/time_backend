@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ForbiddenException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -17,6 +18,8 @@ import { User } from 'src/mongoose/user';
 import { UserType } from 'src/common/models/enums/user-type';
 import { StoreReview } from 'src/mongoose/store-review';
 import { StoreReport } from 'src/mongoose/store-report';
+import { Coupon } from 'src/mongoose/coupon';
+import { CouponService } from '../coupon/coupon.service';
 
 @Injectable()
 export class ReservationService {
@@ -33,6 +36,10 @@ export class ReservationService {
     private readonly storeReviewModel: Model<StoreReview>,
     @InjectModel('StoreReport')
     private readonly storeReportModel: Model<StoreReport>,
+    @InjectModel('Coupon')
+    private readonly couponModel: Model<Coupon>,
+    @Inject()
+    private readonly couponService: CouponService,
   ) {}
 
   private async generateRandomReservation(length: number) {
@@ -81,6 +88,7 @@ export class ReservationService {
     reservation = await reservation.save();
 
     const items = [];
+    let price = 0;
 
     for (const item of request.items) {
       const service = await this.serviceModel.findById(item.serviceId);
@@ -93,9 +101,11 @@ export class ReservationService {
           reservation: reservation.id,
         })
       ).save();
+      price += reservationItem.price * reservationItem.quantity;
       items.push(reservationItem.id);
     }
 
+    reservation.totalPrice = price;
     reservation.items = items;
     reservation = await reservation.save();
 
@@ -192,5 +202,43 @@ export class ReservationService {
     reservation.status = ReservationStatus.CANCELED;
 
     return await reservation.save();
+  }
+
+  async payReservation(user: Client, reservationId: string, couponId: string) {
+    const reservation = await this.reservationModel
+      .findById(reservationId)
+      .populate('items');
+    const coupon = await this.couponModel.findById(couponId);
+
+    if (!coupon || !reservation) {
+      throw new ForbiddenException();
+    }
+
+    await this.couponService.validateCoupon(coupon.code, user);
+
+    const totalPrice = reservation.items
+      .map((i: any) => i.price * i.quantity)
+      .reduce((acc, curr) => acc + curr);
+
+    const couponPrice =
+      coupon.discount > totalPrice ? totalPrice : coupon.discount;
+
+    const payedPrice = totalPrice - couponPrice;
+
+    if (payedPrice) {
+      throw new BadRequestException();
+    }
+
+    reservation.status = ReservationStatus.PAYED;
+    reservation.payedPrice = payedPrice;
+    reservation.coupon = coupon.id;
+    await reservation.save();
+
+    coupon.discount -= totalPrice;
+    await coupon.save();
+
+    return {
+      success: true,
+    };
   }
 }

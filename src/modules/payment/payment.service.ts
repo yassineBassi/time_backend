@@ -9,6 +9,7 @@ import { StoreSubscription } from 'src/mongoose/store-subscription';
 import { SubscriptionLevel } from 'src/mongoose/subscription-level';
 import { TapPayment } from 'src/mongoose/tap-payment';
 import { GiftService } from '../gift/gift.service';
+import { Coupon } from 'src/mongoose/coupon';
 
 @Injectable()
 export class PaymentService {
@@ -25,6 +26,8 @@ export class PaymentService {
     private readonly storeSubscriptionModel: Model<StoreSubscription>,
     @InjectModel('Reservation')
     private readonly reservationModel: Model<Reservation>,
+    @InjectModel('Coupon')
+    private readonly couponModel: Model<Coupon>,
     private readonly giftService: GiftService,
   ) {}
 
@@ -73,7 +76,11 @@ export class PaymentService {
       );
     } else if (tapPayment.statut == 'CAPTURED') {
       if (metadata.type == 'reservation') {
-        return this.handleReservationCallback(metadata, tapPayment.id);
+        return this.handleReservationCallback(
+          metadata,
+          tapPayment.id,
+          request.amount,
+        );
       } else {
         return this.handleSubscrptionCallback(metadata, tapPayment.id);
       }
@@ -82,14 +89,24 @@ export class PaymentService {
     return false;
   }
 
-  async handleReservationCallback(metadata: any, tapPaymentId: any) {
+  async handleReservationCallback(
+    metadata: any,
+    tapPaymentId: any,
+    amount: number,
+  ) {
     const reservation = await this.reservationModel.findById(metadata.id);
     reservation.status = ReservationStatus.PAYED;
     reservation.payment = tapPaymentId;
 
-    await reservation.save();
+    if (metadata.coupon) {
+      const coupon = await this.couponModel.findById(metadata.coupon);
+      reservation.coupon = coupon.id;
+      coupon.consumed = true;
+      await coupon.save();
+    }
 
-    console.log('reservation captured');
+    reservation.payedPrice = amount;
+    await reservation.save();
 
     return true;
   }

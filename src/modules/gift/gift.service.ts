@@ -43,7 +43,8 @@ export class GiftService {
         userType: user.type,
         user: user.id,
       })
-      .populate(['coupon', 'giftCard']);
+      .populate(['coupon', 'giftCard'])
+      .sort({createdAt: -1});
 
     console.log(gifts);
 
@@ -99,13 +100,13 @@ export class GiftService {
       payment: tapPaymentId,
       status:
         status == 'CAPTURED' ? GiftStatus.PAYED : GiftStatus.PAYMENT_FAILED,
+      price: giftCard.price,
       userType: metadata.userType,
       user: metadata.userId,
     });
 
-
     if (gift.status == GiftStatus.PAYED) {
-        console.log('captured');
+      console.log('captured');
       const coupon = await this.couponService.createCoupon(
         user,
         giftCard.price,
@@ -113,7 +114,9 @@ export class GiftService {
         CouponType.GIFT,
         new Date(new Date().getTime() + giftCard.validityMills),
       );
+
       console.log(coupon);
+
       gift.coupon = coupon.id;
       await gift.save();
     }

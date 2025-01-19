@@ -8,6 +8,7 @@ export const ReservationSchema = new mongoose.Schema(
     client: { type: mongoose.Types.ObjectId, ref: 'Client' },
     payment: { type: mongoose.Types.ObjectId, ref: 'TapPayment' },
     store: { type: mongoose.Types.ObjectId, ref: 'Store' },
+    coupon: { type: mongoose.Types.ObjectId, ref: 'Coupon' },
     items: [{ type: mongoose.Types.ObjectId, ref: 'ReservationItem' }],
     status: {
       type: String,
@@ -15,9 +16,10 @@ export const ReservationSchema = new mongoose.Schema(
       default: ReservationStatus.CREATED,
     },
     reservationDate: { type: Date },
-    tva: { type: String },
+    tva: { type: Number },
     totalPrice: { type: Number },
-    reports: []
+    payedPrice: { type: Number },
+    reports: [],
   },
   { timestamps: true },
 );
@@ -27,11 +29,13 @@ export interface Reservation extends mongooseDelete.SoftDeleteDocument {
   client: mongoose.Schema.Types.ObjectId;
   payment: mongoose.Schema.Types.ObjectId;
   store: mongoose.Schema.Types.ObjectId;
+  coupon: mongoose.Schema.Types.ObjectId;
   items: mongoose.Schema.Types.ObjectId[];
   status: string;
   reservationDate: Date;
-  tva: string;
+  tva: number;
   totalPrice: number;
+  payedPrice: number;
 }
 
 export type ReservationModel = mongooseDelete.SoftDeleteModel<Reservation>;

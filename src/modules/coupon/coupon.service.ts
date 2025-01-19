@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CouponType } from 'src/common/models/enums/coupon-type';
@@ -56,6 +56,38 @@ export class CouponService {
         expiredAt,
       })
     ).save();
+
+    return coupon;
+  }
+
+  async validateCoupon(code: string, user: User) {
+    const coupon = await this.couponModel.findOne({
+      code,
+      $or: [
+        {
+          type: CouponType.BY_POINTS,
+          user: user.id,
+        },
+        {
+          type: CouponType.GIFT,
+        },
+      ],
+    });
+
+    if (!coupon) {
+      throw new BadRequestException('messages.coupon_not_exist');
+    }
+
+    if (
+      coupon.type != CouponType.BY_POINTS &&
+      Date.now() > coupon.expiredAt.getTime()
+    ) {
+      throw new BadRequestException('messages.coupon_expired');
+    }
+
+    if (coupon.consumed) {
+      throw new BadRequestException('messages.coupon_used');
+    }
 
     return coupon;
   }

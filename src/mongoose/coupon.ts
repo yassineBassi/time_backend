@@ -28,11 +28,9 @@ export interface Coupon extends mongooseDelete.SoftDeleteDocument {
   code: string;
   discount: number;
   discountType: DiscountType;
-  type: DiscountType;
+  type: CouponType;
   consumed: boolean;
   userType: UserType;
   user: mongoose.Schema.Types.ObjectId;
   expiredAt: Date;
 }
-
-export type CouponModel = mongooseDelete.SoftDeleteModel<Coupon>;

@@ -18,7 +18,7 @@ export class LoggerMiddleware implements NestMiddleware {
           method +
           ' ' +
           originalUrl +
-          'completed in' +
+          ' completed in' +
           duration +
           'ms with status: ' +
           res.statusCode,

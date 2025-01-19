@@ -5,6 +5,7 @@ export const PointsTransferSchema = new mongoose.Schema(
   {
     coupon: { type: mongoose.Schema.Types.ObjectId, ref: 'Coupon' },
     points: { type: Number },
+    price: { type: Number },
     userType: { type: String, enum: Object.values(UserType) },
     user: { type: mongoose.Schema.Types.ObjectId, refPath: 'userType' },
   },
@@ -14,6 +15,7 @@ export const PointsTransferSchema = new mongoose.Schema(
 export interface PointsTransfer {
   coupon: mongoose.Schema.Types.ObjectId;
   points: number;
+  price: number;
   userType: UserType;
   user: mongoose.Schema.Types.ObjectId;
 }

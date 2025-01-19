@@ -41,13 +41,25 @@ export class ReservationController {
   }
 
   @Get('cancel/:id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.CLIENT))
   async cancelReservation(
     @CurrentUser() user: Client,
     @Param('id') reservationId: string,
   ) {
     return Response.success(
       await this.reservationService.cancelReservation(user, reservationId),
+    );
+  }
+
+  @Post('pay')
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.CLIENT))
+  async payReservation(
+    @CurrentUser() user: Client,
+    @Body('reservationId') reservationId: string,
+    @Body('couponId') couponId: string,
+  ) {
+    return Response.success(
+      await this.reservationService.payReservation(user, reservationId, couponId),
     );
   }
 }
