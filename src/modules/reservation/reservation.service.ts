@@ -95,7 +95,7 @@ export class ReservationService {
       const reservationItem = await (
         await this.reservationItemModel.create({
           service: service.id,
-          price: (service.price * service.discount) / 100,
+          price: service.price - (service.price * service.discount) / 100,
           quantity: item.quantity,
           duration: service.duration,
           reservation: reservation.id,

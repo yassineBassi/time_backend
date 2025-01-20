@@ -16,6 +16,7 @@ import { UserType } from 'src/common/models/enums/user-type';
 import { CurrentUser } from 'src/common/decorators/current-user';
 import { Client } from 'src/mongoose/client';
 import { User } from 'src/mongoose/user';
+import { Store } from 'src/mongoose/store';
 
 @Controller('reservation')
 export class ReservationController {
@@ -59,7 +60,11 @@ export class ReservationController {
     @Body('couponId') couponId: string,
   ) {
     return Response.success(
-      await this.reservationService.payReservation(user, reservationId, couponId),
+      await this.reservationService.payReservation(
+        user,
+        reservationId,
+        couponId,
+      ),
     );
   }
 }

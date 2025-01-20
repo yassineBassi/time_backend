@@ -41,7 +41,7 @@ export class SubscriptionController {
   }
 
   @Get('levels')
-  @UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE), UnSubscribedStoreGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE))
   async getLevels() {
     return Response.success(await this.subscriptionService.getLevels(), '');
   }

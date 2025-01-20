@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CouponType } from 'src/common/models/enums/coupon-type';
@@ -9,8 +13,10 @@ import { Reservation } from 'src/mongoose/reservation';
 import { User } from 'src/mongoose/user';
 import { CouponService } from '../coupon/coupon.service';
 import { PointsTransfer } from 'src/mongoose/points-transfer';
-import { ReservationItem } from 'src/mongoose/reservation-item';
 import { transactionType } from 'src/common/models/enums/transaction-type';
+import { Store } from 'src/mongoose/store';
+import { WithdrawRequest } from 'src/mongoose/withdraw-request';
+import { WithdrawRequestStatus } from 'src/common/models/enums/withdraw-request-status';
 
 @Injectable()
 export class WalletService {
@@ -19,6 +25,10 @@ export class WalletService {
     private readonly reservationModel: Model<Reservation>,
     @InjectModel('PointsTransfer')
     private readonly pointsTransfernModel: Model<PointsTransfer>,
+    @InjectModel('Store')
+    private readonly storeModel: Model<Store>,
+    @InjectModel('WithdrawRequest')
+    private readonly withdrawRequestModel: Model<WithdrawRequest>,
     private readonly couponService: CouponService,
   ) {}
 
@@ -44,19 +54,6 @@ export class WalletService {
         .reduce((acc, curr) => acc + curr);
     }
 
-    const transfers = await this.pointsTransfernModel
-      .find({
-        user: user.id,
-        userType: user.type,
-      })
-      .populate('coupon');
-
-    if (transfers && transfers.length) {
-      points -= transfers
-        .map((t) => t.points)
-        .reduce((acc, curr) => acc + curr);
-    }
-
     let transactions = [];
     for (const r of reservations) {
       for (const i of r.items) {
@@ -73,17 +70,54 @@ export class WalletService {
       }
     }
 
-    for (const t of transfers) {
-        console.log(t);
-      transactions.push({
-        _id: t.id,
-        label: '',
-        price: (t.coupon as any).discount,
-        points: t.points,
-        number: '',
-        type: transactionType.POINTS_TRANSFER,
-        date: new Date((t as any).createdAt),
+    if (user.type == UserType.CLIENT) {
+      const transfers = await this.pointsTransfernModel
+        .find({
+          user: user.id,
+          userType: user.type,
+        })
+        .populate('coupon');
+
+      if (transfers && transfers.length) {
+        points -= transfers
+          .map((t) => t.points)
+          .reduce((acc, curr) => acc + curr);
+      }
+
+      for (const t of transfers) {
+        transactions.push({
+          _id: t.id,
+          label: '',
+          price: (t.coupon as any).discount,
+          points: t.points,
+          number: '',
+          type: transactionType.POINTS_TRANSFER,
+          date: new Date((t as any).createdAt),
+        });
+      }
+    } else if (user.type == UserType.STORE) {
+      const requests = await this.withdrawRequestModel.find({
+        store: user.id,
       });
+
+      if (requests && requests.length) {
+        points -= requests
+          .map((r) => r.amount)
+          .reduce((acc, curr) => acc + curr);
+      }
+
+      for (const r of requests) {
+        transactions.push({
+          _id: r.id,
+          label: '',
+          price: r.amount,
+          points: r.amount,
+          number: '',
+          status: r.status,
+          type: transactionType.WITHDRAW_FUNDS,
+          date: new Date((r as any).createdAt),
+        });
+      }
     }
 
     if (transactions && transactions.length) {
@@ -92,9 +126,26 @@ export class WalletService {
       );
     }
 
+    let successTransactions = 0;
+    let failedTransactions = 0;
+    if (user.type == UserType.STORE) {
+      successTransactions = await this.reservationModel.countDocuments({
+        store: user.id,
+        status: ReservationStatus.COMPLETED,
+      });
+      failedTransactions = await this.reservationModel.countDocuments({
+        store: user.id,
+        status: {
+          $in: [ReservationStatus.CANCELED, ReservationStatus.REJECTED],
+        },
+      });
+    }
+
     return {
       points: points,
       transactions,
+      success: successTransactions,
+      failed: failedTransactions,
     };
   }
 
@@ -123,5 +174,32 @@ export class WalletService {
     ).save();
 
     return coupon;
+  }
+
+  async requestWithdraw(user: Store, amount: number) {
+    if (!amount) {
+      return new BadRequestException();
+    }
+
+    const store = await this.storeModel.findById(user.id);
+
+    const wallet = await this.getMyWallet(store);
+    const balance = wallet.points;
+
+    if (amount > balance) {
+      return new ForbiddenException('');
+    }
+
+    await (
+      await this.withdrawRequestModel.create({
+        store: store.id,
+        amount: amount,
+        status: WithdrawRequestStatus.CREATED,
+      })
+    ).save();
+
+    return {
+      success: true,
+    };
   }
 }

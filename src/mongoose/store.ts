@@ -50,9 +50,9 @@ export interface Store extends User {
 }
 
 StoreSchema.virtual('lat').get(function (this: Store) {
-  return this.geoLocation.coordinates[0];
+  return this.geoLocation.coordinates ? this.geoLocation.coordinates[0] : 0;
 });
 
 StoreSchema.virtual('lng').get(function (this: Store) {
-  return this.geoLocation.coordinates[1];
+  return this.geoLocation.coordinates ? this.geoLocation.coordinates[1] : 0;
 });
