@@ -127,7 +127,11 @@ export class AuthService {
 
     // check subscription for stores
     if (account.type == UserType.STORE) {
-      let store = await this.storeModel.findById(account.id);
+      let store = await this.storeModel
+        .findById(account.id)
+        .select(
+          '_id username fullName email phoneNumber picture isVerified type subscription',
+        );
       const check =
         await this.subscriptionService.checkStoreSubscription(store);
       if (!check) {
@@ -158,6 +162,9 @@ export class AuthService {
       googleID: request.googleID,
       firebaseID: request.firebaseID,
     });
+
+    console.log('------**----------');
+    console.log(account);
 
     return this.loginAccount(account);
   }
@@ -327,7 +334,7 @@ export class AuthService {
       .findByIdAndUpdate(currentUser.id, request)
       .exec();
 
-      return store;
+    return store;
   }
 
   async editClientProfile(request: EditClientProfileDTO, currentUser: Client) {

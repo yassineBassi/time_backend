@@ -8,6 +8,7 @@ import {
   IsOptional,
   ValidateIf,
 } from 'class-validator';
+import { ContainsSpaceSeparatedValues } from 'src/common/validators/contains-space-seperated';
 import { IsMatch } from 'src/common/validators/is-match.decorator';
 import { IsUnique } from 'src/common/validators/is-unique';
 
@@ -17,8 +18,9 @@ export class RegisterClientDTO {
 
   @IsNotEmpty()
   @IsString()
-  @MaxLength(40)
-  @MinLength(3)
+  @MaxLength(80)
+  @MinLength(6)
+  @ContainsSpaceSeparatedValues()
   fullName: string;
 
   @IsNotEmpty()

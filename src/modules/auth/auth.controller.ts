@@ -42,6 +42,7 @@ export class AuthController {
 
   @Post('login/google')
   async loginWithGoogle(@Body() request: LoginWithGoogleDTO) {
+    console.log(request);
     return Response.success(
       await this.authService.loginWithGoogle(request),
       '',

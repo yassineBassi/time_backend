@@ -7,18 +7,26 @@ import {
   IsNotEmpty,
   Length,
   IsOptional,
+  IsAlpha,
 } from 'class-validator';
+import { ContainsSpaceSeparatedValues } from 'src/common/validators/contains-space-seperated';
 import { IsUnique } from 'src/common/validators/is-unique';
 import { StoreCategory } from 'src/mongoose/store-category';
 
 export class RegisterStoreDTO {
-  @IsNotEmpty()
   @IsNotEmpty()
   @IsString()
   @MaxLength(40)
   @MinLength(3)
   @IsUnique(['Store'], 'storeName')
   storeName: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @MaxLength(80)
+  @MinLength(6)
+  @ContainsSpaceSeparatedValues()
+  fullName: string;
 
   @IsNotEmpty()
   @IsString()

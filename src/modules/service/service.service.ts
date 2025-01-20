@@ -43,12 +43,12 @@ export class ServiceService {
     service.category = category.id;
     service.store = (await this.storeModel.findById(store.id)).id;
 
-    const facilities = (createServiceDto.facilitiesIds as string)
+    /*const facilities = (createServiceDto.facilitiesIds as string)
       .slice(1, -1)
       .split(', ')
       .map((id) => new mongoose.Types.ObjectId(id));
 
-    service.facilities = facilities;
+    service.facilities = facilities;*/
 
     service = await service.save();
 

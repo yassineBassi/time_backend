@@ -36,7 +36,6 @@ export class SubscriptionController {
   @Get('types')
   @UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE), UnSubscribedStoreGuard)
   async getTypes(@CurrentUser() user: any) {
-    console.log('current user', user);
     return Response.success(await this.subscriptionService.getTypes(), '');
   }
 
