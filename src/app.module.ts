@@ -143,18 +143,12 @@ export class AppModule implements NestModule {
     private giftCardModel: Model<GiftCard>,
   ) {
     setTimeout(async () => {
-      await this.storeModel.updateMany({}, {
-        status: UserStatus.ENABLED
-      })
-      /*const stores = await this.storeModel.find();
-      stores.forEach(async (s) => {
-        if (!s.workingTimes) {
-          s.workingTimes = (
-            await (await workingTimeModel.create({})).save()
-          ).id;
-          console.log('+--------------');
-          await s.save();
-        }
+      /*const reservations = await this.reservationModel.find();
+      reservations.forEach(async (r) => {
+        const client = await this.clientModel.findById(r.client);
+        r.clientAddress = client.address;
+        r.clientPhoneNumber = client.phoneNumber;
+        await r.save();
       });*/
     }, 1000);
   }

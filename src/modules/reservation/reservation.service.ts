@@ -83,6 +83,8 @@ export class ReservationService {
       tva: request.tva,
       totalPrice: request.totalPrice,
       number: await this.generateRandomReservation(10),
+      clientAddress: client.address,
+      clientPhoneNumber: client.phoneNumber
     });
 
     reservation = await reservation.save();
@@ -150,11 +152,15 @@ export class ReservationService {
         },
         {
           path: 'items',
-          select: '_id service quantity',
+          select: '_id service quantity price',
           populate: {
             path: 'service',
             select: 'title',
           },
+        },
+        {
+          path: 'client',
+          select: '_id fullName picture type',
         },
       ])
       .sort({
@@ -232,6 +238,8 @@ export class ReservationService {
     reservation.status = ReservationStatus.PAYED;
     reservation.payedPrice = payedPrice;
     reservation.coupon = coupon.id;
+    reservation.clientAddress = user.address;
+    reservation.clientPhoneNumber = user.phoneNumber;
     await reservation.save();
 
     coupon.discount -= totalPrice;

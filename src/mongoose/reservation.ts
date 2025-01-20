@@ -19,6 +19,8 @@ export const ReservationSchema = new mongoose.Schema(
     tva: { type: Number },
     totalPrice: { type: Number },
     payedPrice: { type: Number },
+    clientPhoneNumber: { type: Number },
+    clientAddress: { type: Number },
     reports: [],
   },
   { timestamps: true },
@@ -36,6 +38,8 @@ export interface Reservation extends mongooseDelete.SoftDeleteDocument {
   tva: number;
   totalPrice: number;
   payedPrice: number;
+  clientPhoneNumber: string;
+  clientAddress: string;
 }
 
 export type ReservationModel = mongooseDelete.SoftDeleteModel<Reservation>;
