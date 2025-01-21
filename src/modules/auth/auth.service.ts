@@ -95,9 +95,20 @@ export class AuthService {
     appleID?: string;
   }) {
     const select =
-      '_id username fullName email phoneNumber picture isVerified type subscription';
+      '_id username fullName storeName storeName email phoneNumber picture isVerified type subscription';
 
-    const store = await this.storeModel.findOne(filter).select(select).exec();
+    const store = await this.storeModel
+      .findOne(filter)
+      .select(select)
+      .populate({
+        path: 'category',
+        select: 'name section',
+        populate: {
+          path: 'section',
+          select: 'name',
+        },
+      })
+      .exec();
     if (store) {
       return store;
     }
@@ -130,8 +141,16 @@ export class AuthService {
       let store = await this.storeModel
         .findById(account.id)
         .select(
-          '_id username fullName email phoneNumber picture isVerified type subscription',
-        );
+          '_id username storeName category fullName email phoneNumber picture isVerified type subscription',
+        )
+        .populate({
+          path: 'category',
+          select: 'name section',
+          populate: {
+            path: 'section',
+            select: 'name',
+          },
+        });
       const check =
         await this.subscriptionService.checkStoreSubscription(store);
       if (!check) {

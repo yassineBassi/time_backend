@@ -54,7 +54,8 @@ export class StoreService {
     },
   ];
   defaultFilter = {
-    status: UserStatus.ENABLED
+    status: UserStatus.ENABLED,
+    available: true,
   };
 
   async getSections() {
@@ -69,7 +70,9 @@ export class StoreService {
     return categories;
   }
 
-  async saveWorkingDays(request: any, store: Store) {
+  async saveWorkingDays(request: any, user: Store) {
+    const store = await this.storeModel.findById(user.id);
+
     let workingTime: any = await this.WorkingTimeModel.findOne({
       storeId: store.id,
     });
@@ -80,6 +83,8 @@ export class StoreService {
           storeId: store.id,
         })
       ).save();
+      store.workingTimes = workingTime.id;
+      await store.save();
     }
 
     workingTime.monday = request['monday'];
@@ -108,7 +113,7 @@ export class StoreService {
     return workingTime;
   }
 
-  addFieldsToStores(stores: Store[], client: Client){
+  addFieldsToStores(stores: Store[], client: Client) {
     return stores.map((s: any) => ({
       ...s.toObject(),
       isFavorite: client.favotiteStores.includes(s.id),
@@ -219,7 +224,6 @@ export class StoreService {
       .findById(storeId)
       .select('_id geoLocation lat lng workingTimes')
       .populate('workingTimes');
-
 
     const reservedTimes = (
       await this.reservationModel
@@ -359,4 +363,20 @@ export class StoreService {
     };
   }
 
+  async toggleAvailablity(user: Store) {
+    const store = await this.storeModel.findById(user.id);
+    store.available = !store.available;
+    await store.save();
+
+    return {
+      available: store.available,
+    };
+  }
+
+  async fetchAvailability(user: Store) {
+    const store = await this.storeModel.findById(user.id);
+    return {
+      available: store.available,
+    };
+  }
 }

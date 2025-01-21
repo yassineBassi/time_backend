@@ -67,4 +67,27 @@ export class ReservationController {
       ),
     );
   }
+
+  @Get('statistics')
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE))
+  async statistics(@CurrentUser() user: Store) {
+    return Response.success(await this.reservationService.statistics(user));
+  }
+
+  @Get('transactions')
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE))
+  async transactions(@CurrentUser() user: Store) {
+    return Response.success(await this.reservationService.transactions(user));
+  }
+
+  @Get('by-date')
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE))
+  async getReservationsByDate(
+    @CurrentUser() user: Store,
+    @Query('date') date: Date,
+  ) {
+    return Response.success(
+      await this.reservationService.getReservationsByDate(user, date),
+    );
+  }
 }

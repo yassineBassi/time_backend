@@ -20,6 +20,9 @@ import { StoreReview } from 'src/mongoose/store-review';
 import { StoreReport } from 'src/mongoose/store-report';
 import { Coupon } from 'src/mongoose/coupon';
 import { CouponService } from '../coupon/coupon.service';
+import { UserStatus } from 'src/common/models/enums/user-status';
+import { TransactionType } from 'src/common/models/enums/transaction-type';
+import { Transaction } from 'src/common/models/transaction';
 
 @Injectable()
 export class ReservationService {
@@ -65,6 +68,16 @@ export class ReservationService {
   async createReservation(request: createReservationDTO, client: Client) {
     const store = await this.storeModel.findById(request.storeId);
 
+    // check if store enable and available
+
+    if (!store.available) {
+      return new ForbiddenException('messages.store_unavailable');
+    }
+
+    if (store.status != UserStatus.ENABLED) {
+      return new ForbiddenException('messages.store_not_exist_any_more');
+    }
+
     // check if there are reservations in the wanted time
     const count = await this.reservationModel.countDocuments({
       store: store.id,
@@ -84,7 +97,7 @@ export class ReservationService {
       totalPrice: request.totalPrice,
       number: await this.generateRandomReservation(10),
       clientAddress: client.address,
-      clientPhoneNumber: client.phoneNumber
+      clientPhoneNumber: client.phoneNumber,
     });
 
     reservation = await reservation.save();
@@ -248,5 +261,111 @@ export class ReservationService {
     return {
       success: true,
     };
+  }
+
+  async statistics(user: Store) {
+    return {
+      inProgress: await this.reservationModel.countDocuments({
+        store: user.id,
+        status: ReservationStatus.PAYED,
+      }),
+      completed: await this.reservationModel.countDocuments({
+        store: user.id,
+        status: ReservationStatus.COMPLETED,
+      }),
+      canceled: await this.reservationModel.countDocuments({
+        store: user.id,
+        status: {
+          $in: [ReservationStatus.REJECTED, ReservationStatus.CANCELED],
+        },
+      }),
+    };
+  }
+
+  reservationsToTransactions(reservations: Reservation[]): Transaction[] {
+    const transactions: Transaction[] = [];
+
+    if (reservations && reservations.length) {
+      for (const r of reservations) {
+        for (const i of r.items) {
+          const item: any = i;
+          transactions.push({
+            _id: item.id,
+            label: item.service.title,
+            price: item.price * item.quantity,
+            points: item.price * item.quantity,
+            number: r.number,
+            type: TransactionType.RESERVATION,
+            date: new Date((r as any).createdAt),
+          });
+        }
+      }
+    }
+
+    return transactions;
+  }
+
+  async transactions(store: Store) {
+    const reservations = await this.reservationModel
+      .find({
+        store: store.id,
+        status: ReservationStatus.COMPLETED,
+      })
+      .populate({
+        path: 'items',
+        populate: 'service',
+      });
+
+    const transactions: Transaction[] =
+      this.reservationsToTransactions(reservations);
+
+    return transactions;
+  }
+
+  async getReservationsByDate(user: Store, date: Date) {
+    const startDate = new Date(
+      date.toString().split(' ')[0] + ' 00:00:00.000Z',
+    );
+    const endDate = new Date(date.toString().split(' ')[0] + ' 23:59:59.000Z');
+
+    const reservations = await this.reservationModel
+      .find({
+        store: user.id,
+        status: ReservationStatus.PAYED,
+        reservationDate: {
+          $gt: startDate,
+          $lt: endDate,
+        },
+      })
+      .populate([
+        {
+          path: 'client',
+          select: '_id fullName picture type',
+        },
+        {
+          path: 'store',
+          select: '_id storeName picture isVerified geoLocation',
+          populate: {
+            path: 'category',
+            select: 'name section',
+            populate: {
+              path: 'section',
+              select: '_id name',
+            },
+          },
+        },
+        {
+          path: 'items',
+          select: '_id service quantity price',
+          populate: {
+            path: 'service',
+            select: 'title',
+          },
+        },
+      ]);
+
+    console.log(reservations);
+
+    return reservations;
   }
 }

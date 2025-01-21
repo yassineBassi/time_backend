@@ -46,7 +46,7 @@ export interface Store extends User {
   workingTimes: mongoose.Schema.Types.ObjectId;
   services: mongoose.Schema.Types.ObjectId[];
   reports: mongoose.Schema.Types.ObjectId[];
-  available: string;
+  available: boolean;
 }
 
 StoreSchema.virtual('lat').get(function (this: Store) {

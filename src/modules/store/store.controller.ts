@@ -72,7 +72,7 @@ export class StoreController {
   async getMapStores(
     @Query('latitude') latitude: string,
     @Query('longitude') longitude: string,
-    @CurrentUser() client: Client
+    @CurrentUser() client: Client,
   ) {
     return Response.success(
       await this.storeService.getMapStores(latitude, longitude, client),
@@ -93,6 +93,18 @@ export class StoreController {
   @UseGuards(JwtAuthGuard, RolesGuard(UserType.CLIENT))
   async getStoreComments(@Query('storeId') storeId: string) {
     return Response.success(await this.storeService.getStoreComments(storeId));
+  }
+
+  @Post('toggle-availability')
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE))
+  async toggleAvailablity(@CurrentUser() store: Store) {
+    return Response.success(await this.storeService.toggleAvailablity(store));
+  }
+
+  @Get('availability')
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE))
+  async fetchAvailability(@CurrentUser() store: Store) {
+    return Response.success(await this.storeService.fetchAvailability(store));
   }
 
   @Get(':id')
@@ -124,5 +136,4 @@ export class StoreController {
       await this.storeService.reportStore(message, reservationId, client),
     );
   }
-
 }

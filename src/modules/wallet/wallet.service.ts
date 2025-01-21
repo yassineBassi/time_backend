@@ -13,10 +13,12 @@ import { Reservation } from 'src/mongoose/reservation';
 import { User } from 'src/mongoose/user';
 import { CouponService } from '../coupon/coupon.service';
 import { PointsTransfer } from 'src/mongoose/points-transfer';
-import { transactionType } from 'src/common/models/enums/transaction-type';
+import { TransactionType } from 'src/common/models/enums/transaction-type';
 import { Store } from 'src/mongoose/store';
 import { WithdrawRequest } from 'src/mongoose/withdraw-request';
 import { WithdrawRequestStatus } from 'src/common/models/enums/withdraw-request-status';
+import { Transaction } from 'src/common/models/transaction';
+import { ReservationService } from '../reservation/reservation.service';
 
 @Injectable()
 export class WalletService {
@@ -30,6 +32,7 @@ export class WalletService {
     @InjectModel('WithdrawRequest')
     private readonly withdrawRequestModel: Model<WithdrawRequest>,
     private readonly couponService: CouponService,
+    private readonly reservationService: ReservationService,
   ) {}
 
   async getMyWallet(user: User) {
@@ -54,21 +57,8 @@ export class WalletService {
         .reduce((acc, curr) => acc + curr);
     }
 
-    let transactions = [];
-    for (const r of reservations) {
-      for (const i of r.items) {
-        const item: any = i;
-        transactions.push({
-          _id: item.id,
-          label: item.service.title,
-          price: item.price * item.quantity,
-          points: item.price * item.quantity,
-          number: r.number,
-          type: transactionType.RESERVATION,
-          date: new Date((r as any).createdAt),
-        });
-      }
-    }
+    let transactions: Transaction[] =
+      this.reservationService.reservationsToTransactions(reservations);
 
     if (user.type == UserType.CLIENT) {
       const transfers = await this.pointsTransfernModel
@@ -91,7 +81,7 @@ export class WalletService {
           price: (t.coupon as any).discount,
           points: t.points,
           number: '',
-          type: transactionType.POINTS_TRANSFER,
+          type: TransactionType.POINTS_TRANSFER,
           date: new Date((t as any).createdAt),
         });
       }
@@ -114,7 +104,7 @@ export class WalletService {
           points: r.amount,
           number: '',
           status: r.status,
-          type: transactionType.WITHDRAW_FUNDS,
+          type: TransactionType.WITHDRAW_FUNDS,
           date: new Date((r as any).createdAt),
         });
       }

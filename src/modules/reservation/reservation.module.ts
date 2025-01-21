@@ -27,5 +27,6 @@ import { CouponModule } from '../coupon/coupon.module';
   ],
   controllers: [ReservationController],
   providers: [ReservationService, CouponService],
+  exports: [ReservationService]
 })
 export class ReservationModule {}

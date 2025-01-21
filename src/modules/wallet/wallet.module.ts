@@ -8,11 +8,21 @@ import { CouponSchema } from 'src/mongoose/coupon';
 import { PointsTransferSchema } from 'src/mongoose/points-transfer';
 import { WithdrawRequestSchema } from 'src/mongoose/withdraw-request';
 import { StoreSchema } from 'src/mongoose/store';
+import { ReservationService } from '../reservation/reservation.service';
+import { ReservationItemSchema } from 'src/mongoose/reservation-item';
+import { ServiceSchema } from 'src/mongoose/service';
+import { ReservationModule } from '../reservation/reservation.module';
+import { StoreReviewSchema } from 'src/mongoose/store-review';
+import { StoreReportSchema } from 'src/mongoose/store-report';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: 'Reservation', schema: ReservationSchema },
+      { name: 'ReservationItem', schema: ReservationItemSchema },
+      { name: 'Service', schema: ServiceSchema },
+      { name: 'StoreReview', schema: StoreReviewSchema },
+      { name: 'StoreReport', schema: StoreReportSchema },
       { name: 'Coupon', schema: CouponSchema },
       { name: 'PointsTransfer', schema: PointsTransferSchema },
       { name: 'Store', schema: StoreSchema },
@@ -20,6 +30,6 @@ import { StoreSchema } from 'src/mongoose/store';
     ]),
   ],
   controllers: [WalletController],
-  providers: [WalletService, CouponService],
+  providers: [WalletService, CouponService, ReservationService],
 })
 export class WalletModule {}
