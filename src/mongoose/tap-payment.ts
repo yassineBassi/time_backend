@@ -17,6 +17,7 @@ export const TapPaymentSchema = new mongoose.Schema(
     customer_phone_number: { type: String },
     merchant_id: { type: String },
     type: { type: String },
+    responeBody: { type: String }
   },
   { timestamps: true },
 );
@@ -37,4 +38,5 @@ export interface TapPayment {
   customer_phone_number: string;
   merchant_id: string;
   type: string;
+  responeBody: string
 }

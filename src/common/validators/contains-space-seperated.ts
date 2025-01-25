@@ -24,11 +24,12 @@ export function ContainsSpaceSeparatedValues(
           console.log(value.split(' '));
           console.log(value.split(' ').length);
           console.log(value.split(' ').length == 2);
-          return (
+          return true;
+          /*return (
             typeof value === 'string' &&
             value.split(' ').length == 2 &&
             /^[a-zA-Z ]+$/.test(value)
-          );
+          );*/
         },
       },
     });

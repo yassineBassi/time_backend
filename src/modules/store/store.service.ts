@@ -157,7 +157,7 @@ export class StoreService {
       ...this.defaultFilter,
       geoLocation: {
         $near: {
-          $maxDistance: 5000,
+          $maxDistance: 10000 * 1000,
           $geometry: {
             type: 'Point',
             coordinates: [latitude, longitude],
@@ -177,11 +177,27 @@ export class StoreService {
   async getStores(params: any, client: Client) {
     const filter = {
       ...this.defaultFilter,
-      category: params['category'],
       country: params['country'],
-      area: params['area'],
-      city: params['city'],
     };
+    console.log('params : ', params);
+
+    if (params['category'] && params['category'] != 'all') {
+      filter['category'] = params['category'];
+    } else if (params['section'] && params['section'] != 'all') {
+      filter['category'] = {
+        $in: await this.storeCategoryModel.find({ section: params['section'] }),
+      };
+    }
+    if (params['area'] && params['area'] != 'all') {
+      filter['area'] = params['area'];
+    }
+    if (params['city'] && params['city'] != 'all') {
+      filter['city'] = params['city'];
+    }
+
+    if (params['search'] && params['search'].length) {
+      filter['storeName'] = { $regex: new RegExp(`^${params['search']}`, 'i') };
+    }
 
     const stores = await this.storeModel
       .find(filter)

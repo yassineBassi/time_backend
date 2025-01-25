@@ -64,6 +64,7 @@ export class PaymentService {
         request.customer.phone.number,
       merchant_id: request.merchant.id,
       type: metadata.type,
+      responeBody: JSON.stringify(request)
     });
 
     tapPayment = await tapPayment.save();
