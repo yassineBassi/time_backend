@@ -24,20 +24,21 @@ import { UserType } from 'src/common/models/enums/user-type';
 import { SubscriptionService } from '../subscription/subscription.service';
 import { LoginWithTwitterDTO } from './dtos/login-with-twitter.dto';
 import { LoginWithAppleDTO } from './dtos/login-with-apple.dto';
-import { EditStoreProfileDTO } from './dtos/edit-store-profile.dto';
 import { EditClientProfileDTO } from './dtos/edi-client-profile.dto';
+import { AdminLoginDTO } from './dtos/admin-login';
+import { Admin } from 'src/mongoose/admin';
 
 const SALT_ROUNDS = 10;
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectModel('User')
-    private readonly userModel: Model<User>,
     @InjectModel('Client')
     private readonly clientModel: Model<Client>,
     @InjectModel('Store')
     private readonly storeModel: Model<Store>,
+    @InjectModel('Admin')
+    private readonly adminModel: Model<Admin>,
     @InjectModel('OtpToken')
     private readonly OtpTokenModel: Model<OtpToken>,
     private readonly jwtService: JwtService,
@@ -380,5 +381,22 @@ export class AuthService {
     await this.clientModel.findByIdAndUpdate(currentUser.id, request).exec();
 
     return await this.getProfile(currentUser);
+  }
+
+  async validateAdmin(email: string, password: string) {
+    const account = await this.adminModel.findOne({ email });
+
+    if (!account) throw new BadRequestException('errors.bad_credentials');
+
+    if (account.password != bcrypt.hashSync(password, account.salt)) {
+      throw new BadRequestException('errors.bad_credentials');
+    }
+
+    return account;
+  }
+
+  async loginAdmin(request: AdminLoginDTO) {
+    const account = await this.validateAdmin(request.email, request.password);
+    return this.loginAccount(account);
   }
 }

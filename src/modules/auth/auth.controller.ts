@@ -3,7 +3,6 @@ import {
   Controller,
   Get,
   Post,
-  UploadedFile,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
@@ -29,6 +28,7 @@ import { EditStoreProfileDTO } from './dtos/edit-store-profile.dto';
 import { Store } from 'src/mongoose/store';
 import { EditClientProfileDTO } from './dtos/edi-client-profile.dto';
 import { Client } from 'src/mongoose/client';
+import { AdminLoginDTO } from './dtos/admin-login';
 
 @Controller('auth')
 export class AuthController {
@@ -140,5 +140,11 @@ export class AuthController {
     return await Response.success(
       await this.authService.editClientProfile(request, currentUser),
     );
+  }
+
+  // dashboard APIs
+  @Post('login/admin')
+  async loginAdmin(@Body() request: AdminLoginDTO) {
+    return Response.success(await this.authService.loginAdmin(request));
   }
 }

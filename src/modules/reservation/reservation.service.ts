@@ -148,8 +148,6 @@ export class ReservationService {
       filter['client'] = user.id;
     }
 
-    console.log(filter);
-
     const reservations: any = await this.reservationModel
       .find(filter)
       .populate([
@@ -181,8 +179,6 @@ export class ReservationService {
       .sort({
         updatedAt: -1,
       });
-
-      console.log(reservations);
 
     if (user.type == UserType.CLIENT) {
       for (let i = 0; i < reservations.length; i++) {

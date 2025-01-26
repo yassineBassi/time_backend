@@ -4,12 +4,15 @@ import { UserType } from 'src/common/models/enums/user-type';
 
 const Schema = new mongoose.Schema(
   {
-    picture: { type: String, default: 'images/avatar.png' },
+    picture: {
+      type: String,
+      default: 'public/images/clients/default-client.jpeg',
+    },
     username: { type: String, required: true, unique: true },
     fullName: { type: String },
-    country: { type: String, required: true },
-    city: { type: String, required: true },
-    area: { type: String, required: true },
+    country: { type: String },
+    city: { type: String },
+    area: { type: String },
     email: { type: String, required: true },
     googleID: { type: String, required: false, default: '' },
     firebaseID: { type: String, required: false, default: '' },

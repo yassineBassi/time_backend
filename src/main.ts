@@ -7,6 +7,12 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.enableCors({
+    origin: '*',
+    methods: 'GET, POST',
+    credentials: true,
+  });
+
   const config = new DocumentBuilder()
     .setTitle('Time api')
     .setDescription('Time API description')

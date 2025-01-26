@@ -44,6 +44,9 @@ import { GiftModule } from './modules/gift/gift.module';
 import { UserStatus } from './common/models/enums/user-status';
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
 import { ClientModule } from './modules/client/client.module';
+import { Admin, AdminSchema } from './mongoose/admin';
+import * as bcrypt from 'bcrypt';
+import { UserType } from './common/models/enums/user-type';
 
 @Module({
   imports: [
@@ -60,6 +63,7 @@ import { ClientModule } from './modules/client/client.module';
       { name: 'WorkingTime', schema: WorkingTimeSchema },
       { name: 'Reservation', schema: ReservationSchema },
       { name: 'GiftCard', schema: GiftCardSchema },
+      { name: 'Admin', schema: AdminSchema },
     ]),
     I18nModule.forRoot({
       fallbackLanguage: 'ar',
@@ -141,8 +145,11 @@ export class AppModule implements NestModule {
     private reservationModel: Model<Reservation>,
     @InjectModel('GiftCard')
     private giftCardModel: Model<GiftCard>,
+    @InjectModel('Admin')
+    private adminModel: Model<Admin>,
   ) {
     setTimeout(async () => {
+
       /*const stores = await this.storeModel.find({});
 
       const lats = [

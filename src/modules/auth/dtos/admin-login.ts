@@ -1,8 +1,8 @@
 import { IsNotEmpty } from 'class-validator';
 
-export class LoginDTO {
+export class AdminLoginDTO {
   @IsNotEmpty()
-  phoneNumber: string;
+  email: string;
 
   @IsNotEmpty()
   password: string;

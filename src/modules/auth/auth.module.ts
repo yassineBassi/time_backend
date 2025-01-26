@@ -14,14 +14,15 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { FirebaseAdminModule } from '../firebase-admin/firebase-admin.module';
 import { SubscriptionModule } from '../subscription/subscription.module';
+import { AdminSchema } from 'src/mongoose/admin';
 
 @Module({
   imports: [
     SubscriptionModule,
     MongooseModule.forFeature([
-      { name: 'User', schema: UserSchema },
       { name: 'Client', schema: ClientSchema },
       { name: 'Store', schema: StoreSchema },
+      { name: 'Admin', schema: AdminSchema },
       { name: 'OtpToken', schema: OtpTokenSchema },
     ]),
     PassportModule,
