@@ -18,6 +18,7 @@ import { WorkingTime } from 'src/mongoose/working-time';
 import { RateStoreDTO } from './dto/rate-store.sto';
 import { StoreReport } from 'src/mongoose/store-report';
 import { UserStatus } from 'src/common/models/enums/user-status';
+import { I18nService } from 'nestjs-i18n';
 
 @Injectable()
 export class StoreService {
@@ -36,6 +37,7 @@ export class StoreService {
     private readonly storeReviewModel: Model<StoreReview>,
     @InjectModel('StoreReport')
     private readonly storeReportModel: Model<StoreReport>,
+    private readonly i18n: I18nService,
   ) {}
 
   defaultSelect =
@@ -152,26 +154,71 @@ export class StoreService {
     return this.addFieldsToStores(stores, client);
   }
 
+  async getStoresWithSegments(client: Client) {
+    const storesMap = {};
+
+    const limit = 3;
+
+    // last seen stores
+    storesMap[this.i18n.translate('messages.last_seen')] =
+      this.addFieldsToStores(
+        await this.storeModel
+          .find(this.defaultFilter)
+          .select(this.defaultSelect)
+          .populate(this.defaultPopulate)
+          .limit(limit),
+        client,
+      );
+
+    // suggested stores
+    storesMap[this.i18n.translate('messages.suggested')] =
+      this.addFieldsToStores(
+        await this.storeModel
+          .find(this.defaultFilter)
+          .select(this.defaultSelect)
+          .populate(this.defaultPopulate)
+          .limit(limit),
+        client,
+      );
+
+    // most reserved
+    storesMap[this.i18n.translate('messages.most_reserved')] =
+      this.addFieldsToStores(
+        await this.storeModel
+          .find(this.defaultFilter)
+          .select(this.defaultSelect)
+          .populate(this.defaultPopulate)
+          .limit(limit),
+        client,
+      );
+
+    return storesMap;
+  }
+
   async getMapStores(latitude: string, longitude: string, client: Client) {
     const filter = {
       ...this.defaultFilter,
       geoLocation: {
         $near: {
-          $maxDistance: 10000 * 1000,
+          $maxDistance: 50000 * 1000,
           $geometry: {
             type: 'Point',
-            coordinates: [latitude, longitude],
+            coordinates: [longitude, latitude],
           },
         },
       },
     };
 
-    const stores = await this.storeModel
+    let stores = await this.storeModel
       .find(filter)
       .select(this.defaultSelect)
       .populate(this.defaultPopulate);
 
-    return this.addFieldsToStores(stores, client);
+    stores = await this.addFieldsToStores(stores, client);
+
+    console.log(stores);
+
+    return stores;
   }
 
   async getStores(params: any, client: Client) {

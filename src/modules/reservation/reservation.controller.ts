@@ -70,8 +70,10 @@ export class ReservationController {
 
   @Get('statistics')
   @UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE))
-  async statistics(@CurrentUser() user: Store) {
-    return Response.success(await this.reservationService.statistics(user));
+  async statistics(@CurrentUser() user: Store, @Query('date') date: string) {
+    return Response.success(
+      await this.reservationService.statistics(user, date),
+    );
   }
 
   @Get('transactions')

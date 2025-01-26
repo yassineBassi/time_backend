@@ -148,6 +148,8 @@ export class ReservationService {
       filter['client'] = user.id;
     }
 
+    console.log(filter);
+
     const reservations: any = await this.reservationModel
       .find(filter)
       .populate([
@@ -179,6 +181,8 @@ export class ReservationService {
       .sort({
         updatedAt: -1,
       });
+
+      console.log(reservations);
 
     if (user.type == UserType.CLIENT) {
       for (let i = 0; i < reservations.length; i++) {
@@ -219,6 +223,7 @@ export class ReservationService {
     }
 
     reservation.status = ReservationStatus.CANCELED;
+    reservation.canceledAt = new Date();
 
     return await reservation.save();
   }
@@ -263,22 +268,51 @@ export class ReservationService {
     };
   }
 
-  async statistics(user: Store) {
+  async statistics(user: Store, date: string) {
+
+
+    const completedFilter = {
+      store: user.id,
+      status: ReservationStatus.COMPLETED,
+    };
+    const canceledFilter = {
+      store: user.id,
+      status: {
+        $in: [ReservationStatus.REJECTED, ReservationStatus.CANCELED],
+      },
+    };
+    const inProgressFilter = {
+      store: user.id,
+      status: ReservationStatus.PAYED,
+    };
+
+    if (date && date.length) {
+      date = date.split(' ')[0];
+      const minDate = new Date(date + ' 00:00:00.000Z');
+      const maxDate = new Date(date + ' 23:59:59.000Z');
+
+      completedFilter['reservationDate'] = {
+        $gt: minDate,
+        $lt: maxDate,
+      };
+
+      canceledFilter['canceledAt'] = {
+        $gt: minDate,
+        $lt: maxDate,
+      };
+
+      /*
+      inProgressFilter['canceledAt'] = {
+        $gt: minDate,
+        $lt: maxDate,
+      };
+      */
+    }
+
     return {
-      inProgress: await this.reservationModel.countDocuments({
-        store: user.id,
-        status: ReservationStatus.PAYED,
-      }),
-      completed: await this.reservationModel.countDocuments({
-        store: user.id,
-        status: ReservationStatus.COMPLETED,
-      }),
-      canceled: await this.reservationModel.countDocuments({
-        store: user.id,
-        status: {
-          $in: [ReservationStatus.REJECTED, ReservationStatus.CANCELED],
-        },
-      }),
+      inProgress: await this.reservationModel.countDocuments(inProgressFilter),
+      completed: await this.reservationModel.countDocuments(completedFilter),
+      canceled: await this.reservationModel.countDocuments(canceledFilter),
     };
   }
 

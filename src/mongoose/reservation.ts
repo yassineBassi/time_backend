@@ -22,6 +22,7 @@ export const ReservationSchema = new mongoose.Schema(
     clientPhoneNumber: { type: Number },
     clientAddress: { type: Number },
     reports: [],
+    canceledAt: { type: Date },
   },
   { timestamps: true },
 );
@@ -40,6 +41,7 @@ export interface Reservation extends mongooseDelete.SoftDeleteDocument {
   payedPrice: number;
   clientPhoneNumber: string;
   clientAddress: string;
+  canceledAt: Date;
 }
 
 export type ReservationModel = mongooseDelete.SoftDeleteModel<Reservation>;

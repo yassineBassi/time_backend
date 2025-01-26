@@ -47,7 +47,4 @@ export class EditStoreProfileDTO {
   @IsString()
   city: string;
 
-  @IsNotEmpty()
-  @MinLength(23)
-  accountNumber: string;
 }

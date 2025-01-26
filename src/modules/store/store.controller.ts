@@ -61,6 +61,14 @@ export class StoreController {
     );
   }
 
+  @Get('with-segments')
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.CLIENT))
+  async getStoresWithSegments(@CurrentUser() client: Client) {
+    return Response.success(
+      await this.storeService.getStoresWithSegments(client),
+    );
+  }
+
   @Get('')
   @UseGuards(JwtAuthGuard, RolesGuard(UserType.CLIENT))
   async getStores(@Query() params: any, @CurrentUser() client: Client) {

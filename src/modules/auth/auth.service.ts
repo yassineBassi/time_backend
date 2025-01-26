@@ -182,9 +182,6 @@ export class AuthService {
       firebaseID: request.firebaseID,
     });
 
-    console.log('------**----------');
-    console.log(account);
-
     return this.loginAccount(account);
   }
 
@@ -222,9 +219,6 @@ export class AuthService {
       const user = await this.firebaseService.getUserByUid(
         registerClientDTO.firebaseID as string,
       );
-      console.log('returened user : ', user);
-      console.log('returened user id : ', user.uid);
-      console.log('apple id : ', registerClientDTO.appleID);
       if (
         !user ||
         ![
@@ -339,6 +333,30 @@ export class AuthService {
   }
 
   async getProfile(user: any) {
+    const select =
+      '_id picture email phoneNumber type fullName country city area';
+    if (user.type == UserType.STORE) {
+      user = await this.storeModel
+        .findById(user.id)
+        .select(
+          select + ' storeName subscription category geolocation lat lng ',
+        )
+        .populate({
+          path: 'category',
+          select: '_id name section',
+          populate: {
+            path: 'section',
+            select: '_id name',
+          },
+        });
+    } else {
+      user = await this.clientModel
+        .findById(user.id)
+        .select(
+          select + ' storeName subscription category geolocation lat lng ',
+        );
+    }
+    console.log(user);
     return user;
   }
 
@@ -349,11 +367,9 @@ export class AuthService {
 
     if (picture && picture.length) request.picture = picture;
 
-    const store = await this.storeModel
-      .findByIdAndUpdate(currentUser.id, request)
-      .exec();
+    await this.storeModel.findByIdAndUpdate(currentUser.id, request).exec();
 
-    return store;
+    return await this.getProfile(currentUser);
   }
 
   async editClientProfile(request: EditClientProfileDTO, currentUser: Client) {
@@ -361,10 +377,8 @@ export class AuthService {
       throw new ForbiddenException();
     }
 
-    const client = await this.clientModel
-      .findByIdAndUpdate(currentUser.id, request)
-      .exec();
+    await this.clientModel.findByIdAndUpdate(currentUser.id, request).exec();
 
-    return client;
+    return await this.getProfile(currentUser);
   }
 }

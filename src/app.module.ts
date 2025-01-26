@@ -111,13 +111,13 @@ import { ClientModule } from './modules/client/client.module';
     WinstonLogger,
     {
       provide: APP_INTERCEPTOR,
-      useClass: WinstonLogger
-    }
+      useClass: WinstonLogger,
+    },
   ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggerMiddleware).forRoutes('*');  
+    consumer.apply(LoggerMiddleware).forRoutes('*');
   }
 
   constructor(
@@ -143,11 +143,29 @@ export class AppModule implements NestModule {
     private giftCardModel: Model<GiftCard>,
   ) {
     setTimeout(async () => {
-      /*const stores = await this.storeModel.find();
+      /*const stores = await this.storeModel.find({});
+
+      const lats = [
+        33.50257139798814, 33.51594429344873, 33.5045942321576,
+        33.521525361431095, 33.510684595744266, 33.56966136180068,
+        33.535115215193855, 33.52103470860897, 33.53493110196977,
+        33.51535705672033, 33.470569018357914, 33.488278206373685,
+        33.482329026830925,
+      ];
+
+      console.log(lats.length);
+      console.log(stores.length);
+
+      let ind = 0;
       stores.forEach(async (s) => {
-        s.available = true;
-        await s.save();
-      });*/
+        console.log('---------------------');
+        console.log(s.geoLocation.coordinates)
+        if (s.geoLocation.coordinates[1] < 0) {
+          ind++;
+        }
+      });
+
+      console.log();*/
     }, 1000);
   }
 }

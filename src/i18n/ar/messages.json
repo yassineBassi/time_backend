@@ -3,5 +3,8 @@
     "cancel_reservation_date_passed": "لا يمكن إلغاء حجز تم إجراؤه قبل أكثر من 24 ساعة",
     "coupon_not_exist": "رمز القسيمة غير صالح",
     "coupon_expired": "هذه القسيمة منتهية الصلاحية",
-    "coupon_used": "هذه القسيمة مستخدمة بالفعل"
+    "coupon_used": "هذه القسيمة مستخدمة بالفعل",
+    "last_seen": "شوهدت مؤخراً",
+    "suggested": "مقترح لك",
+    "most_reserved": "الأكثر حجزاً"
 }
