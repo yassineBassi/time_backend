@@ -6,9 +6,14 @@ export class LoggerMiddleware implements NestMiddleware {
   use(req: any, res: any, next: (error?: Error | any) => void) {
     const { method, originalUrl, body, headers } = req;
 
+    if (originalUrl.split('/')[1] == 'images') return next();
+
+
+    logger.info('--------------------------------------------');
     logger.info('request : ' + method + ' ' + originalUrl);
     logger.info('headers: ' + JSON.stringify(headers));
     logger.info('body: ' + JSON.stringify(body));
+    logger.info('--------------------------------------------');
 
     const startTime = Date.now();
     res.on('finish', () => {

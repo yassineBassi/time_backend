@@ -7,6 +7,7 @@ import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Client } from 'src/mongoose/client';
 import { UserType } from 'src/common/models/enums/user-type';
+import { Admin } from 'src/mongoose/admin';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -15,6 +16,8 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     private readonly storeModel: Model<Store>,
     @InjectModel('Client')
     private readonly clientModel: Model<Client>,
+    @InjectModel('Admin')
+    private readonly adminModel: Model<Admin>,
     configService: ConfigService,
   ) {
     super({
@@ -25,10 +28,14 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(payload: any) {
-    const account =
-      payload.type == UserType.STORE
-        ? await this.storeModel.findById(payload.sub)
-        : await this.clientModel.findById(payload.sub);
+    let account;
+
+    if (payload.type == UserType.STORE)
+      account = await this.storeModel.findById(payload.sub);
+    if (payload.type == UserType.CLIENT)
+      account = await this.clientModel.findById(payload.sub);
+    if (payload.type == UserType.ADMIN)
+      account = await this.adminModel.findById(payload.sub);
 
     return account;
   }

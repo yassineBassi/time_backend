@@ -18,6 +18,7 @@ import { Store } from 'src/mongoose/store';
 import { StoresListSegment } from 'src/common/models/enums/stores-list-segement';
 import { Client } from 'src/mongoose/client';
 import { RateStoreDTO } from './dto/rate-store.sto';
+import { DashboardFilterQuery } from 'src/common/models/dahsboard-filter-query';
 
 @Controller('store')
 export class StoreController {
@@ -113,6 +114,38 @@ export class StoreController {
   @UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE))
   async fetchAvailability(@CurrentUser() store: Store) {
     return Response.success(await this.storeService.fetchAvailability(store));
+  }
+
+  @Get('dashboard')
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.ADMIN))
+  async fetchDashboardStores(@Query() query: DashboardFilterQuery) {
+    return Response.success(
+      await this.storeService.fetchDashboardStores(query),
+    );
+  }
+
+  @Post('block')
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.ADMIN))
+  async blockStores(@Body('ids') ids: string[]) {
+    return Response.success(await this.storeService.blockStores(ids));
+  }
+
+  @Post('suspend')
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.ADMIN))
+  async susbpendStores(@Body('ids') ids: string[]) {
+    return Response.success(await this.storeService.suspendStores(ids));
+  }
+
+  @Post('enable')
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.ADMIN))
+  async enableStores(@Body('ids') ids: string[]) {
+    return Response.success(await this.storeService.enableStores(ids));
+  }
+
+  @Get('dashboard/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.ADMIN))
+  async getStoreInDashboard(@Param('id') id: string) {
+    return Response.success(await this.storeService.getStoreInDashboard(id));
   }
 
   @Get(':id')

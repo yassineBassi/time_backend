@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { ReservationStatus } from 'src/common/models/enums/reservation-status';
 import { StoresListSegment } from 'src/common/models/enums/stores-list-segement';
 import { Client } from 'src/mongoose/client';
@@ -19,6 +19,7 @@ import { RateStoreDTO } from './dto/rate-store.sto';
 import { StoreReport } from 'src/mongoose/store-report';
 import { UserStatus } from 'src/common/models/enums/user-status';
 import { I18nService } from 'nestjs-i18n';
+import { DashboardFilterQuery } from 'src/common/models/dahsboard-filter-query';
 
 @Injectable()
 export class StoreService {
@@ -226,7 +227,6 @@ export class StoreService {
       ...this.defaultFilter,
       country: params['country'],
     };
-    console.log('params : ', params);
 
     if (params['category'] && params['category'] != 'all') {
       filter['category'] = params['category'];
@@ -441,5 +441,84 @@ export class StoreService {
     return {
       available: store.available,
     };
+  }
+
+  // Admin services
+
+  async fetchDashboardStores(query: DashboardFilterQuery) {
+    const searchQuery = JSON.parse(decodeURIComponent(query.searchQuery));
+
+    const searchFilter = {};
+
+    Object.keys(searchQuery).forEach((k) => {
+      if (searchQuery[k].length)
+        searchFilter[k] = { $regex: new RegExp(`${searchQuery[k]}`, 'i') };
+    });
+
+    console.log(searchFilter);
+
+    const stores = await this.storeModel
+      .find(searchFilter)
+      .select(
+        '_id picture storeName phoneNumber email address status fullName createdAt',
+      )
+      .sort({ createdAt: -1 })
+      .skip(query.skip)
+      .limit(query.take);
+
+    return {
+      stores,
+      count: await this.storeModel.countDocuments(),
+    };
+  }
+
+  async blockStores(ids: string[]) {
+    const result = await this.storeModel.updateMany(
+      {
+        _id: {
+          $in: ids,
+        },
+      },
+      {
+        status: UserStatus.BLOCKED,
+      },
+    );
+
+    return result;
+  }
+
+  async suspendStores(ids: string[]) {
+    const result = await this.storeModel.updateMany(
+      {
+        _id: {
+          $in: ids,
+        },
+      },
+      {
+        status: UserStatus.SUSPENDED,
+      },
+    );
+
+    return result;
+  }
+
+  async enableStores(ids: string[]) {
+    const result = await this.storeModel.updateMany(
+      {
+        _id: {
+          $in: ids,
+        },
+      },
+      {
+        status: UserStatus.ENABLED,
+      },
+    );
+
+    return result;
+  }
+
+  async getStoreInDashboard(id: string){
+    const store = this.storeModel.findById(id);
+    return store;
   }
 }
