@@ -23,6 +23,8 @@ import { CouponService } from '../coupon/coupon.service';
 import { UserStatus } from 'src/common/models/enums/user-status';
 import { TransactionType } from 'src/common/models/enums/transaction-type';
 import { Transaction } from 'src/common/models/transaction';
+import { Cron } from '@nestjs/schedule';
+import { logger } from 'src/common/winston-logger';
 
 @Injectable()
 export class ReservationService {
@@ -265,8 +267,6 @@ export class ReservationService {
   }
 
   async statistics(user: Store, date: string) {
-
-
     const completedFilter = {
       store: user.id,
       status: ReservationStatus.COMPLETED,
@@ -397,5 +397,27 @@ export class ReservationService {
     console.log(reservations);
 
     return reservations;
+  }
+
+  @Cron('*/1 * * * *')
+  async completeReservationsCron() {
+    const result = await this.reservationModel.updateMany(
+      {
+        status: ReservationStatus.PAYED,
+        reservationDate: {
+          $lt: new Date(),
+        },
+      },
+      {
+        status: ReservationStatus.COMPLETED,
+      },
+    );
+    logger.info(
+      'update reservations status to completed (current date : ' +
+        new Date().toString() +
+        ', update result : ' +
+        JSON.stringify(result) +
+        ' )',
+    );
   }
 }

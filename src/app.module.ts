@@ -47,6 +47,7 @@ import { ClientModule } from './modules/client/client.module';
 import { Admin, AdminSchema } from './mongoose/admin';
 import * as bcrypt from 'bcrypt';
 import { UserType } from './common/models/enums/user-type';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -85,6 +86,7 @@ import { UserType } from './common/models/enums/user-type';
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
     }),
+    ScheduleModule.forRoot(),
     AuthModule,
     SharedModule,
     SectionModule,
