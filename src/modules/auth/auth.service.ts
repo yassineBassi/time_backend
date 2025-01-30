@@ -6,7 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { Client } from 'src/mongoose/client';
 import { OtpToken } from 'src/mongoose/otp-token';
 import { RegisterClientDTO } from './dtos/register-client.dto';
@@ -27,6 +27,7 @@ import { LoginWithAppleDTO } from './dtos/login-with-apple.dto';
 import { EditClientProfileDTO } from './dtos/edi-client-profile.dto';
 import { AdminLoginDTO } from './dtos/admin-login';
 import { Admin } from 'src/mongoose/admin';
+import { EditStoreProfileDTO } from './dtos/edit-store-profile.dto';
 
 const SALT_ROUNDS = 10;
 
@@ -340,7 +341,7 @@ export class AuthService {
       user = await this.storeModel
         .findById(user.id)
         .select(
-          select + ' storeName subscription category geolocation lat lng ',
+          select + ' storeName subscription category geolocation facilities lat lng ',
         )
         .populate({
           path: 'category',
@@ -366,9 +367,18 @@ export class AuthService {
       throw new ForbiddenException();
     }
 
+    const facilities = request.facilitiesIds.map(
+      (id) => new mongoose.Types.ObjectId(id),
+    );
+
     if (picture && picture.length) request.picture = picture;
 
-    await this.storeModel.findByIdAndUpdate(currentUser.id, request).exec();
+    await this.storeModel
+      .findByIdAndUpdate(currentUser.id, {
+        ...request,
+        facilities,
+      })
+      .exec();
 
     return await this.getProfile(currentUser);
   }

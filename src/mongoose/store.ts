@@ -22,6 +22,7 @@ export const StoreSchema = new mongoose.Schema(
     reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'StoreReview' }],
     reports: [{ type: mongoose.Schema.Types.ObjectId, ref: 'StoreReport' }],
     available: { type: Boolean, default: false },
+    facilities: [{ type: mongoose.Types.ObjectId, ref: 'FacilityItem' }],
   },
   {
     timestamps: true,
@@ -47,6 +48,7 @@ export interface Store extends User {
   services: mongoose.Schema.Types.ObjectId[];
   reports: mongoose.Schema.Types.ObjectId[];
   available: boolean;
+  facilities: mongoose.Types.ObjectId[];
 }
 
 StoreSchema.virtual('lat').get(function (this: Store) {

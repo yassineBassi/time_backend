@@ -70,6 +70,8 @@ export class ReservationService {
   async createReservation(request: createReservationDTO, client: Client) {
     const store = await this.storeModel.findById(request.storeId);
 
+    console.log('reservation date : ', request.reservationDate)
+
     // check if store enable and available
 
     if (!store.available) {

@@ -13,7 +13,6 @@ export const ServiceSchema = new mongoose.Schema(
     discountType: { type: String, enum: Object.values(DiscountType) },
     enabled: { type: Boolean, default: false },
     duration: { type: Number },
-    facilities: [{ type: mongoose.Types.ObjectId, ref: 'FacilityItem' }],
   },
   { timestamps: true },
 );
@@ -34,7 +33,6 @@ export interface Service extends mongooseDelete.SoftDeleteDocument {
   discountType: DiscountType;
   enabled: boolean;
   duration: number;
-  facilities: mongoose.Types.ObjectId[];
 }
 
 export type ServiceModel = mongooseDelete.SoftDeleteModel<Service>;

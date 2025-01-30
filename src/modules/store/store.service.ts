@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import mongoose, { Model } from 'mongoose';
+import { Model } from 'mongoose';
 import { ReservationStatus } from 'src/common/models/enums/reservation-status';
 import { StoresListSegment } from 'src/common/models/enums/stores-list-segement';
 import { Client } from 'src/mongoose/client';
@@ -20,6 +20,7 @@ import { StoreReport } from 'src/mongoose/store-report';
 import { UserStatus } from 'src/common/models/enums/user-status';
 import { I18nService } from 'nestjs-i18n';
 import { DashboardFilterQuery } from 'src/common/models/dahsboard-filter-query';
+import { Facility } from 'src/mongoose/facility';
 
 @Injectable()
 export class StoreService {
@@ -38,6 +39,8 @@ export class StoreService {
     private readonly storeReviewModel: Model<StoreReview>,
     @InjectModel('StoreReport')
     private readonly storeReportModel: Model<StoreReport>,
+    @InjectModel('Facility')
+    private readonly facilityModel: Model<Facility>,
     private readonly i18n: I18nService,
   ) {}
 
@@ -149,6 +152,7 @@ export class StoreService {
         .find(this.defaultFilter)
         .select(this.defaultSelect)
         .populate(this.defaultPopulate)
+        .sort({})
         .limit(limit);
     }
 
@@ -167,6 +171,7 @@ export class StoreService {
           .find(this.defaultFilter)
           .select(this.defaultSelect)
           .populate(this.defaultPopulate)
+          .sort({ createdAt: -1 })
           .limit(limit),
         client,
       );
@@ -520,5 +525,10 @@ export class StoreService {
   async getStoreInDashboard(id: string){
     const store = this.storeModel.findById(id);
     return store;
+  }
+
+  async getFacilities() {
+    const facilities = await this.facilityModel.find().populate('items');
+    return facilities;
   }
 }

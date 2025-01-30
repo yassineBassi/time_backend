@@ -7,6 +7,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { UserType } from '../models/enums/user-type';
+import { logger } from '../winston-logger';
 
 export const RolesGuard = (role: UserType): Type<CanActivate> => {
   class RoleGuardMixin implements CanActivate {
@@ -19,6 +20,8 @@ export const RolesGuard = (role: UserType): Type<CanActivate> => {
       }
 
       if (user.type.trim() != role.trim()) {
+        logger.info('required role ' + role);
+        logger.info('user role ' + user.type);
         throw new ForbiddenException('errors.forbiedden_role');
       }
 

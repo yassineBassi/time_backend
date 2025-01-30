@@ -11,6 +11,8 @@ import { WorkingTimeSchema } from 'src/mongoose/working-time';
 import { ReservationSchema } from 'src/mongoose/reservation';
 import { StoreReviewSchema } from 'src/mongoose/store-review';
 import { StoreReportSchema } from 'src/mongoose/store-report';
+import { FacilityItemSchema } from 'src/mongoose/facility-item';
+import { FacilitySchema } from 'src/mongoose/facility';
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import { StoreReportSchema } from 'src/mongoose/store-report';
       { name: 'Reservation', schema: ReservationSchema },
       { name: 'StoreReview', schema: StoreReviewSchema },
       { name: 'StoreReport', schema: StoreReportSchema },
+      { name: 'Facility', schema: FacilitySchema },
+      { name: 'FacilityItem', schema: FacilityItemSchema },
     ]),
   ],
   controllers: [ClientController],

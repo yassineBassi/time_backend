@@ -47,4 +47,6 @@ export class EditStoreProfileDTO {
   @IsString()
   city: string;
 
+  @IsNotEmpty()
+  facilitiesIds: string | string[];
 }

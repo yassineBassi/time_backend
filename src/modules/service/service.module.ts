@@ -14,9 +14,7 @@ import { FacilityItemSchema } from 'src/mongoose/facility-item';
     MongooseModule.forFeature([
       { name: 'ServiceCategory', schema: ServiceCategorySchema },
       { name: 'Service', schema: ServiceSchema },
-      { name: 'Store', schema: StoreSchema },
-      { name: 'Facility', schema: FacilitySchema },
-      { name: 'FacilityItem', schema: FacilityItemSchema },
+      { name: 'Store', schema: StoreSchema }
     ]),
     SubscriptionModule
   ],

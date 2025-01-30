@@ -7,10 +7,9 @@ import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
 import mongoose, { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { Service, ServiceModel } from 'src/mongoose/service';
+import { ServiceModel } from 'src/mongoose/service';
 import { Store } from 'src/mongoose/store';
 import { ServiceCategory } from 'src/mongoose/service-category';
-import { Facility } from 'src/mongoose/facility';
 
 @Injectable()
 export class ServiceService {
@@ -20,9 +19,7 @@ export class ServiceService {
     @InjectModel('ServiceCategory')
     private readonly serviceCategory: Model<ServiceCategory>,
     @InjectModel('Store')
-    private readonly storeModel: Model<Store>,
-    @InjectModel('Facility')
-    private readonly facilityModel: Model<Facility>,
+    private readonly storeModel: Model<Store>
   ) {}
 
   async create(
@@ -42,13 +39,6 @@ export class ServiceService {
     service.picture = picture;
     service.category = category.id;
     service.store = (await this.storeModel.findById(store.id)).id;
-
-    /*const facilities = (createServiceDto.facilitiesIds as string)
-      .slice(1, -1)
-      .split(', ')
-      .map((id) => new mongoose.Types.ObjectId(id));
-
-    service.facilities = facilities;*/
 
     service = await service.save();
 
@@ -120,10 +110,5 @@ export class ServiceService {
       .select('_id title picture price duration discount discountType enabled');
 
     return services;
-  }
-
-  async getFacilities() {
-    const facilities = await this.facilityModel.find().populate('items');
-    return facilities;
   }
 }

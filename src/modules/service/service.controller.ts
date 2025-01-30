@@ -103,10 +103,4 @@ export class ServiceController {
       await this.serviceService.fetchByCategoryId(categoryId),
     );
   }
-
-  @Get('facilities')
-  //@UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE), SubscribedStoreGuard)
-  async getFacilities() {
-    return Response.success(await this.serviceService.getFacilities());
-  }
 }

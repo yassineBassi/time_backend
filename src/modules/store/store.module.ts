@@ -10,6 +10,8 @@ import { StoreSchema } from 'src/mongoose/store';
 import { ReservationSchema } from 'src/mongoose/reservation';
 import { StoreReviewSchema } from 'src/mongoose/store-review';
 import { StoreReportSchema } from 'src/mongoose/store-report';
+import { FacilitySchema } from 'src/mongoose/facility';
+import { FacilityItemSchema } from 'src/mongoose/facility-item';
 
 @Module({
   imports: [
@@ -20,7 +22,9 @@ import { StoreReportSchema } from 'src/mongoose/store-report';
       { name: 'WorkingTime', schema: WorkingTimeSchema },
       { name: 'Reservation', schema: ReservationSchema },
       { name: 'StoreReview', schema: StoreReviewSchema },
-      { name: 'StoreReport', schema: StoreReportSchema },
+      { name: 'StoreReport', schema: StoreReportSchema },,
+      { name: 'Facility', schema: FacilitySchema },
+      { name: 'FacilityItem', schema: FacilityItemSchema },
     ]),
     SubscriptionModule,
   ],

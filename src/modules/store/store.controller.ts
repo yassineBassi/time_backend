@@ -116,6 +116,11 @@ export class StoreController {
     return Response.success(await this.storeService.fetchAvailability(store));
   }
 
+  @Get('facilities')
+  async getFacilities() {
+    return Response.success(await this.storeService.getFacilities());
+  }
+
   @Get('dashboard')
   @UseGuards(JwtAuthGuard, RolesGuard(UserType.ADMIN))
   async fetchDashboardStores(@Query() query: DashboardFilterQuery) {
