@@ -45,7 +45,7 @@ export class StoreService {
   ) {}
 
   defaultSelect =
-    'picture storeName category workingTimes available reviews geoLocation isVerified lat lng ';
+    'picture storeName category workingTimes available reviews facilities geoLocation isVerified lat lng ';
   defaultPopulate = [
     {
       path: 'category',
@@ -62,6 +62,9 @@ export class StoreService {
   defaultFilter = {
     status: UserStatus.ENABLED,
     available: true,
+    /*subscription: {
+      $not: null,
+    }*/
   };
 
   async getSections() {
