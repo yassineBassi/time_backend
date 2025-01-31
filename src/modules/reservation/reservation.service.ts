@@ -70,16 +70,14 @@ export class ReservationService {
   async createReservation(request: createReservationDTO, client: Client) {
     const store = await this.storeModel.findById(request.storeId);
 
-    console.log('reservation date : ', request.reservationDate)
-
     // check if store enable and available
 
     if (!store.available) {
-      return new ForbiddenException('messages.store_unavailable');
+      throw new ForbiddenException('messages.store_unavailable');
     }
 
     if (store.status != UserStatus.ENABLED) {
-      return new ForbiddenException('messages.store_not_exist_any_more');
+      throw new ForbiddenException('messages.store_not_exist_any_more');
     }
 
     // check if there are reservations in the wanted time
