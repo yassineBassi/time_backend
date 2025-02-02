@@ -133,7 +133,7 @@ export class AuthService {
     return account;
   }
 
-  async loginAccount(account) {
+  async loginAccount(account: User, notificationToken: string) {
     if (!account) {
       throw new NotFoundException('errors.account_not_found');
     }
@@ -161,10 +161,19 @@ export class AuthService {
         account = store;
       }
     }
-    ///////////////////////////////////////////
+
+    //////// set firebase notificatgion token /////////
+
+    if (notificationToken) {
+      await (
+        account.type == UserType.STORE ? this.storeModel : this.clientModel
+      ).updateOne({ _id: account.id }, { notificationToken });
+    }
+
+    //////////////////////////////////////////
 
     const payload = {
-      sub: account._id,
+      sub: account.id,
       username: account.username,
       type: account.type,
     };
@@ -184,7 +193,7 @@ export class AuthService {
       firebaseID: request.firebaseID,
     });
 
-    return this.loginAccount(account);
+    return this.loginAccount(account, request.notificationToken);
   }
 
   async loginWithTwitter(request: LoginWithTwitterDTO) {
@@ -193,7 +202,7 @@ export class AuthService {
       firebaseID: request.firebaseID,
     });
 
-    return this.loginAccount(account);
+    return this.loginAccount(account, request.notificationToken);
   }
 
   async loginWithApple(request: LoginWithAppleDTO) {
@@ -202,12 +211,12 @@ export class AuthService {
       firebaseID: request.firebaseID,
     });
 
-    return this.loginAccount(account);
+    return this.loginAccount(account, request.notificationToken);
   }
 
   async login(request: LoginDTO) {
     const account = await this.validate(request.phoneNumber, request.password);
-    return this.loginAccount(account);
+    return this.loginAccount(account, request.notificationToken);
   }
 
   async registerClient(registerClientDTO: RegisterClientDTO) {
@@ -256,6 +265,7 @@ export class AuthService {
     return this.login({
       phoneNumber: client.phoneNumber as string,
       password: registerClientDTO.password,
+      notificationToken: null,
     });
   }
 
@@ -316,6 +326,7 @@ export class AuthService {
     return this.login({
       phoneNumber: store.phoneNumber as string,
       password: registerStoreDTO.password,
+      notificationToken: null,
     });
   }
 
@@ -341,7 +352,8 @@ export class AuthService {
       user = await this.storeModel
         .findById(user.id)
         .select(
-          select + ' storeName subscription category geolocation facilities lat lng ',
+          select +
+            ' storeName subscription category geolocation facilities lat lng ',
         )
         .populate({
           path: 'category',
@@ -407,6 +419,6 @@ export class AuthService {
 
   async loginAdmin(request: AdminLoginDTO) {
     const account = await this.validateAdmin(request.email, request.password);
-    return this.loginAccount(account);
+    return this.loginAccount(account, null);
   }
 }

@@ -28,8 +28,9 @@ import { StoreReportSchema } from 'src/mongoose/store-report';
       { name: 'Store', schema: StoreSchema },
       { name: 'WithdrawRequest', schema: WithdrawRequestSchema },
     ]),
+    ReservationModule,
   ],
   controllers: [WalletController],
-  providers: [WalletService, CouponService, ReservationService],
+  providers: [WalletService, CouponService],
 })
 export class WalletModule {}

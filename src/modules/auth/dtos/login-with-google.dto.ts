@@ -1,4 +1,4 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsOptional } from 'class-validator';
 
 export class LoginWithGoogleDTO {
   @IsNotEmpty()
@@ -6,4 +6,7 @@ export class LoginWithGoogleDTO {
 
   @IsNotEmpty()
   firebaseID: string;
+
+  @IsOptional()
+  notificationToken: string;
 }

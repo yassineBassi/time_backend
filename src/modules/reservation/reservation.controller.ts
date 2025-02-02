@@ -35,9 +35,20 @@ export class ReservationController {
 
   @Get('')
   @UseGuards(JwtAuthGuard)
-  async fetchReservation(@CurrentUser() user: User, @Query('tab') tab: string) {
+  async fetchReservations(
+    @CurrentUser() user: User,
+    @Query('tab') tab: string,
+  ) {
     return Response.success(
-      await this.reservationService.fetchReservation(user, tab),
+      await this.reservationService.fetchReservations(user, tab),
+    );
+  }
+
+  @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE))
+  async fetchReservation(@CurrentUser() user: User, @Param('id') id: string) {
+    return Response.success(
+      await this.reservationService.fetchReservation(user, id),
     );
   }
 

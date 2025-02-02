@@ -3,7 +3,7 @@ import { InjectModel, MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
-import { I18nModule } from 'nestjs-i18n';
+import { I18nModule, I18nService } from 'nestjs-i18n';
 import * as path from 'path';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { ResponseExceptionFilter } from './common/filters/response-exception.filter';
@@ -48,6 +48,12 @@ import { Admin, AdminSchema } from './mongoose/admin';
 import * as bcrypt from 'bcrypt';
 import { UserType } from './common/models/enums/user-type';
 import { ScheduleModule } from '@nestjs/schedule';
+import { FirebaseAdminService } from './modules/firebase-admin/firebase-admin.service';
+import { FirebaseAdminModule } from './modules/firebase-admin/firebase-admin.module';
+import { Notification, NotificationSchema } from './mongoose/notification';
+import { NotificationType } from './common/models/enums/notification-type';
+import { NotificationReference } from './common/models/enums/notification-reference';
+import { format } from 'date-fns-tz';
 
 @Module({
   imports: [
@@ -65,6 +71,7 @@ import { ScheduleModule } from '@nestjs/schedule';
       { name: 'Reservation', schema: ReservationSchema },
       { name: 'GiftCard', schema: GiftCardSchema },
       { name: 'Admin', schema: AdminSchema },
+      { name: 'Notification', schema: NotificationSchema },
     ]),
     I18nModule.forRoot({
       fallbackLanguage: 'ar',
@@ -106,6 +113,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     CouponModule,
     GiftModule,
     ClientModule,
+    FirebaseAdminModule,
   ],
   controllers: [AppController],
   providers: [
@@ -149,9 +157,52 @@ export class AppModule implements NestModule {
     private giftCardModel: Model<GiftCard>,
     @InjectModel('Admin')
     private adminModel: Model<Admin>,
+    @InjectModel('Notification')
+    private notificationModel: Model<Notification>,
+    private firebaseAdminService: FirebaseAdminService,
+    private readonly i18n: I18nService,
   ) {
     setTimeout(async () => {
+      //console.log(store);
+      /*const storeId = '678ec435d94220f49498737e';
 
+      
+      const store = await this.storeModel.findById(storeId);
+
+      const reservation = await this.reservationModel.findOne({
+        store: storeId,
+      });
+
+      if (reservation) {
+        const notification = await (
+          await this.notificationModel.create({
+            title: this.i18n.translate(
+              'messages.notification_' +
+                NotificationType.RESERVATION_REMINDER +
+                '_1h_title',
+            ),
+            description:
+              this.i18n.translate(
+                'messages.notification_' +
+                  NotificationType.RESERVATION_REMINDER +
+                  '_1h_description',
+              ),
+
+            type: NotificationType.NEW_RESERVATION,
+            referenceType: NotificationReference.RESERVATION,
+            reference: reservation.id,
+            receiverType: UserType.STORE,
+            receiver: store.id,
+          })
+        ).save();
+
+
+        this.firebaseAdminService.sendNotification(
+          store.notificationToken,
+          notification,
+        );
+      }
+*/
       /*const stores = await this.storeModel.find({});
 
       const lats = [

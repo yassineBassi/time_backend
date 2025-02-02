@@ -6,5 +6,13 @@
     "coupon_used": "هذه القسيمة مستخدمة بالفعل",
     "last_seen": "شوهدت مؤخراً",
     "suggested": "مقترح لك",
-    "most_reserved": "الأكثر حجزاً"
+    "most_reserved": "الأكثر حجزاً",
+    "notification_newReservation_title": "حجز جديد",
+    "notification_newReservation_description": "لديك حجز جديد في تاريخ",
+    "notification_reservationReminder_24h_title": "تذكير بحجزك غدًا",
+    "notification_reservationReminder_24h_description": "نذكرك بأن لديك حجزاً غداً في الساعة",
+    "notification_reservationReminder_1h_title": "تذكير بحجزك!",
+    "notification_reservationReminder_1h_description": "نذكرك أن حجزك في غضون ساعة من الآن",
+    "notification_cancelReservation_title": "م إلغاء الحجز",
+    "notification_cancelReservation_description": "م إلغاء حجزك المقرر في"
 }

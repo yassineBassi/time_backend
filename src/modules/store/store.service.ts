@@ -58,6 +58,9 @@ export class StoreService {
     {
       path: 'reviews',
     },
+    {
+      path: 'workingTimes',
+    },
   ];
   defaultFilter = {
     status: UserStatus.ENABLED,
@@ -66,6 +69,15 @@ export class StoreService {
       $not: null,
     }*/
   };
+  days = [
+    'sunday',
+    'monday',
+    'tuesday',
+    'wednesday',
+    'thursday',
+    'friday',
+    'saturday',
+  ];
 
   async getSections() {
     return this.storeSectionModel.find();
@@ -136,6 +148,23 @@ export class StoreService {
           ).toFixed(1)
         : 0,
       reviewsCount: s.reviews.length,
+      /*closingTime: s.workingTimes[this.days[new Date().getDay()]]
+        .map((wt) => {
+          const [time, period] = wt.split(' ');
+          let [hours, minutes] = time.split(':').map(Number);
+
+          if (period.toLowerCase() === 'pm' && hours !== 12) {
+            hours += 12;
+          }
+          if (period.toLowerCase() === 'am' && hours === 12) {
+            hours = 0;
+          }
+
+          return new Date(
+            new Date().setHours(hours, minutes, 0, 0),
+          ).toLocaleString();
+        })
+        .filter((wt) => wt > new Date().toLocaleString())[0],*/
     }));
   }
 
@@ -279,17 +308,7 @@ export class StoreService {
   }
 
   async getStoreAvailableTimes(date: string, storeId: string) {
-    const days = [
-      'sunday',
-      'monday',
-      'tuesday',
-      'wednesday',
-      'thursday',
-      'friday',
-      'saturday',
-    ];
-
-    const day = days[new Date(date).getDay()];
+    const day = this.days[new Date(date).getDay()];
 
     const store = await this.storeModel
       .findById(storeId)
@@ -525,7 +544,7 @@ export class StoreService {
     return result;
   }
 
-  async getStoreInDashboard(id: string){
+  async getStoreInDashboard(id: string) {
     const store = this.storeModel.findById(id);
     return store;
   }

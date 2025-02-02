@@ -23,6 +23,8 @@ export const ReservationSchema = new mongoose.Schema(
     clientAddress: { type: Number },
     reports: [],
     canceledAt: { type: Date },
+    notifiedBefore24h: { type: Boolean, default: false },
+    notifiedBefore1h: { type: Boolean, default: false },
   },
   { timestamps: true },
 );
@@ -42,6 +44,8 @@ export interface Reservation extends mongooseDelete.SoftDeleteDocument {
   clientPhoneNumber: string;
   clientAddress: string;
   canceledAt: Date;
+  notifiedBefore24h: boolean;
+  notifiedBefore1h: boolean;
 }
 
 export type ReservationModel = mongooseDelete.SoftDeleteModel<Reservation>;

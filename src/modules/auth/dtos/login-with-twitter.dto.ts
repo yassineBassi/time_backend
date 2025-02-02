@@ -1,4 +1,4 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsOptional } from 'class-validator';
 
 export class LoginWithTwitterDTO {
   @IsNotEmpty()
@@ -6,4 +6,8 @@ export class LoginWithTwitterDTO {
 
   @IsNotEmpty()
   firebaseID: string;
+
+
+  @IsOptional()
+  notificationToken: string;
 }

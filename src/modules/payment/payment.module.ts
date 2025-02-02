@@ -12,10 +12,12 @@ import { GiftModule } from '../gift/gift.module';
 import { GiftService } from '../gift/gift.service';
 import { GiftSchema } from 'src/mongoose/gift';
 import { CouponSchema } from 'src/mongoose/coupon';
+import { ReservationModule } from '../reservation/reservation.module';
 
 @Module({
   imports: [
     GiftModule,
+    ReservationModule,
     MongooseModule.forFeature([
       { name: 'TapPayment', schema: TapPaymentSchema },
       { name: 'Client', schema: ClientSchema },

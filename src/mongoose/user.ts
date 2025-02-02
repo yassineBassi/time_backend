@@ -41,6 +41,7 @@ const Schema = new mongoose.Schema(
         required: true,
       },
     },
+    notificationToken: { type: String }
   },
   {
     timestamps: true,
@@ -79,6 +80,7 @@ export interface User extends Document {
   geoLocation: GeoJSONPoint;
   lat: number;
   lng: number;
+  notificationToken: string;
 }
 
 Schema.virtual('lat').get(function (this: User) {

@@ -25,12 +25,20 @@ import { TransactionType } from 'src/common/models/enums/transaction-type';
 import { Transaction } from 'src/common/models/transaction';
 import { Cron } from '@nestjs/schedule';
 import { logger } from 'src/common/winston-logger';
+import { I18nService } from 'nestjs-i18n';
+import { NotificationType } from 'src/common/models/enums/notification-type';
+import { NotificationReference } from 'src/common/models/enums/notification-reference';
+import { FirebaseAdminService } from '../firebase-admin/firebase-admin.service';
+import { Notification } from 'src/mongoose/notification';
+import { format } from 'date-fns';
 
 @Injectable()
 export class ReservationService {
   constructor(
     @InjectModel('Store')
     private readonly storeModel: Model<Store>,
+    @InjectModel('Client')
+    private readonly clientModel: Model<Client>,
     @InjectModel('ReservationItem')
     private readonly reservationItemModel: Model<ReservationItem>,
     @InjectModel('Reservation')
@@ -43,8 +51,12 @@ export class ReservationService {
     private readonly storeReportModel: Model<StoreReport>,
     @InjectModel('Coupon')
     private readonly couponModel: Model<Coupon>,
+    @InjectModel('Notification')
+    private readonly notificationModel: Model<Notification>,
     @Inject()
     private readonly couponService: CouponService,
+    private readonly i18n: I18nService,
+    private firebaseAdminService: FirebaseAdminService,
   ) {}
 
   private async generateRandomReservation(length: number) {
@@ -129,7 +141,7 @@ export class ReservationService {
     return reservation;
   }
 
-  async fetchReservation(user: User, tab: string) {
+  async fetchReservations(user: User, tab: string) {
     const filter = {};
 
     if (tab.split('ReservationTab.')[1] == 'completed') {
@@ -179,7 +191,7 @@ export class ReservationService {
         },
       ])
       .sort({
-        updatedAt: -1,
+        reservationDate: 1,
       });
 
     if (user.type == UserType.CLIENT) {
@@ -203,8 +215,44 @@ export class ReservationService {
     return reservations;
   }
 
+  async fetchReservation(user: User, id: string) {
+    const reservations: any = await this.reservationModel
+      .findOne({
+        _id: id,
+        store: user.id,
+      })
+      .populate([
+        {
+          path: 'store',
+          select: '_id storeName picture isVerified geoLocation',
+          populate: {
+            path: 'category',
+            select: 'name section',
+            populate: {
+              path: 'section',
+              select: '_id name',
+            },
+          },
+        },
+        {
+          path: 'items',
+          select: '_id service quantity price',
+          populate: {
+            path: 'service',
+            select: 'title',
+          },
+        },
+        {
+          path: 'client',
+          select: '_id fullName picture type',
+        },
+      ]);
+
+    return reservations;
+  }
+
   async cancelReservation(user: Client, reservationId: string) {
-    const reservation = await this.reservationModel.findById(reservationId);
+    let reservation = await this.reservationModel.findById(reservationId);
 
     if (!reservation) {
       throw new NotFoundException();
@@ -223,7 +271,12 @@ export class ReservationService {
     reservation.status = ReservationStatus.CANCELED;
     reservation.canceledAt = new Date();
 
-    return await reservation.save();
+    reservation = await reservation.save();
+
+    const store = await this.storeModel.findById(reservation.store);
+    await this.sendCancelReservationNotification(store, reservation);
+
+    return reservation;
   }
 
   async payReservation(user: Client, reservationId: string, couponId: string) {
@@ -401,11 +454,17 @@ export class ReservationService {
 
   @Cron('*/1 * * * *')
   async completeReservationsCron() {
+    let currentDate = new Date();
+    // add timezone
+    currentDate = new Date(
+      currentDate.getTime() + currentDate.getTimezoneOffset() * 60 * 1000 * -1,
+    );
+
     const result = await this.reservationModel.updateMany(
       {
         status: ReservationStatus.PAYED,
         reservationDate: {
-          $lt: new Date(),
+          $lt: currentDate,
         },
       },
       {
@@ -418,6 +477,221 @@ export class ReservationService {
         ', update result : ' +
         JSON.stringify(result) +
         ' )',
+    );
+  }
+
+  @Cron('*/1 * * * *')
+  async ReservationRminderCron() {
+    let currentDate = new Date();
+    // add timezone
+    currentDate = new Date(
+      currentDate.getTime() + currentDate.getTimezoneOffset() * 60 * 1000 * -1,
+    );
+
+    console.log(new Date(currentDate.getTime() + 1000 * 60 * 60));
+
+    // before 1h reminder
+    let reservations = await this.reservationModel
+      .find({
+        status: ReservationStatus.PAYED,
+        notifiedBefore1h: false,
+        reservationDate: {
+          $lt: new Date(currentDate.getTime() + 1000 * 60 * 60),
+        },
+      })
+      .select('_id client reservationDate');
+
+    if (reservations.length) {
+      for (const reservation of reservations) {
+        const client = await this.clientModel.findById(reservation.client);
+        this.sendReservationReminderNotification(client, reservation, '1h');
+      }
+      await this.reservationModel.updateMany(
+        {
+          _id: {
+            $in: reservations.map((r) => r.id),
+          },
+        },
+        {
+          notifiedBefore1h: true,
+          notifiedBefore24h: true,
+        },
+      );
+    }
+
+    // before 24h reminder
+    reservations = await this.reservationModel
+      .find({
+        status: ReservationStatus.PAYED,
+        notifiedBefore24h: false,
+        reservationDate: {
+          $lt: new Date(currentDate.getTime() + 1000 * 60 * 60 * 24),
+        },
+      })
+      .select('_id client reservationDate');
+
+    if (reservations.length) {
+      for (const reservation of reservations) {
+        const client = await this.clientModel.findById(reservation.client);
+        this.sendReservationReminderNotification(client, reservation, '24h');
+      }
+      await this.reservationModel.updateMany(
+        {
+          _id: {
+            $in: reservations.map((r) => r.id),
+          },
+        },
+        {
+          notifiedBefore24h: true,
+        },
+      );
+    }
+  }
+
+  async handleReservationCallback(
+    metadata: any,
+    tapPaymentId: any,
+    amount: number,
+  ) {
+    const reservation = await this.reservationModel.findById(metadata.id);
+    reservation.status = ReservationStatus.PAYED;
+    reservation.payment = tapPaymentId;
+
+    if (metadata.coupon) {
+      const coupon = await this.couponModel.findById(metadata.coupon);
+      reservation.coupon = coupon.id;
+      coupon.consumed = true;
+      await coupon.save();
+    }
+
+    reservation.payedPrice = amount;
+    await reservation.save();
+
+    const store = await this.storeModel.findById(reservation.store);
+    await this.sendNewReservationNotification(store, reservation);
+
+    return true;
+  }
+
+  async sendNewReservationNotification(store: Store, reservation: Reservation) {
+    const notification = await (
+      await this.notificationModel.create({
+        title: this.i18n.translate(
+          'messages.notification_' +
+            NotificationType.NEW_RESERVATION +
+            '_title',
+        ),
+        description:
+          this.i18n.translate(
+            'messages.notification_' +
+              NotificationType.NEW_RESERVATION +
+              '_description',
+          ) +
+          ' ' +
+          reservation.reservationDate
+            .toISOString()
+            .split('T')
+            .join(' ')
+            .slice(0, -8)
+            .split(' ')
+            .reverse()
+            .join(' '),
+        type: NotificationType.NEW_RESERVATION,
+        referenceType: NotificationReference.RESERVATION,
+        reference: reservation.id,
+        receiverType: UserType.STORE,
+        receiver: store.id,
+      })
+    ).save();
+
+    this.firebaseAdminService.sendNotification(
+      store.notificationToken,
+      notification,
+    );
+  }
+
+  async sendReservationReminderNotification(
+    client: Client,
+    reservation: Reservation,
+    reminderTime: string,
+  ) {
+    const notification = await (
+      await this.notificationModel.create({
+        title: this.i18n.translate(
+          'messages.notification_' +
+            NotificationType.RESERVATION_REMINDER +
+            '_' +
+            reminderTime +
+            '_title',
+        ),
+        description:
+          this.i18n.translate(
+            'messages.notification_' +
+              NotificationType.RESERVATION_REMINDER +
+              '_' +
+              reminderTime +
+              '_description',
+          ) +
+          (reminderTime == '24h'
+            ? ' ' +
+              reservation.reservationDate
+                .toISOString()
+                .split('T')[1]
+                .slice(0, -8)
+            : ''),
+
+        type: NotificationType.RESERVATION_REMINDER,
+        referenceType: NotificationReference.RESERVATION,
+        reference: reservation.id,
+        receiverType: UserType.CLIENT,
+        receiver: client.id,
+      })
+    ).save();
+
+    this.firebaseAdminService.sendNotification(
+      client.notificationToken,
+      notification,
+    );
+  }
+
+  async sendCancelReservationNotification(
+    store: Store,
+    reservation: Reservation,
+  ) {
+    const notification = await (
+      await this.notificationModel.create({
+        title: this.i18n.translate(
+          'messages.notification_' +
+            NotificationType.CANCEL_RESERVATION +
+            '_title',
+        ),
+        description:
+          this.i18n.translate(
+            'messages.notification_' +
+              NotificationType.CANCEL_RESERVATION +
+              '_description',
+          ) +
+          ' ' +
+          reservation.reservationDate
+            .toISOString()
+            .split('T')
+            .join(' ')
+            .slice(0, -8)
+            .split(' ')
+            .reverse()
+            .join(' '),
+
+        type: NotificationType.CANCEL_RESERVATION,
+        referenceType: NotificationReference.RESERVATION,
+        reference: reservation.id,
+        receiverType: UserType.STORE,
+        receiver: store.id,
+      })
+    ).save();
+
+    this.firebaseAdminService.sendNotification(
+      store.notificationToken,
+      notification,
     );
   }
 }

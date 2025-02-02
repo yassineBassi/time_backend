@@ -1,5 +1,6 @@
 import * as admin from 'firebase-admin';
 import { Injectable } from '@nestjs/common';
+import { Notification } from 'src/mongoose/notification';
 
 @Injectable()
 export class FirebaseAdminService {
@@ -18,11 +19,39 @@ export class FirebaseAdminService {
   async getUserByUid(uid: string): Promise<admin.auth.UserInfo | null> {
     try {
       const user = await this.firebaseApp.auth().getUser(uid);
-      console.log("---------", user);
+      console.log('---------', user);
       return user.providerData[0];
     } catch (error) {
       console.error('Error fetching user data:', error);
       return null;
+    }
+  }
+
+  async sendNotification(token: string, notification: Notification) {
+    try {
+      const message = {
+        token: token,
+        data: {
+          notification: JSON.stringify(notification),
+        },
+        apns: {
+          payload: {
+            aps: {
+              alert: {
+                title: notification.title,
+                body: notification.description,
+              },
+              sound: 'default',
+              badge: 1,
+            },
+          },
+        },
+      };
+
+      const result = await admin.messaging().send(message);
+      console.log('Notification sent successfully!', result);
+    } catch (error) {
+      console.error('Error sending notification:', error);
     }
   }
 }

@@ -11,22 +11,28 @@ import { StoreReportSchema } from 'src/mongoose/store-report';
 import { CouponSchema } from 'src/mongoose/coupon';
 import { CouponService } from '../coupon/coupon.service';
 import { CouponModule } from '../coupon/coupon.module';
+import { NotificationSchema } from 'src/mongoose/notification';
+import { FirebaseAdminModule } from '../firebase-admin/firebase-admin.module';
+import { ClientSchema } from 'src/mongoose/client';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: 'Store', schema: StoreSchema },
+      { name: 'Client', schema: ClientSchema },
       { name: 'Service', schema: ServiceSchema },
       { name: 'Reservation', schema: ReservationSchema },
       { name: 'ReservationItem', schema: ReservationItemSchema },
       { name: 'StoreReview', schema: StoreReviewSchema },
       { name: 'StoreReport', schema: StoreReportSchema },
       { name: 'Coupon', schema: CouponSchema },
+      { name: 'Notification', schema: NotificationSchema },
     ]),
-    CouponModule
+    CouponModule,
+    FirebaseAdminModule
   ],
   controllers: [ReservationController],
   providers: [ReservationService, CouponService],
-  exports: [ReservationService]
+  exports: [ReservationService],
 })
 export class ReservationModule {}
