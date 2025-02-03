@@ -265,7 +265,7 @@ export class AuthService {
     return this.login({
       phoneNumber: client.phoneNumber as string,
       password: registerClientDTO.password,
-      notificationToken: null,
+      notificationToken: registerClientDTO.notificationToken,
     });
   }
 
@@ -326,7 +326,7 @@ export class AuthService {
     return this.login({
       phoneNumber: store.phoneNumber as string,
       password: registerStoreDTO.password,
-      notificationToken: null,
+      notificationToken: registerStoreDTO.notificationToken,
     });
   }
 

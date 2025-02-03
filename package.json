@@ -43,6 +43,7 @@
     "googleapis": "^144.0.0",
     "i18next": "^23.14.0",
     "i18next-fs-backend": "^2.3.2",
+    "moment": "^2.30.1",
     "mongoose": "^8.5.4",
     "mongoose-auto-increment": "^5.0.1",
     "mongoose-delete": "^1.0.2",

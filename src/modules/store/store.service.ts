@@ -21,6 +21,7 @@ import { UserStatus } from 'src/common/models/enums/user-status';
 import { I18nService } from 'nestjs-i18n';
 import { DashboardFilterQuery } from 'src/common/models/dahsboard-filter-query';
 import { Facility } from 'src/mongoose/facility';
+const moment = require('moment');
 
 @Injectable()
 export class StoreService {
@@ -291,6 +292,62 @@ export class StoreService {
     return this.addFieldsToStores(stores, client);
   }
 
+  getNextClosingDateTime(workingHours) {
+    const now = moment(); // Get current date & time
+    const today = now.format('YYYY-MM-DD'); // Get today's date
+
+    // Convert working hours to full datetime with today's date
+    const sortedClosingTimes = workingHours
+      .map((time) => moment(`${today} ${time}`, 'YYYY-MM-DD hh:mm A')) // Attach today’s date
+      .sort((a, b) => a - b); // Sort in ascending order
+
+    // Find the next closing time
+    for (const closingTime of sortedClosingTimes) {
+      if (now.isBefore(closingTime)) {
+        return `The store will close today at ${closingTime.format('YYYY-MM-DD hh:mm A')}`;
+      }
+    }
+
+    return 'The store is already closed for today.';
+  }
+
+  getNextOpeningDateTime(openingHours) {
+    const now = moment(); // Current time
+    const today = now.format('YYYY-MM-DD'); // Today's date
+
+    // Convert opening hours to full datetime
+    const sortedOpeningTimes = openingHours
+      .map((time) => moment(`${today} ${time}`, 'YYYY-MM-DD hh:mm A')) // Attach today's date
+      .sort((a, b) => a - b); // Sort in ascending order
+
+    // Check if the store is already open
+    for (let i = 0; i < sortedOpeningTimes.length; i++) {
+      const openingTime = sortedOpeningTimes[i];
+      const nextClosingTime =
+        sortedOpeningTimes[i + 1] || moment(openingTime).add(1, 'hour'); // Assume 1-hour open period if no closing time
+
+      if (now.isBetween(openingTime, nextClosingTime)) {
+        return 'The store is already open.';
+      }
+    }
+
+    // Find the next opening time
+    for (const openingTime of sortedOpeningTimes) {
+      if (now.isBefore(openingTime)) {
+        return `The store will open today at ${openingTime.format('YYYY-MM-DD hh:mm A')}`;
+      }
+    }
+
+    // If no more openings today, return the earliest opening time tomorrow
+    const tomorrow = now.add(1, 'day').format('YYYY-MM-DD');
+    const nextOpeningTime = moment(
+      `${tomorrow} ${sortedOpeningTimes[0].format('hh:mm A')}`,
+      'YYYY-MM-DD hh:mm A',
+    );
+
+    return `The store will open tomorrow at ${nextOpeningTime.format('YYYY-MM-DD hh:mm A')}`;
+  }
+
   async getStoreById(id: string, client: Client) {
     const store = await this.storeModel
       .findOne({
@@ -303,6 +360,25 @@ export class StoreService {
     if (!store) {
       throw new NotFoundException();
     }
+
+    let currentDate = new Date();
+    // add timezone
+    currentDate = new Date(
+      currentDate.getTime() + currentDate.getTimezoneOffset() * 60 * 1000 * -1,
+    );
+
+    /*console.log(
+      '------------',
+      this.getNextClosingDateTime(
+        store.workingTimes[this.days[currentDate.getDay()]],
+      ),
+    );*/
+    console.log(
+      '---------',
+      this.getNextOpeningDateTime(
+        store.workingTimes[this.days[currentDate.getDay()]],
+      ),
+    );
 
     return this.addFieldsToStores([store], client)[0];
   }

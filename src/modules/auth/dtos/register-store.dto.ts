@@ -90,4 +90,7 @@ export class RegisterStoreDTO {
   twitterID: string;
   @IsOptional()
   appleID: string;
+
+  @IsOptional()
+  notificationToken: string;
 }

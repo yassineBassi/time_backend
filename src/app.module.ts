@@ -163,69 +163,35 @@ export class AppModule implements NestModule {
     private readonly i18n: I18nService,
   ) {
     setTimeout(async () => {
-      //console.log(store);
-      /*const storeId = '678ec435d94220f49498737e';
+      const client = await this.clientModel.findById(
+        '67a121c70dfc41636ac360b6',
+      );
 
-      
-      const store = await this.storeModel.findById(storeId);
+      const notification = await (
+        await this.notificationModel.create({
+          title: this.i18n.translate(
+            'messages.notification_' +
+              NotificationType.RESERVATION_REMINDER +
+              '_1h_title',
+          ),
+          description: this.i18n.translate(
+            'messages.notification_' +
+              NotificationType.RESERVATION_REMINDER +
+              '_1h_description',
+          ),
 
-      const reservation = await this.reservationModel.findOne({
-        store: storeId,
-      });
+          type: NotificationType.NEW_RESERVATION,
+          referenceType: NotificationReference.RESERVATION,
+          reference: null,
+          receiverType: UserType.CLIENT,
+          receiver: client.id,
+        })
+      ).save();
 
-      if (reservation) {
-        const notification = await (
-          await this.notificationModel.create({
-            title: this.i18n.translate(
-              'messages.notification_' +
-                NotificationType.RESERVATION_REMINDER +
-                '_1h_title',
-            ),
-            description:
-              this.i18n.translate(
-                'messages.notification_' +
-                  NotificationType.RESERVATION_REMINDER +
-                  '_1h_description',
-              ),
-
-            type: NotificationType.NEW_RESERVATION,
-            referenceType: NotificationReference.RESERVATION,
-            reference: reservation.id,
-            receiverType: UserType.STORE,
-            receiver: store.id,
-          })
-        ).save();
-
-
-        this.firebaseAdminService.sendNotification(
-          store.notificationToken,
-          notification,
-        );
-      }
-*/
-      /*const stores = await this.storeModel.find({});
-
-      const lats = [
-        33.50257139798814, 33.51594429344873, 33.5045942321576,
-        33.521525361431095, 33.510684595744266, 33.56966136180068,
-        33.535115215193855, 33.52103470860897, 33.53493110196977,
-        33.51535705672033, 33.470569018357914, 33.488278206373685,
-        33.482329026830925,
-      ];
-
-      console.log(lats.length);
-      console.log(stores.length);
-
-      let ind = 0;
-      stores.forEach(async (s) => {
-        console.log('---------------------');
-        console.log(s.geoLocation.coordinates)
-        if (s.geoLocation.coordinates[1] < 0) {
-          ind++;
-        }
-      });
-
-      console.log();*/
+      this.firebaseAdminService.sendNotification(
+        client.notificationToken,
+        notification,
+      );
     }, 1000);
   }
 }

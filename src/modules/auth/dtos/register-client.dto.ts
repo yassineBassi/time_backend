@@ -65,4 +65,7 @@ export class RegisterClientDTO {
   twitterID: string;
   @IsOptional()
   appleID: string;
+
+  @IsOptional()
+  notificationToken: string;
 }

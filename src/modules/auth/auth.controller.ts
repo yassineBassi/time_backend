@@ -51,6 +51,7 @@ export class AuthController {
 
   @Post('login/twitter')
   async loginWithTwitter(@Body() request: LoginWithTwitterDTO) {
+    console.log(request);
     return Response.success(
       await this.authService.loginWithTwitter(request),
       '',

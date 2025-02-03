@@ -44,25 +44,6 @@ export class ReservationController {
     );
   }
 
-  @Get(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE))
-  async fetchReservation(@CurrentUser() user: User, @Param('id') id: string) {
-    return Response.success(
-      await this.reservationService.fetchReservation(user, id),
-    );
-  }
-
-  @Get('cancel/:id')
-  @UseGuards(JwtAuthGuard, RolesGuard(UserType.CLIENT))
-  async cancelReservation(
-    @CurrentUser() user: Client,
-    @Param('id') reservationId: string,
-  ) {
-    return Response.success(
-      await this.reservationService.cancelReservation(user, reservationId),
-    );
-  }
-
   @Post('pay')
   @UseGuards(JwtAuthGuard, RolesGuard(UserType.CLIENT))
   async payReservation(
@@ -101,6 +82,25 @@ export class ReservationController {
   ) {
     return Response.success(
       await this.reservationService.getReservationsByDate(user, date),
+    );
+  }
+
+  @Get('cancel/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.CLIENT))
+  async cancelReservation(
+    @CurrentUser() user: Client,
+    @Param('id') reservationId: string,
+  ) {
+    return Response.success(
+      await this.reservationService.cancelReservation(user, reservationId),
+    );
+  }
+  
+  @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE))
+  async fetchReservation(@CurrentUser() user: User, @Param('id') id: string) {
+    return Response.success(
+      await this.reservationService.fetchReservation(user, id),
     );
   }
 }
