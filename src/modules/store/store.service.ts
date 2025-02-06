@@ -21,6 +21,7 @@ import { UserStatus } from 'src/common/models/enums/user-status';
 import { I18nService } from 'nestjs-i18n';
 import { DashboardFilterQuery } from 'src/common/models/dahsboard-filter-query';
 import { Facility } from 'src/mongoose/facility';
+import { ParamsService } from '../params/params.service';
 const moment = require('moment');
 
 @Injectable()
@@ -42,6 +43,7 @@ export class StoreService {
     private readonly storeReportModel: Model<StoreReport>,
     @InjectModel('Facility')
     private readonly facilityModel: Model<Facility>,
+    private readonly paramsService: ParamsService,
     private readonly i18n: I18nService,
   ) {}
 
@@ -135,38 +137,29 @@ export class StoreService {
     return workingTime;
   }
 
-  addFieldsToStores(stores: Store[], client: Client) {
-    return stores.map((s: any) => ({
-      ...s.toObject(),
-      isFavorite: client.favotiteStores.includes(s.id),
-      photos: [s.picture],
-      reviews: s.reviews.length
-        ? (
-            s.reviews
-              .map((v) => v.rate)
-              .reduce((acc: number, curr: number) => acc + curr) /
-            s.reviews.length
-          ).toFixed(1)
-        : 0,
-      reviewsCount: s.reviews.length,
-      /*closingTime: s.workingTimes[this.days[new Date().getDay()]]
-        .map((wt) => {
-          const [time, period] = wt.split(' ');
-          let [hours, minutes] = time.split(':').map(Number);
-
-          if (period.toLowerCase() === 'pm' && hours !== 12) {
-            hours += 12;
-          }
-          if (period.toLowerCase() === 'am' && hours === 12) {
-            hours = 0;
-          }
-
-          return new Date(
-            new Date().setHours(hours, minutes, 0, 0),
-          ).toLocaleString();
-        })
-        .filter((wt) => wt > new Date().toLocaleString())[0],*/
-    }));
+  async addFieldsToStores(
+    stores: Store[],
+    client: Client,
+  ): Promise<Promise<Store>[]> {
+    return await Promise.all(
+      stores.map(async (s: any) => ({
+        ...s.toObject(),
+        isFavorite: client.favotiteStores.includes(s.id),
+        photos: [s.picture],
+        reviews: s.reviews.length
+          ? (
+              s.reviews
+                .map((v) => v.rate)
+                .reduce((acc: number, curr: number) => acc + curr) /
+              s.reviews.length
+            ).toFixed(1)
+          : 0,
+        reviewsCount: s.reviews.length,
+        isOpen: this.isStoreOpen(s),
+        closingTime: await this.getNextClosingDateTime(s),
+        openingTime: await this.getNextOpeningDateTime(s),
+      })),
+    );
   }
 
   async getStoresBySegment(segment: StoresListSegment, client: Client) {
@@ -189,7 +182,7 @@ export class StoreService {
         .limit(limit);
     }
 
-    return this.addFieldsToStores(stores, client);
+    return await this.addFieldsToStores(stores, client);
   }
 
   async getStoresWithSegments(client: Client) {
@@ -199,7 +192,7 @@ export class StoreService {
 
     // last seen stores
     storesMap[this.i18n.translate('messages.last_seen')] =
-      this.addFieldsToStores(
+      await this.addFieldsToStores(
         await this.storeModel
           .find(this.defaultFilter)
           .select(this.defaultSelect)
@@ -211,7 +204,7 @@ export class StoreService {
 
     // suggested stores
     storesMap[this.i18n.translate('messages.suggested')] =
-      this.addFieldsToStores(
+      await this.addFieldsToStores(
         await this.storeModel
           .find(this.defaultFilter)
           .select(this.defaultSelect)
@@ -222,7 +215,7 @@ export class StoreService {
 
     // most reserved
     storesMap[this.i18n.translate('messages.most_reserved')] =
-      this.addFieldsToStores(
+      await this.addFieldsToStores(
         await this.storeModel
           .find(this.defaultFilter)
           .select(this.defaultSelect)
@@ -248,14 +241,12 @@ export class StoreService {
       },
     };
 
-    let stores = await this.storeModel
+    let stores: any = await this.storeModel
       .find(filter)
       .select(this.defaultSelect)
       .populate(this.defaultPopulate);
 
     stores = await this.addFieldsToStores(stores, client);
-
-    console.log(stores);
 
     return stores;
   }
@@ -292,64 +283,72 @@ export class StoreService {
     return this.addFieldsToStores(stores, client);
   }
 
-  getNextClosingDateTime(workingHours) {
-    const now = moment(); // Get current date & time
-    const today = now.format('YYYY-MM-DD'); // Get today's date
+  isStoreOpen(store: Store): boolean {
+    const currentDate = moment();
+    const today = currentDate.format('YYYY-MM-DD');
+    const todayName = currentDate.format('dddd').toLowerCase();
+    const workingTimes = store.workingTimes[todayName]
+      .map((time) => moment(`${today} ${time}`, 'YYYY-MM-DD hh:mm A'))
+      .filter(
+        (time) =>
+          currentDate.isAfter(time) && currentDate.diff(time, 'minutes') <= 15,
+      );
 
-    // Convert working hours to full datetime with today's date
-    const sortedClosingTimes = workingHours
-      .map((time) => moment(`${today} ${time}`, 'YYYY-MM-DD hh:mm A')) // Attach today’s date
-      .sort((a, b) => a - b); // Sort in ascending order
-
-    // Find the next closing time
-    for (const closingTime of sortedClosingTimes) {
-      if (now.isBefore(closingTime)) {
-        return `The store will close today at ${closingTime.format('YYYY-MM-DD hh:mm A')}`;
-      }
-    }
-
-    return 'The store is already closed for today.';
+    return !!workingTimes.length;
   }
 
-  getNextOpeningDateTime(openingHours) {
-    const now = moment(); // Current time
-    const today = now.format('YYYY-MM-DD'); // Today's date
+  getStoreWorkingTimes(store: Store) {
+    const currentDate = moment();
+    const today = currentDate.format('YYYY-MM-DD');
+    const todayName = currentDate.format('dddd').toLowerCase();
+    const workingTimes = store.workingTimes[todayName]
+      .map((time: string) => moment(`${today} ${time}`, 'YYYY-MM-DD hh:mm A'))
+      .filter((time) => time > currentDate)
+      .sort((a, b) => a - b);
 
-    // Convert opening hours to full datetime
-    const sortedOpeningTimes = openingHours
-      .map((time) => moment(`${today} ${time}`, 'YYYY-MM-DD hh:mm A')) // Attach today's date
-      .sort((a, b) => a - b); // Sort in ascending order
+    return workingTimes;
+  }
 
-    // Check if the store is already open
-    for (let i = 0; i < sortedOpeningTimes.length; i++) {
-      const openingTime = sortedOpeningTimes[i];
-      const nextClosingTime =
-        sortedOpeningTimes[i + 1] || moment(openingTime).add(1, 'hour'); // Assume 1-hour open period if no closing time
+  async getParamWorkingTimes() {
+    const currentDate = moment();
+    const today = currentDate.format('YYYY-MM-DD');
+    const workingTimes = (await this.paramsService.getWorkingTimes())
+      .map((time) => moment(`${today} ${time}`, 'YYYY-MM-DD hh:mm A'))
+      .filter((time) => time > currentDate)
+      .sort((a, b) => a - b);
 
-      if (now.isBetween(openingTime, nextClosingTime)) {
-        return 'The store is already open.';
+    return workingTimes;
+  }
+
+  async getNextClosingDateTime(store: Store) {
+    const storeWorkingTimes = this.getStoreWorkingTimes(store);
+    const paramWorkingTimes = await this.getParamWorkingTimes();
+
+    let closingTime;
+    for (const time of paramWorkingTimes) {
+      if (!storeWorkingTimes.map((t) => t.valueOf()).includes(time.valueOf())) {
+        closingTime = time;
+        break;
       }
     }
 
-    // Find the next opening time
-    for (const openingTime of sortedOpeningTimes) {
-      if (now.isBefore(openingTime)) {
-        return `The store will open today at ${openingTime.format('YYYY-MM-DD hh:mm A')}`;
-      }
-    }
+    return closingTime ? closingTime : null;
+  }
 
-    // If no more openings today, return the earliest opening time tomorrow
-    const tomorrow = now.add(1, 'day').format('YYYY-MM-DD');
-    const nextOpeningTime = moment(
-      `${tomorrow} ${sortedOpeningTimes[0].format('hh:mm A')}`,
-      'YYYY-MM-DD hh:mm A',
-    );
+  async getNextOpeningDateTime(store: Store) {
+    const currentDate = moment();
+    const today = currentDate.format('YYYY-MM-DD');
+    const todayName = currentDate.format('dddd').toLowerCase();
+    const nextWorkingTime = store.workingTimes[todayName]
+      .map((time) => moment(`${today} ${time}`, 'YYYY-MM-DD hh:mm A'))
+      .filter((time) => time > currentDate);
 
-    return `The store will open tomorrow at ${nextOpeningTime.format('YYYY-MM-DD hh:mm A')}`;
+      console.log('store ', store.storeName, ' date : ', nextWorkingTime[0]);
+    return nextWorkingTime[0];
   }
 
   async getStoreById(id: string, client: Client) {
-    const store = await this.storeModel
+    let store: any = await this.storeModel
       .findOne({
         ...this.defaultFilter,
         _id: id,
@@ -361,26 +360,9 @@ export class StoreService {
       throw new NotFoundException();
     }
 
-    let currentDate = new Date();
-    // add timezone
-    currentDate = new Date(
-      currentDate.getTime() + currentDate.getTimezoneOffset() * 60 * 1000 * -1,
-    );
+    store = (await this.addFieldsToStores([store], client))[0];
 
-    /*console.log(
-      '------------',
-      this.getNextClosingDateTime(
-        store.workingTimes[this.days[currentDate.getDay()]],
-      ),
-    );*/
-    console.log(
-      '---------',
-      this.getNextOpeningDateTime(
-        store.workingTimes[this.days[currentDate.getDay()]],
-      ),
-    );
-
-    return this.addFieldsToStores([store], client)[0];
+    return store;
   }
 
   async getStoreAvailableTimes(date: string, storeId: string) {
@@ -557,8 +539,6 @@ export class StoreService {
       if (searchQuery[k].length)
         searchFilter[k] = { $regex: new RegExp(`${searchQuery[k]}`, 'i') };
     });
-
-    console.log(searchFilter);
 
     const stores = await this.storeModel
       .find(searchFilter)

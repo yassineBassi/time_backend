@@ -12,6 +12,7 @@ import { StoreReviewSchema } from 'src/mongoose/store-review';
 import { StoreReportSchema } from 'src/mongoose/store-report';
 import { FacilitySchema } from 'src/mongoose/facility';
 import { FacilityItemSchema } from 'src/mongoose/facility-item';
+import { ParamsModule } from '../params/params.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { FacilityItemSchema } from 'src/mongoose/facility-item';
       { name: 'FacilityItem', schema: FacilityItemSchema },
     ]),
     SubscriptionModule,
+    ParamsModule,
   ],
   controllers: [StoreController],
   providers: [StoreService],

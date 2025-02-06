@@ -10,5 +10,6 @@ import { ParameterSchema } from 'src/mongoose/parameter';
   ],
   controllers: [ParamsController],
   providers: [ParamsService],
+  exports: [ParamsService],
 })
 export class ParamsModule {}

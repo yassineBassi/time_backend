@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { I18nService } from 'nestjs-i18n';
 import { ParameterType } from 'src/common/models/enums/parameter-type';
 import { Parameter } from 'src/mongoose/parameter';
 

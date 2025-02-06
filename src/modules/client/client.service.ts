@@ -42,15 +42,18 @@ export class ClientService {
       path: 'favotiteStores',
       populate: this.storeService.defaultPopulate,
       select: this.storeService.defaultSelect,
-      match: this.storeService.defaultFilter
+      match: this.storeService.defaultFilter,
     });
 
-    const stores = this.storeService
-      .addFieldsToStores(client.favotiteStores as any, client)
-      .map((s) => ({
-        ...s,
-        isFavorite: true,
-      }));
+    const stores = (
+      await this.storeService.addFieldsToStores(
+        client.favotiteStores as any,
+        client,
+      )
+    ).map((s) => ({
+      ...s,
+      isFavorite: true,
+    }));
 
     return stores;
   }
