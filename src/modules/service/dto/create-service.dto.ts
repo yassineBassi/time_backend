@@ -40,7 +40,4 @@ export class CreateServiceDto {
   @IsNumber()
   @IsNotEmpty()
   duration: number;
-
-  @IsNotEmpty()
-  facilitiesIds: string | string[];
 }

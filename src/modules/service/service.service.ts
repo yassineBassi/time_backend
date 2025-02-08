@@ -19,7 +19,7 @@ export class ServiceService {
     @InjectModel('ServiceCategory')
     private readonly serviceCategory: Model<ServiceCategory>,
     @InjectModel('Store')
-    private readonly storeModel: Model<Store>
+    private readonly storeModel: Model<Store>,
   ) {}
 
   async create(
@@ -27,6 +27,8 @@ export class ServiceService {
     picture: string,
     store: Store,
   ) {
+    console.log('service : ', createServiceDto);
+
     const category = await this.serviceCategory.findById(
       createServiceDto.categoryId,
     );
@@ -42,9 +44,7 @@ export class ServiceService {
 
     service = await service.save();
 
-    service = await this.serviceModel
-      .findById(service.id)
-      .populate('facilities');
+    service = await this.serviceModel.findById(service.id);
 
     category.services.push(service.id);
     await category.save();
@@ -57,6 +57,8 @@ export class ServiceService {
     picture: string,
     store: Store,
   ) {
+    console.log('service : ', updateServiceDto);
+
     const service = await this.serviceModel.findByIdAndUpdate(
       updateServiceDto.id,
       {
@@ -66,9 +68,6 @@ export class ServiceService {
               picture,
             }
           : updateServiceDto),
-        facilities: updateServiceDto.facilitiesIds.map(
-          (id) => new mongoose.Types.ObjectId(id),
-        ),
       },
       {
         new: true,
@@ -101,11 +100,10 @@ export class ServiceService {
   }
 
   async fetchByCategoryId(categoryId: string) {
-
     const services = await this.serviceModel
       .find({
         category: categoryId,
-        enabled: true
+        enabled: true,
       })
       .select('_id title picture price duration discount discountType enabled');
 
