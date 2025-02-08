@@ -14,6 +14,7 @@ import { CouponModule } from '../coupon/coupon.module';
 import { NotificationSchema } from 'src/mongoose/notification';
 import { FirebaseAdminModule } from '../firebase-admin/firebase-admin.module';
 import { ClientSchema } from 'src/mongoose/client';
+import { SubscriptionModule } from '../subscription/subscription.module';
 
 @Module({
   imports: [
@@ -29,7 +30,8 @@ import { ClientSchema } from 'src/mongoose/client';
       { name: 'Notification', schema: NotificationSchema },
     ]),
     CouponModule,
-    FirebaseAdminModule
+    FirebaseAdminModule,
+    SubscriptionModule,
   ],
   controllers: [ReservationController],
   providers: [ReservationService, CouponService],

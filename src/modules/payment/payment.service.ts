@@ -1,32 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import mongoose, { Model } from 'mongoose';
-import { ReservationStatus } from 'src/common/models/enums/reservation-status';
-import { Client } from 'src/mongoose/client';
-import { Reservation } from 'src/mongoose/reservation';
-import { Store } from 'src/mongoose/store';
-import { StoreSubscription } from 'src/mongoose/store-subscription';
-import { SubscriptionLevel } from 'src/mongoose/subscription-level';
+import { Model } from 'mongoose';
 import { TapPayment } from 'src/mongoose/tap-payment';
 import { GiftService } from '../gift/gift.service';
-import { Coupon } from 'src/mongoose/coupon';
 import { ReservationService } from '../reservation/reservation.service';
+import { SubscriptionService } from '../subscription/subscription.service';
 
 @Injectable()
 export class PaymentService {
   constructor(
     @InjectModel('TapPayment')
     private readonly tapPaymentModel: Model<TapPayment>,
-    @InjectModel('Client')
-    private readonly clientModel: Model<Client>,
-    @InjectModel('Store')
-    private readonly storeModel: Model<Store>,
-    @InjectModel('SubscriptionLevel')
-    private readonly subscriptionLevelModel: Model<SubscriptionLevel>,
-    @InjectModel('StoreSubscription')
-    private readonly storeSubscriptionModel: Model<StoreSubscription>,
     private readonly giftService: GiftService,
     private readonly reservationService: ReservationService,
+    private readonly subscriptionService: SubscriptionService,
   ) {}
 
   async callback(request: any) {
@@ -62,7 +49,7 @@ export class PaymentService {
         request.customer.phone.number,
       merchant_id: request.merchant.id,
       type: metadata.type,
-      responeBody: JSON.stringify(request)
+      responeBody: JSON.stringify(request),
     });
 
     tapPayment = await tapPayment.save();
@@ -81,34 +68,13 @@ export class PaymentService {
           request.amount,
         );
       } else {
-        return this.handleSubscrptionCallback(metadata, tapPayment.id);
+        return this.subscriptionService.handleSubscrptionCallback(
+          metadata,
+          tapPayment.id,
+        );
       }
     }
 
     return false;
-  }
-
-  async handleSubscrptionCallback(metadata: any, tapPaymentId: any) {
-    let store = await this.storeModel.findById(metadata.userId);
-    const subscriptionLevel = await this.subscriptionLevelModel.findById(
-      metadata.id,
-    );
-
-    let subscription = new this.storeSubscriptionModel({
-      storeId: store.id,
-      subscriptionId: subscriptionLevel.id,
-      paymentId: tapPaymentId,
-    });
-
-    subscription = await subscription.save();
-
-    console.log('subscription: ', subscription);
-
-    store.subscription = subscription.id;
-    store = await store.save();
-
-    console.log('subscription captured');
-
-    return true;
   }
 }

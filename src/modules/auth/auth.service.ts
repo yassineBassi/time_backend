@@ -417,6 +417,21 @@ export class AuthService {
     return account;
   }
 
+  async logout(user: any) {
+    if (user.type == UserType.STORE) {
+      user = await this.storeModel.findById(user.id);
+    } else {
+      user = await this.clientModel.findById(user.id);
+    }
+
+    user.notificationToken = null;
+    user.save();
+
+    return {
+      success: true
+    };
+  }
+
   async loginAdmin(request: AdminLoginDTO) {
     const account = await this.validateAdmin(request.email, request.password);
     return this.loginAccount(account, null);

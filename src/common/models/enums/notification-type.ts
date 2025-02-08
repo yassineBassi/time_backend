@@ -4,4 +4,5 @@ export enum NotificationType {
   RESERVATION_REMINDER = 'reservationReminder',
   RESERVATION_COMPLETED = 'reservationCompleted',
   SUBSCRIPTION_REMINDER = 'subscriptionReminder',
+  SUBSCRIPTION_EXPIRED = 'subscriptionExpired',
 }

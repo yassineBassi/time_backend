@@ -54,6 +54,15 @@ import { Notification, NotificationSchema } from './mongoose/notification';
 import { NotificationType } from './common/models/enums/notification-type';
 import { NotificationReference } from './common/models/enums/notification-reference';
 import { format } from 'date-fns-tz';
+import {
+  StoreSubscription,
+  StoreSubscriptionSchema,
+} from './mongoose/store-subscription';
+import {
+  SubscriptionLevel,
+  SubscriptionLevelSchema,
+} from './mongoose/subscription-level';
+import { SubscriptionStatus } from './common/models/enums/subscription-status';
 
 @Module({
   imports: [
@@ -62,6 +71,8 @@ import { format } from 'date-fns-tz';
       { name: 'Store', schema: StoreSchema },
       { name: 'StoreSection', schema: StoreSectionSchema },
       { name: 'StoreCategory', schema: StoreCategorySchema },
+      { name: 'StoreSubscription', schema: StoreSubscriptionSchema },
+      { name: 'SubscriptionLevel', schema: SubscriptionLevelSchema },
       { name: 'FacilityItem', schema: FacilityItemSchema },
       { name: 'StoreReview', schema: StoreReviewSchema },
       { name: 'Client', schema: ClientSchema },
@@ -139,6 +150,10 @@ export class AppModule implements NestModule {
     private storeCategoryModel: Model<StoreCategory>,
     @InjectModel('StoreSection')
     private storeSectionModel: Model<StoreSection>,
+    @InjectModel('StoreSubscription')
+    private storeSubscriptionModel: Model<StoreSubscription>,
+    @InjectModel('SubscriptionLevel')
+    private subscriptionLevelModel: Model<SubscriptionLevel>,
     @InjectModel('Store')
     private storeModel: Model<Store>,
     @InjectModel('StoreReview')
@@ -163,47 +178,24 @@ export class AppModule implements NestModule {
     private readonly i18n: I18nService,
   ) {
     setTimeout(async () => {
-      const client = await this.clientModel.findById(
-        '67a121c70dfc41636ac360b6',
+      let currentDate = new Date();
+      // add timezone
+      currentDate = new Date(
+        currentDate.getTime() +
+          currentDate.getTimezoneOffset() * 60 * 1000 * -1,
       );
 
-      const notification = await (
-        await this.notificationModel.create({
-          title: this.i18n.translate(
-            'messages.notification_' +
-              NotificationType.RESERVATION_REMINDER +
-              '_1h_title',
-          ),
-          description: this.i18n.translate(
-            'messages.notification_' +
-              NotificationType.RESERVATION_REMINDER +
-              '_1h_description',
-          ),
+      // before 1h reminder
+      //const subscriptions = await this.storeSubscriptionModel.find({});
 
-          type: NotificationType.NEW_RESERVATION,
-          referenceType: NotificationReference.RESERVATION,
-          reference: null,
-          receiverType: UserType.CLIENT,
-          receiver: client.id,
-        })
-      ).save();
+      /*for (const subsciption of subscriptions) {
+        subsciption.notifiedBefore1h = false;
+        subsciption.notifiedBefore24h = false;
+        await subsciption.save();
+      }*/
+      //.select('_id client reservationDate');
 
-      this.firebaseAdminService.sendNotification(
-        client.notificationToken,
-        notification,
-      );
+      //console.log(subscriptions);
     }, 1000);
   }
 }
-
-/*
-/public/images/sections/camps.png
-/public/images/sections/coffe.png
-
-
-
-
-
-/public/images/sections/tailor.png
-
-*/

@@ -14,6 +14,7 @@ import { ServiceSchema } from 'src/mongoose/service';
 import { ReservationModule } from '../reservation/reservation.module';
 import { StoreReviewSchema } from 'src/mongoose/store-review';
 import { StoreReportSchema } from 'src/mongoose/store-report';
+import { SubscriptionModule } from '../subscription/subscription.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { StoreReportSchema } from 'src/mongoose/store-report';
       { name: 'WithdrawRequest', schema: WithdrawRequestSchema },
     ]),
     ReservationModule,
+    SubscriptionModule,
   ],
   controllers: [WalletController],
   providers: [WalletService, CouponService],

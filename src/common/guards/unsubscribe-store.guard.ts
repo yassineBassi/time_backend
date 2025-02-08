@@ -6,6 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { SubscriptionService } from 'src/modules/subscription/subscription.service';
+import { UserType } from '../models/enums/user-type';
 
 @Injectable()
 export class UnSubscribedStoreGuard implements CanActivate {
@@ -19,8 +20,15 @@ export class UnSubscribedStoreGuard implements CanActivate {
       throw new UnauthorizedException('errors.authenticated_not_found');
     }
 
-    if (await this.subscriptionService.checkStoreSubscription(user)) {
-      throw new ForbiddenException('errors.1002');
+    if (
+      user.type == UserType.STORE &&
+      (await this.subscriptionService.checkStoreSubscription(user))
+    ) {
+      throw new ForbiddenException({
+        message: 'errors.1002',
+        code: 1002,
+        //statusCode: 403,
+      });
     }
 
     return true;

@@ -17,6 +17,7 @@ import { CurrentUser } from 'src/common/decorators/current-user';
 import { Client } from 'src/mongoose/client';
 import { User } from 'src/mongoose/user';
 import { Store } from 'src/mongoose/store';
+import { SubscribedStoreGuard } from 'src/common/guards/subscribed-store.guard';
 
 @Controller('reservation')
 export class ReservationController {
@@ -34,7 +35,7 @@ export class ReservationController {
   }
 
   @Get('')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, SubscribedStoreGuard)
   async fetchReservations(
     @CurrentUser() user: User,
     @Query('tab') tab: string,
@@ -61,7 +62,7 @@ export class ReservationController {
   }
 
   @Get('statistics')
-  @UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE))
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE), SubscribedStoreGuard)
   async statistics(@CurrentUser() user: Store, @Query('date') date: string) {
     return Response.success(
       await this.reservationService.statistics(user, date),
@@ -69,13 +70,13 @@ export class ReservationController {
   }
 
   @Get('transactions')
-  @UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE))
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE), SubscribedStoreGuard)
   async transactions(@CurrentUser() user: Store) {
     return Response.success(await this.reservationService.transactions(user));
   }
 
   @Get('by-date')
-  @UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE))
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE), SubscribedStoreGuard)
   async getReservationsByDate(
     @CurrentUser() user: Store,
     @Query('date') date: Date,
@@ -95,9 +96,9 @@ export class ReservationController {
       await this.reservationService.cancelReservation(user, reservationId),
     );
   }
-  
+
   @Get(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE))
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE), SubscribedStoreGuard)
   async fetchReservation(@CurrentUser() user: User, @Param('id') id: string) {
     return Response.success(
       await this.reservationService.fetchReservation(user, id),

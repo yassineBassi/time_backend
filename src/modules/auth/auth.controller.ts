@@ -29,6 +29,7 @@ import { Store } from 'src/mongoose/store';
 import { EditClientProfileDTO } from './dtos/edi-client-profile.dto';
 import { Client } from 'src/mongoose/client';
 import { AdminLoginDTO } from './dtos/admin-login';
+import { User } from 'src/mongoose/user';
 
 @Controller('auth')
 export class AuthController {
@@ -141,6 +142,12 @@ export class AuthController {
     return await Response.success(
       await this.authService.editClientProfile(request, currentUser),
     );
+  }
+
+  @Post('logout')
+  @UseGuards(JwtAuthGuard)
+  async logout(@CurrentUser() user: User) {
+    return Response.success(await this.authService.logout(user));
   }
 
   // dashboard APIs

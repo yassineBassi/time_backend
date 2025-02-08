@@ -14,5 +14,11 @@
     "notification_reservationReminder_1h_title": "تذكير بحجزك!",
     "notification_reservationReminder_1h_description": "نذكرك أن حجزك في غضون ساعة من الآن",
     "notification_cancelReservation_title": "م إلغاء الحجز",
-    "notification_cancelReservation_description": "م إلغاء حجزك المقرر في"
+    "notification_cancelReservation_description": "م إلغاء حجزك المقرر في",
+    "notification_subscriptionReminder_1h_title": "تذكير بالاشتراك!",
+    "notification_subscriptionReminder_1h_description": "نذكرك أن اشتراكك سينتهي بعد ساعة من الآن",
+    "notification_subscriptionReminder_24h_title": "تذكير بالاشتراك!",
+    "notification_subscriptionReminder_24h_description": "نذكرك بأن اشتراكك سينتهي غدًا",
+    "notification_subscriptionExpired_title": "انتهت صلاحية اشتراكك",
+    "notification_subscriptionExpired_description": "نعلمك أن اشتراكك قد انتهت صلاحيته"
 }

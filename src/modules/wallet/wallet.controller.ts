@@ -7,13 +7,14 @@ import { User } from 'src/mongoose/user';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { UserType } from 'src/common/models/enums/user-type';
 import { Store } from 'src/mongoose/store';
+import { SubscribedStoreGuard } from 'src/common/guards/subscribed-store.guard';
 
 @Controller('wallet')
 export class WalletController {
   constructor(private readonly walletService: WalletService) {}
 
   @Get('my-wallet')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, SubscribedStoreGuard)
   async getMyWallet(@CurrentUser() user: User) {
     return Response.success(await this.walletService.getMyWallet(user));
   }
@@ -30,7 +31,7 @@ export class WalletController {
   }
 
   @Post('request-withdraw')
-  @UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE))
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.STORE), SubscribedStoreGuard)
   async requestWithdraw(
     @CurrentUser() user: Store,
     @Body('amount') amount: number,

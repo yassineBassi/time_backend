@@ -30,7 +30,7 @@ import { NotificationType } from 'src/common/models/enums/notification-type';
 import { NotificationReference } from 'src/common/models/enums/notification-reference';
 import { FirebaseAdminService } from '../firebase-admin/firebase-admin.service';
 import { Notification } from 'src/mongoose/notification';
-import { format } from 'date-fns';
+const moment = require('moment');
 
 @Injectable()
 export class ReservationService {
@@ -488,8 +488,6 @@ export class ReservationService {
       currentDate.getTime() + currentDate.getTimezoneOffset() * 60 * 1000 * -1,
     );
 
-    console.log(new Date(currentDate.getTime() + 1000 * 60 * 60));
-
     // before 1h reminder
     let reservations = await this.reservationModel
       .find({
@@ -520,12 +518,19 @@ export class ReservationService {
     }
 
     // before 24h reminder
+    const dateAfter24h = new Date(currentDate.getTime() + 1000 * 60 * 60 * 24);
+    const endOfDay = new Date(
+      moment().endOf('day').toDate().getTime() +
+        currentDate.getTimezoneOffset() * 60 * 1000 * -1,
+    );
+
     reservations = await this.reservationModel
       .find({
         status: ReservationStatus.PAYED,
         notifiedBefore24h: false,
         reservationDate: {
-          $lt: new Date(currentDate.getTime() + 1000 * 60 * 60 * 24),
+          $lt: dateAfter24h,
+          $gt: endOfDay,
         },
       })
       .select('_id client reservationDate');

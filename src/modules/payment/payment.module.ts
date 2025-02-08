@@ -9,15 +9,16 @@ import { StoreSchema } from 'src/mongoose/store';
 import { ClientSchema } from 'src/mongoose/client';
 import { ReservationSchema } from 'src/mongoose/reservation';
 import { GiftModule } from '../gift/gift.module';
-import { GiftService } from '../gift/gift.service';
 import { GiftSchema } from 'src/mongoose/gift';
 import { CouponSchema } from 'src/mongoose/coupon';
 import { ReservationModule } from '../reservation/reservation.module';
+import { SubscriptionModule } from '../subscription/subscription.module';
 
 @Module({
   imports: [
     GiftModule,
     ReservationModule,
+    SubscriptionModule,
     MongooseModule.forFeature([
       { name: 'TapPayment', schema: TapPaymentSchema },
       { name: 'Client', schema: ClientSchema },

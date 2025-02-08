@@ -27,8 +27,6 @@ export class ServiceService {
     picture: string,
     store: Store,
   ) {
-    console.log('service : ', createServiceDto);
-
     const category = await this.serviceCategory.findById(
       createServiceDto.categoryId,
     );
@@ -57,8 +55,6 @@ export class ServiceService {
     picture: string,
     store: Store,
   ) {
-    console.log('service : ', updateServiceDto);
-
     const service = await this.serviceModel.findByIdAndUpdate(
       updateServiceDto.id,
       {
