@@ -63,6 +63,7 @@ import {
   SubscriptionLevelSchema,
 } from './mongoose/subscription-level';
 import { SubscriptionStatus } from './common/models/enums/subscription-status';
+import { NotificationModule } from './modules/notification/notification.module';
 
 @Module({
   imports: [
@@ -125,6 +126,7 @@ import { SubscriptionStatus } from './common/models/enums/subscription-status';
     GiftModule,
     ClientModule,
     FirebaseAdminModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [

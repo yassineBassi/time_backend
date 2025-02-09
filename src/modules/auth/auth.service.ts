@@ -428,7 +428,7 @@ export class AuthService {
     user.save();
 
     return {
-      success: true
+      success: true,
     };
   }
 
