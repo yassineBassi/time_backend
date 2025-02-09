@@ -289,6 +289,7 @@ export class StoreService {
     const todayName = currentDate.format('dddd').toLowerCase();
     const workingTimes = store.workingTimes[todayName]
       .map((time) => moment(`${today} ${time}`, 'YYYY-MM-DD hh:mm A'))
+      .sort((a, b) => a - b)
       .filter(
         (time) =>
           currentDate.isAfter(time) && currentDate.diff(time, 'minutes') <= 15,
@@ -309,12 +310,10 @@ export class StoreService {
     return workingTimes;
   }
 
-  async getParamWorkingTimes() {
-    const currentDate = moment();
-    const today = currentDate.format('YYYY-MM-DD');
+  async getParamWorkingTimes(date) {
+    const today = date.format('YYYY-MM-DD');
     const workingTimes = (await this.paramsService.getWorkingTimes())
       .map((time) => moment(`${today} ${time}`, 'YYYY-MM-DD hh:mm A'))
-      .filter((time) => time > currentDate)
       .sort((a, b) => a - b);
 
     return workingTimes;
@@ -322,7 +321,9 @@ export class StoreService {
 
   async getNextClosingDateTime(store: Store) {
     const storeWorkingTimes = this.getStoreWorkingTimes(store);
-    const paramWorkingTimes = await this.getParamWorkingTimes();
+    const paramWorkingTimes = (
+      await this.getParamWorkingTimes(moment())
+    ).filter((time) => time > moment());
 
     let closingTime;
     for (const time of paramWorkingTimes) {
@@ -343,7 +344,7 @@ export class StoreService {
       .map((time) => moment(`${today} ${time}`, 'YYYY-MM-DD hh:mm A'))
       .filter((time) => time > currentDate);
 
-      console.log('store ', store.storeName, ' date : ', nextWorkingTime[0]);
+    console.log('store ', store.storeName, ' date : ', nextWorkingTime[0]);
     return nextWorkingTime[0];
   }
 
@@ -374,36 +375,49 @@ export class StoreService {
       .populate('workingTimes');
 
     const reservedTimes = (
-      await this.reservationModel
-        .find({
-          store: store.id,
-          status: ReservationStatus.PAYED,
-          $expr: {
-            $eq: [
-              {
-                $dateToString: { format: '%Y-%m-%d', date: '$reservationDate' },
+      await Promise.all(
+        (
+          await this.reservationModel
+            .find({
+              store: store.id,
+              status: ReservationStatus.PAYED,
+              $expr: {
+                $eq: [
+                  {
+                    $dateToString: {
+                      format: '%Y-%m-%d',
+                      date: '$reservationDate',
+                    },
+                  },
+                  new Date(date).toISOString().split('T')[0],
+                ],
               },
-              new Date(date).toISOString().split('T')[0],
-            ],
-          },
-        })
-        .select('reservationDate')
-    )
-      .map((r) => r.reservationDate)
-      .map((d) => {
-        const date = new Date(d);
-        const hours = date.getHours();
-        const minutes = date.getMinutes();
+            })
+            .select('reservationDate reservationStartDate reservationEndDate')
+        ).map(async (r) => {
+          return (await this.getParamWorkingTimes(moment(r.reservationDate)))
+            .filter(
+              (time) =>
+                time.valueOf() >= r.reservationStartDate.valueOf() &&
+                time.valueOf() < r.reservationEndDate.valueOf(),
+            )
+            .map((time) => {
+              const date = time.toDate().toISOString();
+              const hours = parseInt(date.split('T')[1].split(':')[0]);
+              const minutes = parseInt(date.split('T')[1].split(':')[1]);
 
-        const formattedDate =
-          (hours % 12 || 12).toString().padStart(2, '0') +
-          ':' +
-          minutes.toString().padStart(2, '0') +
-          ' ' +
-          (hours >= 12 ? 'pm' : 'am');
+              const formattedDate =
+                (hours % 12 || 12).toString().padStart(2, '0') +
+                ':' +
+                minutes.toString().padStart(2, '0') +
+                ' ' +
+                (hours >= 12 ? 'pm' : 'am');
 
-        return formattedDate;
-      });
+              return formattedDate;
+            });
+        }),
+      )
+    ).reduce((acc, curr) => [...acc, ...curr], []);
 
     const workingTimes = store.workingTimes[day];
 

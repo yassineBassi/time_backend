@@ -180,20 +180,17 @@ export class AppModule implements NestModule {
     private readonly i18n: I18nService,
   ) {
     setTimeout(async () => {
-      let currentDate = new Date();
-      // add timezone
-      currentDate = new Date(
-        currentDate.getTime() +
-          currentDate.getTimezoneOffset() * 60 * 1000 * -1,
-      );
+     /* const reservations = await this.reservationModel.find({}).populate('items');
 
-      // before 1h reminder
-      //const subscriptions = await this.storeSubscriptionModel.find({});
-
-      /*for (const subsciption of subscriptions) {
-        subsciption.notifiedBefore1h = false;
-        subsciption.notifiedBefore24h = false;
-        await subsciption.save();
+      for (const reservation of reservations) {
+        reservation.reservationStartDate = reservation.reservationDate;
+        reservation.reservationEndDate = new Date(
+          reservation.reservationDate.getTime() +
+            reservation.items
+              .map((item: any) => item.duration)
+              .reduce((acc, curr) => acc + curr, 0),
+        );
+        await reservation.save();
       }*/
       //.select('_id client reservationDate');
 

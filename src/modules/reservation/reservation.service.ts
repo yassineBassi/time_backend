@@ -93,20 +93,30 @@ export class ReservationService {
     }
 
     // check if there are reservations in the wanted time
-    const count = await this.reservationModel.countDocuments({
-      store: store.id,
-      status: ReservationStatus.PAYED,
-      reservationDate: request.reservationDate,
-    });
+    const count = await this.reservationModel
+      .countDocuments({
+        store: store.id,
+        status: ReservationStatus.PAYED,
+        reservationStartDate: {
+          $lt: request.reservationDate,
+        },
+        reservationEndDate: {
+          $gt: request.reservationDate,
+        },
+      })
+      .populate('items');
 
     if (count) {
       throw new BadRequestException('messages.reservation_date_booked');
     }
 
+    // check if selected time is in the available times
+
     let reservation = await this.reservationModel.create({
       store: store.id,
       client: client.id,
       reservationDate: request.reservationDate,
+      reservationStartDate: request.reservationDate,
       tva: request.tva,
       totalPrice: request.totalPrice,
       number: await this.generateRandomReservation(10),
@@ -118,6 +128,7 @@ export class ReservationService {
 
     const items = [];
     let price = 0;
+    let duration = 0;
 
     for (const item of request.items) {
       const service = await this.serviceModel.findById(item.serviceId);
@@ -131,9 +142,13 @@ export class ReservationService {
         })
       ).save();
       price += reservationItem.price * reservationItem.quantity;
+      duration += reservationItem.duration;
       items.push(reservationItem.id);
     }
 
+    reservation.reservationEndDate = new Date(
+      reservation.reservationStartDate.getTime() + duration,
+    );
     reservation.totalPrice = price;
     reservation.items = items;
     reservation = await reservation.save();

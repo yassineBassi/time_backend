@@ -16,6 +16,8 @@ export const ReservationSchema = new mongoose.Schema(
       default: ReservationStatus.CREATED,
     },
     reservationDate: { type: Date },
+    reservationStartDate: { type: Date },
+    reservationEndDate: { type: Date },
     tva: { type: Number },
     totalPrice: { type: Number },
     payedPrice: { type: Number },
@@ -38,6 +40,8 @@ export interface Reservation extends mongooseDelete.SoftDeleteDocument {
   items: mongoose.Schema.Types.ObjectId[];
   status: string;
   reservationDate: Date;
+  reservationStartDate: Date;
+  reservationEndDate: Date;
   tva: number;
   totalPrice: number;
   payedPrice: number;
