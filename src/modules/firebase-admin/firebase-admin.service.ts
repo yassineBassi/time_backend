@@ -1,13 +1,16 @@
 import * as admin from 'firebase-admin';
 import { Injectable } from '@nestjs/common';
 import { Notification } from 'src/mongoose/notification';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class FirebaseAdminService {
   private readonly firebaseApp: admin.app.App;
 
-  constructor() {
-    const serviceAccount = require('../../../time-firebase-service-account-key.json'); // Update path
+  constructor(private readonly configService: ConfigService) {
+    const serviceAccount = require(
+      this.configService.get('FIREBASE_ADMIN_FILE_PATH'),
+    ); // Update path
 
     this.firebaseApp = admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),

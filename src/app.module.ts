@@ -17,7 +17,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { DataModule } from './modules/data/data.module';
 import { SubscriptionModule } from './modules/subscription/subscription.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ServiceModule } from './modules/service/service.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { ServiceCategoryModule } from './modules/service-category/service-category.module';
@@ -67,7 +67,14 @@ import { NotificationModule } from './modules/notification/notification.module';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost:27017/time-db'),
+    ConfigModule.forRoot({ isGlobal: true }),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        uri: configService.get<string>('MONGODB_URI'),
+      }),
+    }),
     MongooseModule.forFeature([
       { name: 'Store', schema: StoreSchema },
       { name: 'StoreSection', schema: StoreSectionSchema },
@@ -112,9 +119,6 @@ import { NotificationModule } from './modules/notification/notification.module';
     StoreModule,
     DataModule,
     SubscriptionModule,
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
     ServiceModule,
     PaymentModule,
     ServiceCategoryModule,
@@ -180,21 +184,6 @@ export class AppModule implements NestModule {
     private readonly i18n: I18nService,
   ) {
     setTimeout(async () => {
-     /* const reservations = await this.reservationModel.find({}).populate('items');
-
-      for (const reservation of reservations) {
-        reservation.reservationStartDate = reservation.reservationDate;
-        reservation.reservationEndDate = new Date(
-          reservation.reservationDate.getTime() +
-            reservation.items
-              .map((item: any) => item.duration)
-              .reduce((acc, curr) => acc + curr, 0),
-        );
-        await reservation.save();
-      }*/
-      //.select('_id client reservationDate');
-
-      //console.log(subscriptions);
     }, 1000);
   }
 }

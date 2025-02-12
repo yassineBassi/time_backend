@@ -6,19 +6,18 @@ import { DataService } from './data.service';
 export class DataController {
   constructor(private readonly dataService: DataService) {}
 
-  @Get("countries")
-  async getCountries(){
-    return Response.success(await this.dataService.getCountries(), "");
+  @Get('countries')
+  async getCountries() {
+    return Response.success(await this.dataService.getCountries(), '');
   }
 
-  @Get("areas")
-  async getAreas(@Query("area") country: String){
-    return Response.success(await this.dataService.getAreas(), "");
+  @Get('areas')
+  async getAreas(@Query('area') country: string) {
+    return Response.success(await this.dataService.getAreas(), '');
   }
 
-  @Get("cities")
-  async getCities(@Query("area") area: String){
-    return Response.success(await this.dataService.getCities(area), "");
+  @Get('cities')
+  async getCities(@Query('area') area: string) {
+    return Response.success(await this.dataService.getCities(area), '');
   }
-
 }
