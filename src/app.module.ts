@@ -10,7 +10,7 @@ import { ResponseExceptionFilter } from './common/filters/response-exception.fil
 import { WinstonLogger, WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
 import { SharedModule } from './common/shared.module';
-import { Client, ClientSchema } from './mongoose/client';
+import { ClientModel, ClientSchema } from './mongoose/client';
 import { SectionModule } from './modules/section/section.module';
 import { StoreModule } from './modules/store/store.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
@@ -26,7 +26,7 @@ import { ParamsModule } from './modules/params/params.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { StoreSection, StoreSectionSchema } from './mongoose/store-section';
 import { Model } from 'mongoose';
-import { Store, StoreSchema } from './mongoose/store';
+import { StoreModel, StoreSchema } from './mongoose/store';
 import { StoreCategory, StoreCategorySchema } from './mongoose/store-category';
 import { StoreReview, StoreReviewSchema } from './mongoose/store-review';
 import { Service, ServiceSchema } from './mongoose/service';
@@ -161,11 +161,11 @@ export class AppModule implements NestModule {
     @InjectModel('SubscriptionLevel')
     private subscriptionLevelModel: Model<SubscriptionLevel>,
     @InjectModel('Store')
-    private storeModel: Model<Store>,
+    private storeModel: StoreModel,
     @InjectModel('StoreReview')
     private storeReviewModel: Model<StoreReview>,
     @InjectModel('Client')
-    private clientModel: Model<Client>,
+    private clientModel: ClientModel,
     @InjectModel('Service')
     private serviceModel: Model<Service>,
     @InjectModel('ServiceCategory')
@@ -183,7 +183,11 @@ export class AppModule implements NestModule {
     private firebaseAdminService: FirebaseAdminService,
     private readonly i18n: I18nService,
   ) {
-    setTimeout(async () => {
+    setTimeout(async () => {/*
+      const result = await this.clientModel.restore({
+        _id: '6768898d6aecc5024753654d',
+      });
+      console.log(result);*/
     }, 1000);
   }
 }

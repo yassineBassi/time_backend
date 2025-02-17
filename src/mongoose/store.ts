@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { User, UserSchema } from './user';
+import * as mongooseDelete from 'mongoose-delete';
 
 export const StoreSchema = new mongoose.Schema(
   {
@@ -23,6 +24,7 @@ export const StoreSchema = new mongoose.Schema(
     reports: [{ type: mongoose.Schema.Types.ObjectId, ref: 'StoreReport' }],
     available: { type: Boolean, default: false },
     facilities: [{ type: mongoose.Types.ObjectId, ref: 'FacilityItem' }],
+    isDemo: { type: Boolean, default: false}
   },
   {
     timestamps: true,
@@ -49,6 +51,7 @@ export interface Store extends User {
   reports: mongoose.Schema.Types.ObjectId[];
   available: boolean;
   facilities: mongoose.Types.ObjectId[];
+  isDemo: boolean;
 }
 
 StoreSchema.virtual('lat').get(function (this: Store) {
@@ -58,3 +61,5 @@ StoreSchema.virtual('lat').get(function (this: Store) {
 StoreSchema.virtual('lng').get(function (this: Store) {
   return this.geoLocation.coordinates ? this.geoLocation.coordinates[0] : 0;
 });
+
+export type StoreModel = mongooseDelete.SoftDeleteModel<Store>

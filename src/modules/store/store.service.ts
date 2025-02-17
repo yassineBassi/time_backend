@@ -22,6 +22,11 @@ import { I18nService } from 'nestjs-i18n';
 import { DashboardFilterQuery } from 'src/common/models/dahsboard-filter-query';
 import { Facility } from 'src/mongoose/facility';
 import { ParamsService } from '../params/params.service';
+import { FirebaseAdminService } from '../firebase-admin/firebase-admin.service';
+import { UserType } from 'src/common/models/enums/user-type';
+import { NotificationType } from 'src/common/models/enums/notification-type';
+import { NotificationReference } from 'src/common/models/enums/notification-reference';
+import { Notification } from 'src/mongoose/notification';
 const moment = require('moment');
 
 @Injectable()
@@ -45,6 +50,9 @@ export class StoreService {
     private readonly facilityModel: Model<Facility>,
     private readonly paramsService: ParamsService,
     private readonly i18n: I18nService,
+    @InjectModel('Notification')
+    private readonly notificationModel: Model<Notification>,
+    private firebaseAdminService: FirebaseAdminService,
   ) {}
 
   defaultSelect =
@@ -68,6 +76,7 @@ export class StoreService {
   defaultFilter = {
     status: UserStatus.ENABLED,
     available: true,
+    isDemo: false,
     /*subscription: {
       $not: null,
     }*/
@@ -381,17 +390,34 @@ export class StoreService {
             .find({
               store: store.id,
               status: ReservationStatus.PAYED,
-              $expr: {
-                $eq: [
-                  {
-                    $dateToString: {
-                      format: '%Y-%m-%d',
-                      date: '$reservationDate',
-                    },
+              $or: [
+                {
+                  $expr: {
+                    $gte: [
+                      {
+                        $dateToString: {
+                          format: '%Y-%m-%d',
+                          date: '$reservationStartDate',
+                        },
+                      },
+                      new Date(date).toISOString().split('T')[0],
+                    ],
                   },
-                  new Date(date).toISOString().split('T')[0],
-                ],
-              },
+                },
+                {
+                  $expr: {
+                    $gte: [
+                      {
+                        $dateToString: {
+                          format: '%Y-%m-%d',
+                          date: '$reservationEndDate',
+                        },
+                      },
+                      new Date(date).toISOString().split('T')[0],
+                    ],
+                  },
+                }
+              ]
             })
             .select('reservationDate reservationStartDate reservationEndDate')
         ).map(async (r) => {
@@ -600,18 +626,36 @@ export class StoreService {
   }
 
   async enableStores(ids: string[]) {
-    const result = await this.storeModel.updateMany(
-      {
-        _id: {
-          $in: ids,
-        },
+    const stores = await this.storeModel.find({
+      _id: {
+        $in: ids,
       },
-      {
-        status: UserStatus.ENABLED,
-      },
-    );
+    });
 
-    return result;
+    for (const store of stores) {
+      store.status = UserStatus.ENABLED;
+      await store.save();
+
+      const notification = await (
+        await this.notificationModel.create({
+          title: this.i18n.translate('messages.your_account_enabled_title'),
+          description: this.i18n.translate('messages.your_account_enabled_description'),
+          receiverType: UserType.STORE,
+          receiver: store.id,
+          type: NotificationType.ENABLE_USER,
+          referenceType: NotificationReference.SELF,
+        })
+      ).save();
+
+      await this.firebaseAdminService.sendNotification(
+        store.notificationToken,
+        notification,
+      );
+    }
+
+    return {
+      success: true,
+    };
   }
 
   async getStoreInDashboard(id: string) {

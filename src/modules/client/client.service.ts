@@ -1,17 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import mongoose, { Model } from 'mongoose';
-import { Client } from 'src/mongoose/client';
-import { Store } from 'src/mongoose/store';
 import { StoreService } from '../store/store.service';
+import { Client, ClientModel } from 'src/mongoose/client';
+import { StoreModel } from 'src/mongoose/store';
 
 @Injectable()
 export class ClientService {
   constructor(
     @InjectModel('Client')
-    private readonly clientModel: Model<Client>,
+    private readonly clientModel: ClientModel,
     @InjectModel('Store')
-    private readonly storeModel: Model<Store>,
+    private readonly storeModel: StoreModel,
     @Inject()
     private readonly storeService: StoreService,
   ) {}

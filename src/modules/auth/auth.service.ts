@@ -7,12 +7,10 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
-import { Client } from 'src/mongoose/client';
 import { OtpToken } from 'src/mongoose/otp-token';
 import { RegisterClientDTO } from './dtos/register-client.dto';
 import * as bcrypt from 'bcrypt';
 import { RegisterStoreDTO } from './dtos/register-STORE.dto';
-import { Store } from 'src/mongoose/store';
 import { LoginDTO } from './dtos/login.dto';
 import { User } from 'src/mongoose/user';
 import { JwtService } from '@nestjs/jwt';
@@ -27,7 +25,8 @@ import { LoginWithAppleDTO } from './dtos/login-with-apple.dto';
 import { EditClientProfileDTO } from './dtos/edi-client-profile.dto';
 import { AdminLoginDTO } from './dtos/admin-login';
 import { Admin } from 'src/mongoose/admin';
-import { EditStoreProfileDTO } from './dtos/edit-store-profile.dto';
+import { Client, ClientModel } from 'src/mongoose/client';
+import { Store, StoreModel } from 'src/mongoose/store';
 
 const SALT_ROUNDS = 10;
 
@@ -35,9 +34,9 @@ const SALT_ROUNDS = 10;
 export class AuthService {
   constructor(
     @InjectModel('Client')
-    private readonly clientModel: Model<Client>,
+    private readonly clientModel: ClientModel,
     @InjectModel('Store')
-    private readonly storeModel: Model<Store>,
+    private readonly storeModel: StoreModel,
     @InjectModel('Admin')
     private readonly adminModel: Model<Admin>,
     @InjectModel('OtpToken')
@@ -81,12 +80,28 @@ export class AuthService {
   }
 
   async findUserByPhoneNumber(phoneNumber: string): Promise<any> {
-    const store = await this.storeModel.findOne({ phoneNumber });
+    const select =
+      '_id username fullName storeName storeName email phoneNumber picture isVerified type subscription salt password';
+
+    const store = await this.storeModel
+      .findOne({ phoneNumber })
+      .select(select)
+      .populate({
+        path: 'category',
+        select: 'name section',
+        populate: {
+          path: 'section',
+          select: 'name',
+        },
+      });
     if (store) {
+      console.log(store);
       return store;
     }
 
-    const client = await this.clientModel.findOne({ phoneNumber });
+    const client = await this.clientModel
+      .findOne({ phoneNumber })
+      .select(select);
     return client;
   }
 
@@ -124,12 +139,22 @@ export class AuthService {
 
     if (!account) throw new BadRequestException('errors.bad_credentials');
 
+    /*
+    const salt = await bcrypt.genSalt(SALT_ROUNDS);
+    const pwd = bcrypt.hashSync(password, account.salt);
+    account.salt = salt;
+    account.password = pwd;
+    await account.save();
+
+    */
     if (
-      !account.firebaseID &&
+      account.firebaseID ||
       account.password != bcrypt.hashSync(password, account.salt)
     ) {
       throw new BadRequestException('errors.bad_credentials');
     }
+
+    account.password = null;
     return account;
   }
 
@@ -219,6 +244,36 @@ export class AuthService {
     return this.loginAccount(account, request.notificationToken);
   }
 
+
+  loginAccountAfterRegister(user: User){
+    if (user.firebaseID) {
+      if (user.googleID)
+        return this.loginWithGoogle({
+          firebaseID: user.firebaseID,
+          googleID: user.googleID,
+          notificationToken: user.notificationToken,
+        });
+      if (user.appleID)
+        return this.loginWithApple({
+          firebaseID: user.firebaseID,
+          appleID: user.appleID,
+          notificationToken: user.notificationToken,
+        });
+      if (user.twitterID)
+        return this.loginWithTwitter({
+          firebaseID: user.firebaseID,
+          twitterID: user.googleID,
+          notificationToken: user.notificationToken,
+        });
+    }
+
+    return this.login({
+      phoneNumber: user.phoneNumber as string,
+      password: user.password,
+      notificationToken: user.notificationToken,
+    });
+  }
+
   async registerClient(registerClientDTO: RegisterClientDTO) {
     let client = new this.clientModel(registerClientDTO);
     if (
@@ -227,20 +282,23 @@ export class AuthService {
         registerClientDTO.twitterID ||
         registerClientDTO.appleID)
     ) {
-      const user = await this.firebaseService.getUserByUid(
+      const users = await this.firebaseService.getUserByUid(
         registerClientDTO.firebaseID as string,
       );
       if (
-        !user ||
-        ![
-          registerClientDTO.googleID,
-          registerClientDTO.twitterID,
-          registerClientDTO.appleID,
-        ].includes(user.uid)
+        !users ||
+        !users.length ||
+        !users.filter((p) =>
+          [
+            registerClientDTO.googleID,
+            registerClientDTO.twitterID,
+            registerClientDTO.appleID,
+          ].includes(p.uid),
+        ).length
       ) {
         throw new BadRequestException(this.generateUniqueUsername());
       }
-      client.status = UserStatus.VERIFIED;
+      client.status = UserStatus.UNDER_VERIFICATION;
     } else {
       const salt = await bcrypt.genSalt(SALT_ROUNDS);
       const hashedPassword = await bcrypt.hash(client.password, salt);
@@ -262,11 +320,7 @@ export class AuthService {
       user: client.id,
     }).save();
 
-    return this.login({
-      phoneNumber: client.phoneNumber as string,
-      password: registerClientDTO.password,
-      notificationToken: registerClientDTO.notificationToken,
-    });
+    return this.loginAccountAfterRegister(client);
   }
 
   async registerStore(registerStoreDTO: RegisterStoreDTO, picture: string) {
@@ -278,21 +332,24 @@ export class AuthService {
         registerStoreDTO.twitterID ||
         registerStoreDTO.appleID)
     ) {
-      const user = await this.firebaseService.getUserByUid(
+      const users = await this.firebaseService.getUserByUid(
         registerStoreDTO.firebaseID as string,
       );
 
       if (
-        !user ||
-        ![
-          registerStoreDTO.googleID,
-          registerStoreDTO.twitterID,
-          registerStoreDTO.appleID,
-        ].includes(user.uid)
+        !users ||
+        !users.length ||
+        !users.filter((p) =>
+          [
+            registerStoreDTO.googleID,
+            registerStoreDTO.twitterID,
+            registerStoreDTO.appleID,
+          ].includes(p.uid),
+        ).length
       ) {
         throw new BadRequestException(this.generateUniqueUsername());
       }
-      store.status = UserStatus.VERIFIED;
+      store.status = UserStatus.UNDER_VERIFICATION;
     } else if (registerStoreDTO.password) {
       const salt = await bcrypt.genSalt(SALT_ROUNDS);
       const hashedPassword = await bcrypt.hash(store.password, salt);
@@ -323,11 +380,7 @@ export class AuthService {
 
     store = await this.storeModel.findById(store.id).populate('category');
 
-    return this.login({
-      phoneNumber: store.phoneNumber as string,
-      password: registerStoreDTO.password,
-      notificationToken: registerStoreDTO.notificationToken,
-    });
+    return this.loginAccountAfterRegister(store);
   }
 
   sendOTP() {
@@ -426,6 +479,22 @@ export class AuthService {
 
     user.notificationToken = null;
     user.save();
+
+    return {
+      success: true,
+    };
+  }
+
+  async deleteAccount(user: User) {
+    let result;
+    console.log(this.clientModel);
+    if (user.type == UserType.STORE) {
+      result = await this.storeModel.delete({ _id: user.id });
+    } else {
+      result = await this.clientModel.delete({ _id: user.id });
+    }
+
+    console.log(result);
 
     return {
       success: true,

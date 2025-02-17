@@ -65,7 +65,7 @@ export class RegisterStoreDTO {
   commerceNumberExpirationDate: Date;
 
   @IsNotEmpty()
-  @MinLength(23)
+  @MinLength(20)
   accountNumber: string;
 
   @IsNotEmpty()

@@ -14,16 +14,13 @@ export class FirebaseAdminService {
 
     this.firebaseApp = admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
-      // Optionally, add databaseURL if using Realtime Database
-      // databaseURL: 'https://<your-database-name>.firebaseio.com',
     });
   }
 
-  async getUserByUid(uid: string): Promise<admin.auth.UserInfo | null> {
+  async getUserByUid(uid: string): Promise<admin.auth.UserInfo[] | null> {
     try {
       const user = await this.firebaseApp.auth().getUser(uid);
-      console.log('---------', user);
-      return user.providerData[0];
+      return user.providerData;
     } catch (error) {
       console.error('Error fetching user data:', error);
       return null;

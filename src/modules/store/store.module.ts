@@ -13,6 +13,8 @@ import { StoreReportSchema } from 'src/mongoose/store-report';
 import { FacilitySchema } from 'src/mongoose/facility';
 import { FacilityItemSchema } from 'src/mongoose/facility-item';
 import { ParamsModule } from '../params/params.module';
+import { NotificationSchema } from 'src/mongoose/notification';
+import { FirebaseAdminModule } from '../firebase-admin/firebase-admin.module';
 
 @Module({
   imports: [
@@ -26,12 +28,14 @@ import { ParamsModule } from '../params/params.module';
       { name: 'StoreReport', schema: StoreReportSchema },,
       { name: 'Facility', schema: FacilitySchema },
       { name: 'FacilityItem', schema: FacilityItemSchema },
+      { name: 'Notification', schema: NotificationSchema },
     ]),
     SubscriptionModule,
     ParamsModule,
+    FirebaseAdminModule,
   ],
   controllers: [StoreController],
   providers: [StoreService],
-  exports: [StoreService]
+  exports: [StoreService],
 })
 export class StoreModule {}

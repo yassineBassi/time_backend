@@ -25,11 +25,11 @@ import { UserType } from 'src/common/models/enums/user-type';
 import { SubscribedStoreGuard } from 'src/common/guards/subscribed-store.guard';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { EditStoreProfileDTO } from './dtos/edit-store-profile.dto';
-import { Store } from 'src/mongoose/store';
 import { EditClientProfileDTO } from './dtos/edi-client-profile.dto';
-import { Client } from 'src/mongoose/client';
 import { AdminLoginDTO } from './dtos/admin-login';
 import { User } from 'src/mongoose/user';
+import { Store, StoreModel } from 'src/mongoose/store';
+import { Client, ClientModel } from 'src/mongoose/client';
 
 @Controller('auth')
 export class AuthController {
@@ -148,6 +148,12 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   async logout(@CurrentUser() user: User) {
     return Response.success(await this.authService.logout(user));
+  }
+
+  @Post('delete')
+  @UseGuards(JwtAuthGuard)
+  async deleteAccount(@CurrentUser() user: User) {
+    return Response.success(await this.authService.deleteAccount(user));
   }
 
   // dashboard APIs

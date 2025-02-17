@@ -89,9 +89,7 @@ export class ServiceService {
   }
 
   async remove(id: string) {
-    console.log('delete service', id);
     const result = await this.serviceModel.delete({ _id: id });
-    console.log('res', result);
     return result;
   }
 

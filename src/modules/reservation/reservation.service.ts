@@ -53,10 +53,10 @@ export class ReservationService {
     private readonly couponModel: Model<Coupon>,
     @InjectModel('Notification')
     private readonly notificationModel: Model<Notification>,
+    private firebaseAdminService: FirebaseAdminService,
     @Inject()
     private readonly couponService: CouponService,
     private readonly i18n: I18nService,
-    private firebaseAdminService: FirebaseAdminService,
   ) {}
 
   private async generateRandomReservation(length: number) {
@@ -142,7 +142,7 @@ export class ReservationService {
         })
       ).save();
       price += reservationItem.price * reservationItem.quantity;
-      duration += reservationItem.duration;
+      duration += reservationItem.duration * reservationItem.quantity;
       items.push(reservationItem.id);
     }
 

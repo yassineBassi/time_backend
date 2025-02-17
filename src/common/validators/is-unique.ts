@@ -6,7 +6,6 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-import { access } from 'fs';
 import { Connection } from 'mongoose';
 
 @ValidatorConstraint({ async: true })
@@ -14,8 +13,6 @@ export class IsUniqueConstraint implements ValidatorConstraintInterface {
   constructor(@InjectConnection() private readonly connection: Connection) {}
 
   async validate(value: any, args: ValidationArguments) {
-    console.log(value);
-    console.log(args.object['id']);
 
     const [modelNames, fieldName, exceptions] = args.constraints;
 
@@ -30,8 +27,6 @@ export class IsUniqueConstraint implements ValidatorConstraintInterface {
           )
         : {};
 
-    console.log(exptionsFilter);
-
     let exists = false;
     for (let i = 0; i < modelNames.length; i++) {
       const model = this.connection.models[modelNames[i]];
@@ -39,8 +34,6 @@ export class IsUniqueConstraint implements ValidatorConstraintInterface {
         .countDocuments({ [fieldName]: value, ...exptionsFilter })
         .exec();
 
-      console.log('filter : ', { [fieldName]: value, ...exptionsFilter });
-      console.log('count : ', count);
       if (count > 0) {
         exists = true;
         break;

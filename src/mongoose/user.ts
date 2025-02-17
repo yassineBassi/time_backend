@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import * as mongooseDelete from 'mongoose-delete';
 import { UserStatus } from 'src/common/models/enums/user-status';
 import { UserType } from 'src/common/models/enums/user-type';
 
@@ -41,7 +42,7 @@ const Schema = new mongoose.Schema(
         required: true,
       },
     },
-    notificationToken: { type: String }
+    notificationToken: { type: String },
   },
   {
     timestamps: true,
@@ -57,7 +58,7 @@ interface GeoJSONPoint {
   coordinates: [number, number];
 }
 
-export interface User extends Document {
+export interface User extends mongooseDelete.SoftDeleteDocument {
   id: string;
   picture: string;
   username: string;
@@ -92,3 +93,5 @@ Schema.virtual('lng').get(function (this: User) {
 });
 
 export const UserSchema = Schema;
+
+export type UserSchema = mongooseDelete.SoftDeleteModel<User>;

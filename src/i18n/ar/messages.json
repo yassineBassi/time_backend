@@ -20,5 +20,7 @@
     "notification_subscriptionReminder_24h_title": "تذكير بالاشتراك!",
     "notification_subscriptionReminder_24h_description": "نذكرك بأن اشتراكك سينتهي غدًا",
     "notification_subscriptionExpired_title": "انتهت صلاحية اشتراكك",
-    "notification_subscriptionExpired_description": "نعلمك أن اشتراكك قد انتهت صلاحيته"
+    "notification_subscriptionExpired_description": "نعلمك أن اشتراكك قد انتهت صلاحيته",
+    "notification_enableUser_title": "تم تفعيل الحساب",
+    "notification_enableUser_description": "لقد تم تفعيل حسابك"
 }
