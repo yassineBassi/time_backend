@@ -126,6 +126,9 @@ export class SubscriptionService {
     subscription = await subscription.save();
 
     store.subscription = subscription.id;
+
+    if (subscriptionLevel.verified) store.isVerified = true;
+
     store = await store.save();
 
     return true;
@@ -282,7 +285,7 @@ export class SubscriptionService {
 
   async sendSubscriptionExpiredNotification(
     store: Store,
-    subscription: StoreSubscription
+    subscription: StoreSubscription,
   ) {
     const notification = await (
       await this.notificationModel.create({
@@ -295,7 +298,7 @@ export class SubscriptionService {
         description: this.i18n.translate(
           'messages.notification_' +
             NotificationType.SUBSCRIPTION_EXPIRED +
-            '_' + 
+            '_' +
             'description',
         ),
         type: NotificationType.SUBSCRIPTION_EXPIRED,

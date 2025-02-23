@@ -39,12 +39,12 @@ export interface Store extends User {
   storeName: string;
   //photos: String,
   commerceNumber: string;
-  commerceNumberExpirationDate: string;
+  commerceNumberExpirationDate: Date;
   accountNumber: string;
   category: mongoose.Schema.Types.ObjectId;
   reviews: mongoose.Schema.Types.ObjectId[];
   reviewsCount: string;
-  isVerified: string;
+  isVerified: boolean;
   subscription: mongoose.Schema.Types.ObjectId;
   workingTimes: mongoose.Schema.Types.ObjectId;
   services: mongoose.Schema.Types.ObjectId[];

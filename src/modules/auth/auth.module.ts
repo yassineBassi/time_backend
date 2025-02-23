@@ -15,6 +15,7 @@ import { LocalStrategy } from './strategies/local.strategy';
 import { FirebaseAdminModule } from '../firebase-admin/firebase-admin.module';
 import { SubscriptionModule } from '../subscription/subscription.module';
 import { AdminSchema } from 'src/mongoose/admin';
+import { WorkingTimeSchema } from 'src/mongoose/working-time';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { AdminSchema } from 'src/mongoose/admin';
       { name: 'Store', schema: StoreSchema },
       { name: 'Admin', schema: AdminSchema },
       { name: 'OtpToken', schema: OtpTokenSchema },
+      { name: 'WorkingTime', schema: WorkingTimeSchema },
     ]),
     PassportModule,
     JwtModule.register({

@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -19,6 +20,7 @@ import { WithdrawRequest } from 'src/mongoose/withdraw-request';
 import { WithdrawRequestStatus } from 'src/common/models/enums/withdraw-request-status';
 import { Transaction } from 'src/common/models/transaction';
 import { ReservationService } from '../reservation/reservation.service';
+import { DashboardFilterQuery } from 'src/common/models/dahsboard-filter-query';
 
 @Injectable()
 export class WalletService {
@@ -87,6 +89,7 @@ export class WalletService {
       }
     } else if (user.type == UserType.STORE) {
       const requests = await this.withdrawRequestModel.find({
+        status: WithdrawRequestStatus.PAYED,
         store: user.id,
       });
 
@@ -166,6 +169,32 @@ export class WalletService {
     return coupon;
   }
 
+  async getWithdrawRequests(query: DashboardFilterQuery) {
+    const searchQuery = JSON.parse(decodeURIComponent(query.searchQuery));
+
+    const searchFilter = {};
+
+    Object.keys(searchQuery).forEach((k) => {
+      if (searchQuery[k].length)
+        searchFilter[k] = { $regex: new RegExp(`${searchQuery[k]}`, 'i') };
+    });
+
+    const requests = await this.withdrawRequestModel
+      .find(searchFilter)
+      .populate({
+        path: 'store',
+        select: 'storeName fullName accountNumber',
+      })
+      .sort({ createdAt: -1 })
+      .skip(query.skip)
+      .limit(query.take);
+
+    return {
+      'withdraw-requests': requests,
+      count: await this.withdrawRequestModel.countDocuments(searchFilter),
+    };
+  }
+
   async requestWithdraw(user: Store, amount: number) {
     if (!amount) {
       return new BadRequestException();
@@ -184,12 +213,58 @@ export class WalletService {
       await this.withdrawRequestModel.create({
         store: store.id,
         amount: amount,
-        status: WithdrawRequestStatus.CREATED,
+        status: WithdrawRequestStatus.INPROGRESS,
       })
     ).save();
 
     return {
       success: true,
+    };
+  }
+
+  async acceptWithdrawRequest(requestId: string) {
+    const withdrawRequest = await this.withdrawRequestModel.findById(requestId);
+    if (!withdrawRequest) {
+      throw new NotFoundException('request_not_found');
+    }
+
+    if (withdrawRequest.status != WithdrawRequestStatus.INPROGRESS) {
+      throw new ForbiddenException('errors.withdraw_request_no_available');
+    }
+
+    const store = await this.storeModel.findById(withdrawRequest.store);
+
+    const balance = (await this.getMyWallet(store)).points;
+
+    if (balance < withdrawRequest.amount) {
+      throw new ForbiddenException('errors.balance_insufficient');
+    }
+
+    withdrawRequest.status = WithdrawRequestStatus.PAYED;
+    await withdrawRequest.save();
+
+    return {
+      success: true,
+      message: 'messages.withdeaw_payed',
+    };
+  }
+
+  async rejectWithdrawRequest(requestId: string) {
+    const withdrawRequest = await this.withdrawRequestModel.findById(requestId);
+    if (!withdrawRequest) {
+      throw new NotFoundException('request_not_found');
+    }
+
+    if (withdrawRequest.status != WithdrawRequestStatus.INPROGRESS) {
+      throw new ForbiddenException('errors.withdraw_request_no_available');
+    }
+
+    withdrawRequest.status = WithdrawRequestStatus.REJECTED;
+    await withdrawRequest.save();
+
+    return {
+      success: true,
+      message: 'messages.withdeaw_rejected',
     };
   }
 }

@@ -27,6 +27,7 @@ import { UserType } from 'src/common/models/enums/user-type';
 import { NotificationType } from 'src/common/models/enums/notification-type';
 import { NotificationReference } from 'src/common/models/enums/notification-reference';
 import { Notification } from 'src/mongoose/notification';
+import { UpdateDashboardStore } from './dto/dashboard-update-store';
 const moment = require('moment');
 
 @Injectable()
@@ -296,6 +297,7 @@ export class StoreService {
     const currentDate = moment();
     const today = currentDate.format('YYYY-MM-DD');
     const todayName = currentDate.format('dddd').toLowerCase();
+
     const workingTimes = store.workingTimes[todayName]
       .map((time) => moment(`${today} ${time}`, 'YYYY-MM-DD hh:mm A'))
       .sort((a, b) => a - b)
@@ -416,8 +418,8 @@ export class StoreService {
                       new Date(date).toISOString().split('T')[0],
                     ],
                   },
-                }
-              ]
+                },
+              ],
             })
             .select('reservationDate reservationStartDate reservationEndDate')
         ).map(async (r) => {
@@ -570,10 +572,19 @@ export class StoreService {
 
   // Admin services
 
-  async fetchDashboardStores(query: DashboardFilterQuery) {
+  async fetchDashboardStores(query: DashboardFilterQuery, subscribed: boolean) {
     const searchQuery = JSON.parse(decodeURIComponent(query.searchQuery));
 
     const searchFilter = {};
+
+    if (subscribed)
+      searchFilter['subscription'] = {
+        $ne: null,
+      };
+    else
+      searchFilter['subscription'] = {
+        $eq: null,
+      };
 
     Object.keys(searchQuery).forEach((k) => {
       if (searchQuery[k].length)
@@ -590,9 +601,25 @@ export class StoreService {
       .limit(query.take);
 
     return {
-      stores,
-      count: await this.storeModel.countDocuments(),
+      subscribedStores: subscribed ? stores : [],
+      unsubscribedStores: !subscribed ? stores : [],
+      count: await this.storeModel.countDocuments(searchFilter),
     };
+  }
+
+  async fetchDashboardStore(storeId: string) {
+    console.log('fetch store dashboard');
+    const store = await this.storeModel
+      .findById(storeId)
+      .select(
+        '_id storeName commerceNumber commerceNumberExpirationDate accountNumber available status picture fullName country area city email phoneNumber address',
+      );
+
+    if (!store) {
+      throw new NotFoundException('store.not_found');
+    }
+
+    return store;
   }
 
   async blockStores(ids: string[]) {
@@ -639,7 +666,9 @@ export class StoreService {
       const notification = await (
         await this.notificationModel.create({
           title: this.i18n.translate('messages.your_account_enabled_title'),
-          description: this.i18n.translate('messages.your_account_enabled_description'),
+          description: this.i18n.translate(
+            'messages.your_account_enabled_description',
+          ),
           receiverType: UserType.STORE,
           receiver: store.id,
           type: NotificationType.ENABLE_USER,
@@ -658,13 +687,26 @@ export class StoreService {
     };
   }
 
-  async getStoreInDashboard(id: string) {
-    const store = this.storeModel.findById(id);
-    return store;
-  }
-
   async getFacilities() {
     const facilities = await this.facilityModel.find().populate('items');
     return facilities;
+  }
+
+  async updateDashboardStore(request: UpdateDashboardStore) {
+    console.log('request ---- ', request);
+    const store = await this.storeModel.findById(request.id);
+    if (!store) {
+      throw new NotFoundException('errors.store_not_found');
+    }
+
+    store.commerceNumberExpirationDate = request.commerceNumberExpirationDate;
+    store.commerceNumber = request.commerceNumber;
+    store.accountNumber = request.accountNumber;
+
+    await store.save();
+
+    return {
+      success: true,
+    };
   }
 }

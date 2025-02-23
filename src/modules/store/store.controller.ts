@@ -19,6 +19,7 @@ import { StoresListSegment } from 'src/common/models/enums/stores-list-segement'
 import { Client } from 'src/mongoose/client';
 import { RateStoreDTO } from './dto/rate-store.sto';
 import { DashboardFilterQuery } from 'src/common/models/dahsboard-filter-query';
+import { UpdateDashboardStore } from './dto/dashboard-update-store';
 
 @Controller('store')
 export class StoreController {
@@ -123,25 +124,34 @@ export class StoreController {
 
   @Get('dashboard')
   @UseGuards(JwtAuthGuard, RolesGuard(UserType.ADMIN))
-  async fetchDashboardStores(@Query() query: DashboardFilterQuery) {
+  async fetchDashboardStores(
+    @Query() query: DashboardFilterQuery,
+    @Query('subscribed') subscribed: boolean,
+  ) {
     return Response.success(
-      await this.storeService.fetchDashboardStores(query),
+      await this.storeService.fetchDashboardStores(query, subscribed),
     );
   }
 
-  @Post('block')
+  @Post('dashboard')
+  @UseGuards(JwtAuthGuard, RolesGuard(UserType.ADMIN))
+  async updateDashboardStore(@Body() request: UpdateDashboardStore) {
+    return Response.success(this.storeService.updateDashboardStore(request));
+  }
+
+  @Post('dashboard/block')
   @UseGuards(JwtAuthGuard, RolesGuard(UserType.ADMIN))
   async blockStores(@Body('ids') ids: string[]) {
     return Response.success(await this.storeService.blockStores(ids));
   }
 
-  @Post('suspend')
+  @Post('dashboard/suspend')
   @UseGuards(JwtAuthGuard, RolesGuard(UserType.ADMIN))
   async susbpendStores(@Body('ids') ids: string[]) {
     return Response.success(await this.storeService.suspendStores(ids));
   }
 
-  @Post('enable')
+  @Post('dashboard/enable')
   @UseGuards(JwtAuthGuard, RolesGuard(UserType.ADMIN))
   async enableStores(@Body('ids') ids: string[]) {
     return Response.success(await this.storeService.enableStores(ids));
@@ -149,8 +159,10 @@ export class StoreController {
 
   @Get('dashboard/:id')
   @UseGuards(JwtAuthGuard, RolesGuard(UserType.ADMIN))
-  async getStoreInDashboard(@Param('id') id: string) {
-    return Response.success(await this.storeService.getStoreInDashboard(id));
+  async fetchDashboardStore(@Param('id') storeId: string) {
+    return Response.success(
+      await this.storeService.fetchDashboardStore(storeId),
+    );
   }
 
   @Get(':id')

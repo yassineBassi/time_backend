@@ -27,6 +27,7 @@ import { AdminLoginDTO } from './dtos/admin-login';
 import { Admin } from 'src/mongoose/admin';
 import { Client, ClientModel } from 'src/mongoose/client';
 import { Store, StoreModel } from 'src/mongoose/store';
+import { WorkingTime } from 'src/mongoose/working-time';
 
 const SALT_ROUNDS = 10;
 
@@ -41,6 +42,8 @@ export class AuthService {
     private readonly adminModel: Model<Admin>,
     @InjectModel('OtpToken')
     private readonly OtpTokenModel: Model<OtpToken>,
+    @InjectModel('WorkingTime')
+    private readonly WorkingTimeModel: Model<WorkingTime>,
     private readonly jwtService: JwtService,
     private configService: ConfigService,
     private readonly firebaseService: FirebaseAdminService,
@@ -367,6 +370,14 @@ export class AuthService {
       parseFloat(registerStoreDTO.lng),
       parseFloat(registerStoreDTO.lat),
     ];
+
+    const workingTime = await (
+      await this.WorkingTimeModel.create({
+        storeId: store.id,
+      })
+    ).save();
+
+    store.workingTimes = workingTime.id;
 
     store = await store.save();
 

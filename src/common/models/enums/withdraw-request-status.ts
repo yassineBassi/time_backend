@@ -1,5 +1,5 @@
 export enum WithdrawRequestStatus {
-  CREATED = 'created',
-  FULFILLED = 'fulfilled',
+  INPROGRESS = 'inProgress',
+  PAYED = 'payed',
   REJECTED = 'rejected',
 }
