@@ -64,6 +64,7 @@ import {
 } from './mongoose/subscription-level';
 import { SubscriptionStatus } from './common/models/enums/subscription-status';
 import { NotificationModule } from './modules/notification/notification.module';
+import { StoreCategoryModule } from './modules/store-category/store-category.module';
 
 @Module({
   imports: [
@@ -131,6 +132,7 @@ import { NotificationModule } from './modules/notification/notification.module';
     ClientModule,
     FirebaseAdminModule,
     NotificationModule,
+    StoreCategoryModule,
   ],
   controllers: [AppController],
   providers: [

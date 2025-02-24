@@ -93,12 +93,15 @@ export class StoreService {
   ];
 
   async getSections() {
-    return this.storeSectionModel.find();
+    return this.storeSectionModel.find({
+      visible: true,
+    });
   }
 
   async getCategories(sectionId: string) {
     const categories = await this.storeCategoryModel.find({
       section: sectionId,
+      visible: true,
     });
 
     return categories;
