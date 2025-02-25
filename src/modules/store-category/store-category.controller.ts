@@ -1,11 +1,14 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
   Param,
   Post,
   Query,
+  UploadedFiles,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { StoreCategoryService } from './store-category.service';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
@@ -15,8 +18,11 @@ import { DashboardFilterQuery } from 'src/common/models/dahsboard-filter-query';
 import { Response } from 'src/common/response';
 import { CreateStoreCategoryDTO } from './dto/create-store-category.dto';
 import { UpdateStoreCategoryDTO } from './dto/update-store-category.dto';
-import { CreateStoreSectionDTO } from './dto/create+store-section.dto';
 import { UpdateStoreSectionDTO } from './dto/update-store-section.dto';
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { v4 as uuid } from 'uuid';
+import path = require('path');
 
 @Controller('store-category')
 export class StoreCategoryController {
@@ -59,18 +65,48 @@ export class StoreCategoryController {
   }
 
   @Post('sections')
+  @UseInterceptors(
+    AnyFilesInterceptor({
+      storage: diskStorage({
+        destination: './public/images/sections',
+        filename: (req, file, cb) => {
+          const ext = path.parse(file.originalname).ext;
+          cb(null, `sextion-${uuid()}${ext ? ext : '.png'}`);
+        },
+      }),
+    }),
+  )
   @UseGuards(JwtAuthGuard, RolesGuard(UserType.ADMIN))
-  async createSection(@Body() request: CreateStoreSectionDTO) {
+  async createSection(
+    @Body() request: any,
+    @UploadedFiles() files: Array<Express.Multer.File>,
+  ) {
+    const iconPath = files.length ? files[0].path : null;
     return Response.success(
-      await this.storeCategoryService.createSection(request),
+      await this.storeCategoryService.createSection(request, iconPath),
     );
   }
 
   @Post('sections/update')
+  @UseInterceptors(
+    AnyFilesInterceptor({
+      storage: diskStorage({
+        destination: './public/images/sections',
+        filename: (req, file, cb) => {
+          const ext = path.parse(file.originalname).ext;
+          cb(null, `sextion-${uuid()}${ext ? ext : '.png'}`);
+        },
+      }),
+    }),
+  )
   @UseGuards(JwtAuthGuard, RolesGuard(UserType.ADMIN))
-  async updateSection(@Body() request: UpdateStoreSectionDTO) {
+  async updateSection(
+    @Body() request: UpdateStoreSectionDTO,
+    @UploadedFiles() files: Array<Express.Multer.File>,
+  ) {
+    const iconPath = files.length ? files[0].path : null;
     return Response.success(
-      await this.storeCategoryService.updateSection(request),
+      await this.storeCategoryService.updateSection(request, iconPath),
     );
   }
 
@@ -127,5 +163,4 @@ export class StoreCategoryController {
       await this.storeCategoryService.getCategoryById(categoryId),
     );
   }
-  
 }

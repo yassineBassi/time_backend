@@ -121,19 +121,22 @@ export class StoreCategoryService {
     return category;
   }
 
-  async createSection(request: CreateStoreSectionDTO) {
+  async createSection(request: CreateStoreSectionDTO, iconPath: string) {
     const section = await (
       await this.storeSectionModel.create({
         name: request.name,
+        icon: iconPath,
       })
     ).save();
 
     return section;
   }
 
-  async updateSection(request: UpdateStoreSectionDTO) {
+  async updateSection(request: UpdateStoreSectionDTO, iconPath: string) {
     const section = await this.storeSectionModel.findById(request._id);
     section.name = request.name;
+
+    if (iconPath) section.icon = iconPath;
 
     await section.save();
 

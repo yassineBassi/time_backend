@@ -28,8 +28,8 @@ import { EditStoreProfileDTO } from './dtos/edit-store-profile.dto';
 import { EditClientProfileDTO } from './dtos/edi-client-profile.dto';
 import { AdminLoginDTO } from './dtos/admin-login';
 import { User } from 'src/mongoose/user';
-import { Store, StoreModel } from 'src/mongoose/store';
-import { Client, ClientModel } from 'src/mongoose/client';
+import { Store } from 'src/mongoose/store';
+import { Client } from 'src/mongoose/client';
 
 @Controller('auth')
 export class AuthController {
