@@ -11,7 +11,6 @@ import { WinstonLogger, WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
 import { SharedModule } from './common/shared.module';
 import { ClientModel, ClientSchema } from './mongoose/client';
-import { SectionModule } from './modules/section/section.module';
 import { StoreModule } from './modules/store/store.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
@@ -116,7 +115,6 @@ import { StoreCategoryModule } from './modules/store-category/store-category.mod
     ScheduleModule.forRoot(),
     AuthModule,
     SharedModule,
-    SectionModule,
     StoreModule,
     DataModule,
     SubscriptionModule,

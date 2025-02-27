@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ParameterType } from 'src/common/models/enums/parameter-type';
@@ -15,6 +15,9 @@ import { NotificationType } from 'src/common/models/enums/notification-type';
 import { NotificationReference } from 'src/common/models/enums/notification-reference';
 import { UserType } from 'src/common/models/enums/user-type';
 import { StoreSubscription } from 'src/mongoose/store-subscription';
+import { DashboardFilterQuery } from 'src/common/models/dahsboard-filter-query';
+import { CreateSubscriptionLevelDTO } from './dto/create-subscription-level.dto';
+import { UpdateSubscriptionLevelDTO } from './dto/update-subscription-level.dto';
 const moment = require('moment');
 
 @Injectable()
@@ -48,6 +51,71 @@ export class SubscriptionService {
   async getLevels() {
     const subscriptionLevels = await this.subscriptionLevelModel.find();
     return subscriptionLevels;
+  }
+
+  async getLevelsInDashboard(query: DashboardFilterQuery) {
+    const searchFilter = {};
+
+    const levels = await this.subscriptionLevelModel
+      .find(searchFilter)
+      .sort({ createdAt: -1 })
+      .skip(query.skip)
+      .limit(query.take);
+
+    console.log(levels);
+
+    return {
+      subscriptionPlans: levels,
+      count: await this.subscriptionLevelModel.countDocuments(searchFilter),
+    };
+  }
+
+  async getLevel(levelId: string){
+    const level = await this.subscriptionLevelModel.findById(levelId);
+    level.color = '#' + level.color;
+    return level;
+  }
+
+  async createLevel(request: CreateSubscriptionLevelDTO) {
+    console.log(request);
+
+    let level = await this.subscriptionLevelModel.create({
+      title: request.title,
+      color: request.color.slice(1),
+      price: request.price,
+      showPrice: request.showPrice,
+      reservations: request.reservations,
+      verified: request.verified,
+      expirationDays: request.expirationDays,
+      specialAds: request.specialAds,
+      support: request.support,
+      specialServices: request.specialServices,
+    });
+
+    level = await level.save();
+
+    return level;
+  }
+
+  async updateLevel(request: UpdateSubscriptionLevelDTO) {
+    console.log(request);
+
+    let level = await this.subscriptionLevelModel.findById(request._id);
+
+    level.title = request.title;
+    level.color = request.color.slice(1);
+    level.price = request.price;
+    level.showPrice = request.showPrice;
+    level.reservations = request.reservations;
+    level.verified = request.verified;
+    level.expirationDays = request.expirationDays;
+    level.specialAds = request.specialAds;
+    level.support = request.support;
+    level.specialServices = request.specialServices;
+
+    level = await level.save();
+
+    return level;
   }
 
   async checkStoreSubscription(store: Store) {

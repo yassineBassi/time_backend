@@ -84,5 +84,12 @@
     "duration": "المدة",
     "isPositive": "يجب أن يكون {property} موجبًا",
     "message": "الرسالة",
-    "1001": "اشتراكك قد انتهت صلاحيته"
+    "1001": "اشتراكك قد انتهت صلاحيته",
+    "showPrice": " ثمن العرض",
+    "expirationDays": "المدة (بالأيام)",
+    "reservations": "المواعيد",
+    "specialAds": "الإعلانات الخاصة",
+    "support": "الدعم",
+    "color": "اللون",
+    "specialServices": "الخدمات المميزة"
 }
