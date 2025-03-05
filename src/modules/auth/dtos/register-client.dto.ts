@@ -45,18 +45,6 @@ export class RegisterClientDTO {
   @IsMatch('password', { message: 'password_not_match' })
   passwordConfirmation: string;
 
-  @IsNotEmpty()
-  @IsString()
-  country: string;
-
-  @IsNotEmpty()
-  @IsString()
-  area: string;
-
-  @IsNotEmpty()
-  @IsString()
-  city: string;
-
   @IsOptional()
   firebaseID: string;
   @IsOptional()

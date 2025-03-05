@@ -97,7 +97,6 @@ export class ServiceController {
   }
 
   @Get('byCategoryId')
-  @UseGuards(JwtAuthGuard, RolesGuard(UserType.CLIENT))
   async fetchByCategoryId(@Query('categoryId') categoryId: string) {
     return Response.success(
       await this.serviceService.fetchByCategoryId(categoryId),

@@ -84,7 +84,7 @@ export class AuthService {
 
   async findUserByPhoneNumber(phoneNumber: string): Promise<any> {
     const select =
-      '_id username fullName storeName storeName email phoneNumber picture isVerified type subscription salt password';
+      '_id username fullName storeName storeName email phoneNumber address picture isVerified type subscription salt password';
 
     const store = await this.storeModel
       .findOne({ phoneNumber })
@@ -115,7 +115,7 @@ export class AuthService {
     appleID?: string;
   }) {
     const select =
-      '_id username fullName storeName storeName email phoneNumber picture isVerified type subscription';
+      '_id username fullName storeName storeName email phoneNumber address picture isVerified type subscription';
 
     const store = await this.storeModel
       .findOne(filter)
@@ -142,14 +142,6 @@ export class AuthService {
 
     if (!account) throw new BadRequestException('errors.bad_credentials');
 
-    /*
-    const salt = await bcrypt.genSalt(SALT_ROUNDS);
-    const pwd = bcrypt.hashSync(password, account.salt);
-    account.salt = salt;
-    account.password = pwd;
-    await account.save();
-
-    */
     if (
       account.firebaseID ||
       account.password != bcrypt.hashSync(password, account.salt)
@@ -171,7 +163,7 @@ export class AuthService {
       let store = await this.storeModel
         .findById(account.id)
         .select(
-          '_id username storeName category fullName email phoneNumber picture isVerified type subscription',
+          '_id username storeName category fullName email address phoneNumber picture isVerified type subscription',
         )
         .populate({
           path: 'category',
@@ -247,8 +239,7 @@ export class AuthService {
     return this.loginAccount(account, request.notificationToken);
   }
 
-
-  loginAccountAfterRegister(user: User){
+  loginAccountAfterRegister(user: User) {
     if (user.firebaseID) {
       if (user.googleID)
         return this.loginWithGoogle({
@@ -329,6 +320,10 @@ export class AuthService {
   async registerStore(registerStoreDTO: RegisterStoreDTO, picture: string) {
     let store = new this.storeModel(registerStoreDTO);
 
+    if (!picture) {
+      throw new BadRequestException('errors.photo_not_selected');
+    }
+
     if (
       registerStoreDTO.firebaseID &&
       (registerStoreDTO.googleID ||
@@ -380,8 +375,6 @@ export class AuthService {
     store.workingTimes = workingTime.id;
 
     store = await store.save();
-
-    console.log(store);
 
     await new this.OtpTokenModel({
       code: this.generateRandomDigits(5),

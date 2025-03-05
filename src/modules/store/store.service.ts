@@ -28,6 +28,7 @@ import { NotificationType } from 'src/common/models/enums/notification-type';
 import { NotificationReference } from 'src/common/models/enums/notification-reference';
 import { Notification } from 'src/mongoose/notification';
 import { UpdateDashboardStore } from './dto/dashboard-update-store';
+import { ConfigService } from '@nestjs/config';
 const moment = require('moment');
 
 @Injectable()
@@ -54,6 +55,7 @@ export class StoreService {
     @InjectModel('Notification')
     private readonly notificationModel: Model<Notification>,
     private firebaseAdminService: FirebaseAdminService,
+    private readonly configService: ConfigService
   ) {}
 
   defaultSelect =
@@ -100,7 +102,7 @@ export class StoreService {
 
   async getCategories(sectionId: string) {
     const categories = await this.storeCategoryModel.find({
-      section: sectionId,
+      section: sectionId == 'all' ? undefined : sectionId,
       visible: true,
     });
 
@@ -157,7 +159,7 @@ export class StoreService {
     return await Promise.all(
       stores.map(async (s: any) => ({
         ...s.toObject(),
-        isFavorite: client.favotiteStores.includes(s.id),
+        isFavorite: client ? client.favotiteStores.includes(s.id) : false,
         photos: [s.picture],
         reviews: s.reviews.length
           ? (
@@ -245,7 +247,7 @@ export class StoreService {
       ...this.defaultFilter,
       geoLocation: {
         $near: {
-          $maxDistance: 50000 * 1000,
+          $maxDistance: this.configService.get('MAP_RADIUS_KM') * 1000,
           $geometry: {
             type: 'Point',
             coordinates: [longitude, latitude],
@@ -260,6 +262,8 @@ export class StoreService {
       .populate(this.defaultPopulate);
 
     stores = await this.addFieldsToStores(stores, client);
+
+    console.log('stores', stores);
 
     return stores;
   }

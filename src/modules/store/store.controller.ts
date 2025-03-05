@@ -53,7 +53,6 @@ export class StoreController {
   }
 
   @Get('bySegment')
-  @UseGuards(JwtAuthGuard, RolesGuard(UserType.CLIENT))
   async getStoresBySegment(
     @Query('segment') segment: StoresListSegment,
     @CurrentUser() client: Client,
@@ -64,7 +63,6 @@ export class StoreController {
   }
 
   @Get('with-segments')
-  @UseGuards(JwtAuthGuard, RolesGuard(UserType.CLIENT))
   async getStoresWithSegments(@CurrentUser() client: Client) {
     return Response.success(
       await this.storeService.getStoresWithSegments(client),
@@ -72,13 +70,11 @@ export class StoreController {
   }
 
   @Get('')
-  @UseGuards(JwtAuthGuard, RolesGuard(UserType.CLIENT))
   async getStores(@Query() params: any, @CurrentUser() client: Client) {
     return Response.success(await this.storeService.getStores(params, client));
   }
 
   @Get('map')
-  @UseGuards(JwtAuthGuard, RolesGuard(UserType.CLIENT))
   async getMapStores(
     @Query('latitude') latitude: string,
     @Query('longitude') longitude: string,
@@ -166,7 +162,6 @@ export class StoreController {
   }
 
   @Get(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard(UserType.CLIENT))
   async getStoreById(@Param('id') id: string, @CurrentUser() client: Client) {
     return Response.success(await this.storeService.getStoreById(id, client));
   }

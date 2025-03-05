@@ -41,7 +41,6 @@ export class ServiceCategoryController {
   }
 
   @Get('byStoreId')
-  @UseGuards(JwtAuthGuard, RolesGuard(UserType.CLIENT))
   async fetchByStoreId(@Query('storeId') storeId: string) {
     return Response.success(
       await this.serviceCategoryService.fetchByStoreId(storeId),

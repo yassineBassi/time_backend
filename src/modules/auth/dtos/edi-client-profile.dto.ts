@@ -33,16 +33,4 @@ export class EditClientProfileDTO {
     { dtoField: 'id', modelField: '_id' },
   ])
   phoneNumber: string;
-
-  @IsNotEmpty()
-  @IsString()
-  country: string;
-
-  @IsNotEmpty()
-  @IsString()
-  area: string;
-
-  @IsNotEmpty()
-  @IsString()
-  city: string;
 }
