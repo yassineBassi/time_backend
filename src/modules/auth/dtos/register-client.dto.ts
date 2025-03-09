@@ -31,9 +31,9 @@ export class RegisterClientDTO {
   @IsNotEmpty()
   @IsString()
   @IsPhoneNumber()
-  @IsUnique(['Client', 'Store'], 'phoneNumber')
+  @IsUnique(['Store', 'Client'], 'phoneNumber')
   phoneNumber: string;
-
+  
   @ValidateIf((o) => !o.firebaseID)
   @IsNotEmpty()
   @IsString()

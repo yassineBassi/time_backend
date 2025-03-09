@@ -221,7 +221,6 @@ export class AuthService {
       twitterID: request.twitterID,
       firebaseID: request.firebaseID,
     });
-
     return this.loginAccount(account, request.notificationToken);
   }
 
@@ -256,7 +255,7 @@ export class AuthService {
       if (user.twitterID)
         return this.loginWithTwitter({
           firebaseID: user.firebaseID,
-          twitterID: user.googleID,
+          twitterID: user.twitterID,
           notificationToken: user.notificationToken,
         });
     }

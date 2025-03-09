@@ -13,7 +13,6 @@ export class IsUniqueConstraint implements ValidatorConstraintInterface {
   constructor(@InjectConnection() private readonly connection: Connection) {}
 
   async validate(value: any, args: ValidationArguments) {
-
     const [modelNames, fieldName, exceptions] = args.constraints;
 
     const exptionsFilter =
@@ -29,10 +28,16 @@ export class IsUniqueConstraint implements ValidatorConstraintInterface {
 
     let exists = false;
     for (let i = 0; i < modelNames.length; i++) {
+      console.log('---------------------');
+      console.log(modelNames[i]);
       const model = this.connection.models[modelNames[i]];
       const count = await model
         .countDocuments({ [fieldName]: value, ...exptionsFilter })
         .exec();
+      console.log(count);
+      console.log(
+        await model.find({ [fieldName]: value, ...exptionsFilter }).exec(),
+      );
 
       if (count > 0) {
         exists = true;
