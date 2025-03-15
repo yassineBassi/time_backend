@@ -22,5 +22,6 @@
     "notification_subscriptionExpired_title": "انتهت صلاحية اشتراكك",
     "notification_subscriptionExpired_description": "نعلمك أن اشتراكك قد انتهت صلاحيته",
     "notification_enableUser_title": "تم تفعيل الحساب",
-    "notification_enableUser_description": "لقد تم تفعيل حسابك"
+    "notification_enableUser_description": "لقد تم تفعيل حسابك",
+    "faq_delete_message": "تم حذف السؤال"
 }

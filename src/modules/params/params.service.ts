@@ -13,8 +13,6 @@ export class ParamsService {
   ) {}
 
   async getAppLinks() {
-    console.log('params');
-
     return {
       appStoreLink: (
         await this.paramsModel.findOne({
@@ -25,6 +23,24 @@ export class ParamsService {
       playStoreLink: (
         await this.paramsModel.findOne({
           type: ParameterType.APP_LINKS,
+          name: 'playStoreLink',
+        })
+      ).value,
+      message: 'use the app : ',
+    };
+  }
+
+  async getAppReviewLinks() {
+    return {
+      appStoreLink: (
+        await this.paramsModel.findOne({
+          type: ParameterType.APP_REVIEW_LINKS,
+          name: 'appStoreLink',
+        })
+      ).value,
+      playStoreLink: (
+        await this.paramsModel.findOne({
+          type: ParameterType.APP_REVIEW_LINKS,
           name: 'playStoreLink',
         })
       ).value,

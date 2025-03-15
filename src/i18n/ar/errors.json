@@ -92,5 +92,7 @@
     "support": "الدعم",
     "color": "اللون",
     "specialServices": "الخدمات المميزة",
-    "photo_not_selected": "يجب عليك اختيار صورة لمتجرك"
+    "photo_not_selected": "يجب عليك اختيار صورة لمتجرك",
+    "question": "السؤال",
+    "answer": "الجواب"
 }

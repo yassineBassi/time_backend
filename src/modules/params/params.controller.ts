@@ -11,6 +11,11 @@ export class ParamsController {
     return Response.success(await this.paramsService.getAppLinks());
   }
 
+  @Get('app-review-links')
+  async getAppReviewLinks() {
+    return Response.success(await this.paramsService.getAppReviewLinks());
+  }
+
   @Get('tva')
   async fetchTva() {
     return Response.success(await this.paramsService.fetchTva());

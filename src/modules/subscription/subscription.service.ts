@@ -70,7 +70,7 @@ export class SubscriptionService {
     };
   }
 
-  async getLevel(levelId: string){
+  async getLevel(levelId: string) {
     const level = await this.subscriptionLevelModel.findById(levelId);
     level.color = '#' + level.color;
     return level;
@@ -226,6 +226,7 @@ export class SubscriptionService {
     if (subscriptions.length) {
       for (const subscription of subscriptions) {
         const store = await this.storeModel.findById(subscription.store);
+        console.log('before 1h subscription reminder');
         this.sendSubscriptionReminderNotification(store, subscription, '1h');
       }
       await this.storeSubscriptionModel.updateMany(
@@ -262,6 +263,7 @@ export class SubscriptionService {
     if (subscriptions.length) {
       for (const subscription of subscriptions) {
         const store = await this.storeModel.findById(subscription.store);
+        console.log('before 24h subscription reminder');
         this.sendSubscriptionReminderNotification(store, subscription, '24h');
       }
       await this.storeSubscriptionModel.updateMany(
@@ -334,8 +336,6 @@ export class SubscriptionService {
     if (subscriptions.length) {
       for (const subscription of subscriptions) {
         const store = await this.storeModel.findById(subscription.store);
-        store.subscription = null;
-        store.save();
         this.sendSubscriptionExpiredNotification(store, subscription);
       }
       await this.storeSubscriptionModel.updateMany(

@@ -55,7 +55,7 @@ export class StoreService {
     @InjectModel('Notification')
     private readonly notificationModel: Model<Notification>,
     private firebaseAdminService: FirebaseAdminService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
   ) {}
 
   defaultSelect =
@@ -305,13 +305,17 @@ export class StoreService {
     const today = currentDate.format('YYYY-MM-DD');
     const todayName = currentDate.format('dddd').toLowerCase();
 
-    const workingTimes = store.workingTimes[todayName]
-      .map((time) => moment(`${today} ${time}`, 'YYYY-MM-DD hh:mm A'))
-      .sort((a, b) => a - b)
-      .filter(
-        (time) =>
-          currentDate.isAfter(time) && currentDate.diff(time, 'minutes') <= 15,
-      );
+    let workingTimes = store.workingTimes[todayName];
+    if (workingTimes.length) {
+      workingTimes = workingTimes
+        .map((time) => moment(`${today} ${time}`, 'YYYY-MM-DD hh:mm A'))
+        .sort((a, b) => a - b)
+        .filter(
+          (time) =>
+            currentDate.isAfter(time) &&
+            currentDate.diff(time, 'minutes') <= 15,
+        );
+    }
 
     return !!workingTimes.length;
   }

@@ -64,6 +64,10 @@ import {
 import { SubscriptionStatus } from './common/models/enums/subscription-status';
 import { NotificationModule } from './modules/notification/notification.module';
 import { StoreCategoryModule } from './modules/store-category/store-category.module';
+import { ParameterType } from './common/models/enums/parameter-type';
+import { Parameter, ParameterSchema } from './mongoose/parameter';
+import { FAQ, FAQSchema } from './mongoose/faq';
+import { FaqModule } from './modules/faq/faq.module';
 
 @Module({
   imports: [
@@ -91,6 +95,8 @@ import { StoreCategoryModule } from './modules/store-category/store-category.mod
       { name: 'GiftCard', schema: GiftCardSchema },
       { name: 'Admin', schema: AdminSchema },
       { name: 'Notification', schema: NotificationSchema },
+      { name: 'Parameter', schema: ParameterSchema },
+      { name: 'FAQ', schema: FAQSchema },
     ]),
     I18nModule.forRoot({
       fallbackLanguage: 'ar',
@@ -131,6 +137,7 @@ import { StoreCategoryModule } from './modules/store-category/store-category.mod
     FirebaseAdminModule,
     NotificationModule,
     StoreCategoryModule,
+    FaqModule,
   ],
   controllers: [AppController],
   providers: [
@@ -180,14 +187,15 @@ export class AppModule implements NestModule {
     private adminModel: Model<Admin>,
     @InjectModel('Notification')
     private notificationModel: Model<Notification>,
+    @InjectModel('Parameter')
+    private parametrageModel: Model<Parameter>,
+    @InjectModel('FAQ')
+    private FAQModel: Model<FAQ>,
     private firebaseAdminService: FirebaseAdminService,
     private readonly i18n: I18nService,
   ) {
-    setTimeout(async () => {/*
-      const result = await this.clientModel.restore({
-        _id: '6768898d6aecc5024753654d',
-      });
-      console.log(result);*/
+    setTimeout(async () => {
+      
     }, 1000);
   }
 }
