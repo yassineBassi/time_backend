@@ -68,6 +68,8 @@ import { ParameterType } from './common/models/enums/parameter-type';
 import { Parameter, ParameterSchema } from './mongoose/parameter';
 import { FAQ, FAQSchema } from './mongoose/faq';
 import { FaqModule } from './modules/faq/faq.module';
+import { AdModule } from './modules/ad/ad.module';
+import { Ad, AdSchema } from './mongoose/ads';
 
 @Module({
   imports: [
@@ -97,6 +99,7 @@ import { FaqModule } from './modules/faq/faq.module';
       { name: 'Notification', schema: NotificationSchema },
       { name: 'Parameter', schema: ParameterSchema },
       { name: 'FAQ', schema: FAQSchema },
+      { name: 'Ad', schema: AdSchema },
     ]),
     I18nModule.forRoot({
       fallbackLanguage: 'ar',
@@ -138,6 +141,7 @@ import { FaqModule } from './modules/faq/faq.module';
     NotificationModule,
     StoreCategoryModule,
     FaqModule,
+    AdModule,
   ],
   controllers: [AppController],
   providers: [
@@ -189,8 +193,8 @@ export class AppModule implements NestModule {
     private notificationModel: Model<Notification>,
     @InjectModel('Parameter')
     private parametrageModel: Model<Parameter>,
-    @InjectModel('FAQ')
-    private FAQModel: Model<FAQ>,
+    @InjectModel('Ad')
+    private AdModel: Model<Ad>,
     private firebaseAdminService: FirebaseAdminService,
     private readonly i18n: I18nService,
   ) {
